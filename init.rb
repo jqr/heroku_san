@@ -1,1 +1,0 @@
-system('rake heroku:create_config')  
