@@ -1,0 +1,64 @@
+= Heroku San
+
+Helpful stuffs for Heroku.
+
+== Install 
+
+  script/plugin install git://github.com/fastestforward/heroku_san.git
+  
+Upon installation your $EDITOR will be opened for editing config/heroku.yml.
+You will need add the Heroku apps that you would like to attach to this 
+project. Here is an example of an app called 'awesomeapp' with three Heroku 
+apps attached.
+
+  apps:
+    # shorthand: heroku app
+    production: awesomeapp
+    staging: awesomeapp-staging
+    demo: awesomeapp-demo
+    
+== Usage
+
+After configuring your Heroku apps you can use a rake tasks to control the 
+apps.
+
+  rake production deploy
+  
+A rake task with the shorthand name of each app is now available and adds that
+server to the list that subsequent commands will execute on. Because this list
+is additive, you can easily select which servers to run a command on
+
+  rake demo staging restart
+
+A special rake task 'all' is created that causes any further commands to 
+execute on all heroku apps.
+  
+Manipulate collaborators on all this project's apps (prompts for email 
+address):
+  
+  rake all heroku:share      
+  rake all sharing:unshare
+  
+Need to add remotes for each app?
+
+  rake all heroku:remotes
+
+A full list of tasks provided:
+
+  rake all                   # Select all Heroku apps for later command
+  rake console               # Opens a remote console
+  rake deploy                # Deploys, migrates and restarts latest code.
+  rake heroku:apps           # Lists configured apps
+  rake heroku:create_config  # Creates an example configuration file
+  rake heroku:gems           # Generate the Heroku gems manifest from gem dependencies
+  rake heroku:remotes        # Add git remotes for all apps in this project
+  rake heroku:share          # Adds a collaborator
+  rake heroku:unshare        # Removes a collaborator
+  rake migrate               # Migrates and restarts remote servers
+  rake restart               # Restarts remote servers
+  
+Frequently used tasks are not namespaced, everything else lives under heroku.
+
+
+Homepage:: http://github.com/fastestforward/heroku_san
+License:: Copyright (c) 2008 Elijah Miller <mailto:elijah.miller@gmail.com>, released under the MIT license.
