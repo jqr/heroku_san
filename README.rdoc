@@ -61,4 +61,4 @@ Frequently used tasks are not namespaced, everything else lives under heroku.
 
 
 Homepage:: http://github.com/fastestforward/heroku_san
-License:: Copyright (c) 2008 Elijah Miller <mailto:elijah.miller@gmail.com>, released under the MIT license.
+License:: Copyright (c) 2009 Elijah Miller <mailto:elijah.miller@gmail.com>, released under the MIT license.
