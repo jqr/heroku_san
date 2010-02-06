@@ -71,6 +71,18 @@ namespace :heroku do
     end
   end
   
+  desc 'Add proper RACK_ENV to each application'
+  task :rack_env => :all do
+    each_heroku_app do |name, app, repo|
+      command = "heroku config --app #{app}"
+      puts command
+      config = Hash[`#{command}`.scan(/^(.+?)\s*=>\s*(.+)$/)]
+      if config['RACK_ENV'] != name
+        system_with_echo "heroku config:add --app #{app} RACK_ENV=#{name}"
+      end
+    end
+  end
+  
   desc 'Creates an example configuration file'
   task :create_config do
     example = File.join(File.dirname(__FILE__), '..', 'templates', 'heroku.example.yml')
