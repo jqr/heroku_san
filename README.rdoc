@@ -52,6 +52,7 @@ A full list of tasks provided:
   rake heroku:create_config  # Creates an example configuration file
   rake heroku:gems           # Generate the Heroku gems manifest from gem dependencies
   rake heroku:remotes        # Add git remotes for all apps in this project
+  rake heroku:rack_env       # Add proper RACK_ENV to each application
   rake heroku:share          # Adds a collaborator
   rake heroku:unshare        # Removes a collaborator
   rake migrate               # Migrates and restarts remote servers
