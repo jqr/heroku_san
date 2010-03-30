@@ -109,6 +109,13 @@ task :deploy do
   end
 end
 
+desc "Captures a bundle on Heroku"
+task :capture do
+  each_heroku_app do |name, app, repo|
+    system_with_echo "heroku bundles:capture --app #{app}"
+  end
+end
+
 desc "Opens a remote console"
 task :console do
   each_heroku_app do |name, app, repo|
