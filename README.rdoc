@@ -37,7 +37,7 @@ Manipulate collaborators on all this project's apps (prompts for email
 address):
   
   rake all heroku:share      
-  rake all sharing:unshare
+  rake all heroku:unshare
   
 Need to add remotes for each app?
 
