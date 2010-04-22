@@ -101,12 +101,20 @@ task :deploy do
   each_heroku_app do |name, app, repo|
     branch = `git branch`.scan(/^\* (.*)\n/).to_s
     if branch.present?
-      system_with_echo "git push #{repo} #{branch} && heroku rake --app #{app} db:migrate && heroku restart --app #{app}"
+      @git_push_arguments ||= []
+      system_with_echo "git push #{repo} #{@git_push_arguments.join(' ')} #{branch} && heroku rake --app #{app} db:migrate && heroku restart --app #{app}"
     else
       puts "Unable to determine the current git branch, please checkout the branch you'd like to deploy"
       exit(1)
     end
   end
+end
+
+desc "Force deploys, migrates and restarts latest code"
+task :force_deploy do
+  @git_push_arguments ||= []
+  @git_push_arguments << '--force'
+  Rake::Task[:deploy].execute
 end
 
 desc "Captures a bundle on Heroku"
