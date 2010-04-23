@@ -90,7 +90,9 @@ namespace :heroku do
       puts "config/heroku.yml already exists"
     else
       puts "Copied example config to config/heroku.yml"
-      FileUtils.cp(example, HEROKU_CONFIG_FILE)
+      File.open(HEROKU_CONFIG_FILE, 'w') do |f|
+        f.write(File.read(example).gsub('awesomeapp', File.basename(RAILS_ROOT).gsub(/[^[:alnum:]]/, '-')))
+      end
       system_with_echo("#{ENV['EDITOR']} #{HEROKU_CONFIG_FILE}")
     end
   end
