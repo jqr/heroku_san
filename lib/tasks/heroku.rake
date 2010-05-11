@@ -145,6 +145,21 @@ task :migrate do
   end
 end
 
+namespace :db do
+  task :pull do
+    each_heroku_app do |name, app, repo|
+      system_with_echo "heroku pgdumps:capture --app #{app}"
+      dump = `heroku pgdumps --app #{app}`.split("\n").last.split(" ").first
+      system_with_echo "mkdir -p #{RAILS_ROOT}/db/dumps"
+      file = "#{RAILS_ROOT}/db/dumps/#{dump}.sql.gz"
+      url = `heroku pgdumps:url --app #{app} #{dump}`.chomp
+      system_with_echo "wget", url, "-O", file
+      system_with_echo "rake db:drop db:create"
+      system_with_echo "gunzip -c #{file} | #{RAILS_ROOT}/script/dbconsole"
+      system_with_echo "rake jobs:clear"
+    end
+  end
+end
 
 def system_with_echo(*args)
   puts args.join(' ')
