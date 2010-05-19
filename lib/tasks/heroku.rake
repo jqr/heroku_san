@@ -167,6 +167,11 @@ def system_with_echo(*args)
 end
 
 def each_heroku_app
+  if @heroku_apps.blank? && HEROKU_SETTINGS['apps'].size == 1
+    app = HEROKU_SETTINGS['apps'].keys.first
+    puts "Defaulting to #{app} app since only one app is defined"
+    @heroku_apps = [app]
+  end
   if @heroku_apps.present?
     @heroku_apps.each do |name|
       app = HEROKU_SETTINGS['apps'][name]
