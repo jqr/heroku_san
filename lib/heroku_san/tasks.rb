@@ -22,17 +22,23 @@ end
 
 namespace :heroku do
   desc "Generate the Heroku gems manifest from gem dependencies"
-  task :gems do
+  task :gems => 'gems:base' do
     RAILS_ENV='production'
     Rake::Task[:environment].invoke
-    list = Rails.configuration.gems.collect do |g| 
-      command, *options = g.send(:install_command)
+    list = []
+    if (RAILS_GEM_VERSION rescue false)
+      list << "rails --version #{RAILS_GEM_VERSION}\n"
+    else
+      list << "rails\n"
+    end
+    list << Rails.configuration.gems.reject{|g| g.frozen? && !g.framework_gem?}.map do |gem|
+      command, *options = gem.send(:install_command)
       options.join(" ") + "\n"
     end
-    
     File.open(File.join(RAILS_ROOT, '.gems'), 'w') do |f|
       f.write(list)
     end
+    puts ".gems has been updated with your application's gem dependencies."
   end
 
   desc 'Add git remotes for all apps in this project'
