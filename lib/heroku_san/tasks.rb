@@ -102,7 +102,7 @@ namespace :heroku do
   end
 end
 
-desc "Deploys, migrates and restarts latest code"
+desc "Deploys, migrates and restarts latest code on Heroku"
 task :deploy do
   each_heroku_app do |name, app, repo|
     branch = `git branch`.scan(/^\* (.*)\n/).to_s
@@ -116,7 +116,7 @@ task :deploy do
   end
 end
 
-desc "Force deploys, migrates and restarts latest code"
+desc "Force deploys, migrates and restarts latest code on Heroku"
 task :force_deploy do
   @git_push_arguments ||= []
   @git_push_arguments << '--force'
@@ -130,21 +130,21 @@ task :capture do
   end
 end
 
-desc "Opens a remote console"
+desc "Opens a remote heroku console"
 task :console do
   each_heroku_app do |name, app, repo|
     system_with_echo "heroku console --app #{app}"
   end
 end
 
-desc "Restarts remote servers"
+desc "Restarts remote heroku servers"
 task :restart do
   each_heroku_app do |name, app, repo|
     system_with_echo "heroku restart --app #{app}"
   end
 end
 
-desc "Migrates and restarts remote servers"
+desc "Migrates and restarts remote heroku servers"
 task :migrate do
   each_heroku_app do |name, app, repo|
     system_with_echo "heroku rake --app #{app} db:migrate && heroku restart --app #{app}"
