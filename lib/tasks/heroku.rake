@@ -30,6 +30,8 @@ namespace :heroku do
       options.join(" ") + "\n"
     end
     
+    list.unshift(%Q{rails --version "= #{Rails.version}"\n})
+
     File.open(File.join(RAILS_ROOT, '.gems'), 'w') do |f|
       f.write(list)
     end
