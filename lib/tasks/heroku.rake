@@ -27,13 +27,13 @@ namespace :heroku do
     Rake::Task[:environment].invoke
     list = Rails.configuration.gems.collect do |g| 
       command, *options = g.send(:install_command)
-      options.join(" ") + "\n"
+      options.join(" ")
     end
     
-    list.unshift(%Q{rails --version "= #{Rails.version}"\n})
+    list.unshift(%Q{rails --version "= #{Rails.version}"})
 
     File.open(File.join(RAILS_ROOT, '.gems'), 'w') do |f|
-      f.write(list)
+      f.write(list.join("\n"))
     end
   end
 
