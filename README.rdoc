@@ -29,34 +29,34 @@ In config/heroku.yml you will need add the Heroku apps that you would like to at
     production: awesomeapp
     staging: awesomeapp-staging
     demo: awesomeapp-demo
-    
-If this is a fresh project, heroku_san can create all the applications for 
+
+If this is a fresh project, heroku_san can create all the applications for
 you, and set the RACK_ENV.
 
   rake all heroku:create heroku:rack_env
 
 == Usage
 
-After configuring your Heroku apps you can use rake tasks to control the 
+After configuring your Heroku apps you can use rake tasks to control the
 apps.
 
   rake production deploy
-  
+
 A rake task with the shorthand name of each app is now available and adds that
 server to the list that subsequent commands will execute on. Because this list
 is additive, you can easily select which servers to run a command on.
 
   rake demo staging restart
 
-A special rake task 'all' is created that causes any further commands to 
+A special rake task 'all' is created that causes any further commands to
 execute on all heroku apps.
-  
-Manipulate collaborators on all this project's apps (prompts for email 
+
+Manipulate collaborators on all this project's apps (prompts for email
 address):
-  
-  rake all heroku:share      
+
+  rake all heroku:share
   rake all heroku:unshare
-  
+
 Need to add remotes for each app?
 
   rake all heroku:remotes
@@ -77,14 +77,19 @@ A full list of tasks provided:
   rake heroku:unshare        # Removes a collaborator
   rake migrate               # Migrates and restarts remote servers
   rake restart               # Restarts remote servers
-  
+
 Frequently used tasks are not namespaced, everything else lives under heroku.
+
+== Links
+
+Homepage:: http://github.com/fastestforward/heroku_san
+Bug Tracker:: http://heroku_san.lighthouseapp.com/projects/56301-heroku_san/tickets
 
 == Contributors
 
+Elijah Miller (elijah.miller@gmail.com)
 Glenn Roberts (glenn.roberts@siyelo.com)
 
 == License
 
-Homepage:: http://github.com/fastestforward/heroku_san
 License:: Copyright (c) 2009 Elijah Miller <mailto:elijah.miller@gmail.com>, released under the MIT license.
