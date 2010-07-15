@@ -21,6 +21,13 @@ task :all do
 end
 
 namespace :heroku do
+  desc "Creates the Heroku app"
+  task :create do
+    each_heroku_app do |name, app, repo|
+      system_with_echo "heroku create #{app}"
+    end
+  end
+
   desc "Generate the Heroku gems manifest from gem dependencies"
   task :gems do
     RAILS_ENV='production'

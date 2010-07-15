@@ -17,6 +17,11 @@ apps attached.
     staging: awesomeapp-staging
     demo: awesomeapp-demo
     
+If this is a fresh application, heroku_san can create all the applications for 
+you.
+
+  rake all heroku:create
+
 == Usage
 
 After configuring your Heroku apps you can use rake tasks to control the 
@@ -50,6 +55,7 @@ A full list of tasks provided:
   rake deploy                # Deploys, migrates and restarts latest code.
   rake capture               # Captures a bundle on Heroku
   rake heroku:apps           # Lists configured apps
+  rake heroku:create         # Creates the Heroku app
   rake heroku:create_config  # Creates an example configuration file
   rake heroku:gems           # Generate the Heroku gems manifest from gem dependencies
   rake heroku:remotes        # Add git remotes for all apps in this project
