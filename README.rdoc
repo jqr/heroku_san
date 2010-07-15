@@ -18,7 +18,7 @@ Rake tasks are not automatically loaded from gems, so you’ll need to add the f
 
 To install as a plugin:
 
-  script/plugin install git://github.com/glennr/heroku_san.git
+  script/plugin install git://github.com/fastestforward/heroku_san.git
 
 == Configure
 
