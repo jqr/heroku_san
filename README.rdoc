@@ -1,15 +1,28 @@
 = Heroku San
 
-Helpful stuffs for Heroku.
+Helpful rake tasks for Heroku.
 
-== Install 
+== Install
 
-  script/plugin install git://github.com/fastestforward/heroku_san.git
-  
-Upon installation your $EDITOR will be opened for editing config/heroku.yml.
-You will need to add the Heroku apps that you would like to attach to this 
-project. Here is an example of an app called 'awesomeapp' with three Heroku 
-apps attached.
+To install as a gem, add the following to config/environment.rb:
+
+  config.gem 'heroku_san'
+
+Rake tasks are not automatically loaded from gems, so you’ll need to add the following to your Rakefile:
+
+  begin
+    require 'heroku_san/tasks'
+  rescue LoadError
+    STDERR.puts "Run `rake gems:install` to install heroku_san"
+  end
+
+To install as a plugin:
+
+  script/plugin install git://github.com/glennr/heroku_san.git
+
+== Configure
+
+In config/heroku.yml you will need add the Heroku apps that you would like to attach to this project. Here is an example of an app called 'awesomeapp' with three Heroku apps attached.
 
   apps:
     # shorthand: heroku app
@@ -67,6 +80,11 @@ A full list of tasks provided:
   
 Frequently used tasks are not namespaced, everything else lives under heroku.
 
+== Contributors
+
+Glenn Roberts (glenn.roberts@siyelo.com)
+
+== License
 
 Homepage:: http://github.com/fastestforward/heroku_san
 License:: Copyright (c) 2009 Elijah Miller <mailto:elijah.miller@gmail.com>, released under the MIT license.

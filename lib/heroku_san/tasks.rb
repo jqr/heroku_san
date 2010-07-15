@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 HEROKU_CONFIG_FILE = File.join(RAILS_ROOT, 'config', 'heroku.yml')
 
 HEROKU_SETTINGS =
@@ -22,27 +21,24 @@ task :all do
 end
 
 namespace :heroku do
-  desc "Creates the Heroku app"
-  task :create do
-    each_heroku_app do |name, app, repo|
-      system_with_echo "heroku create #{app}"
-    end
-  end
-
   desc "Generate the Heroku gems manifest from gem dependencies"
-  task :gems do
+  task :gems => 'gems:base' do
     RAILS_ENV='production'
     Rake::Task[:environment].invoke
-    list = Rails.configuration.gems.collect do |g| 
-      command, *options = g.send(:install_command)
-      options.join(" ")
+    list = []
+    if (RAILS_GEM_VERSION rescue false)
+      list << "rails --version #{RAILS_GEM_VERSION}\n"
+    else
+      list << "rails\n"
     end
-    
-    list.unshift(%Q{rails --version "= #{Rails.version}"})
-
+    list << Rails.configuration.gems.reject{|g| g.frozen? && !g.framework_gem?}.map do |gem|
+      command, *options = gem.send(:install_command)
+      options.join(" ") + "\n"
+    end
     File.open(File.join(RAILS_ROOT, '.gems'), 'w') do |f|
-      f.write(list.join("\n"))
+      f.write(list)
     end
+    puts ".gems has been updated with your application's gem dependencies."
   end
 
   desc 'Add git remotes for all apps in this project'
@@ -106,7 +102,7 @@ namespace :heroku do
   end
 end
 
-desc "Deploys, migrates and restarts latest code"
+desc "Deploys, migrates and restarts latest code on Heroku"
 task :deploy do
   each_heroku_app do |name, app, repo|
     branch = `git branch`.scan(/^\* (.*)\n/).to_s
@@ -120,7 +116,7 @@ task :deploy do
   end
 end
 
-desc "Force deploys, migrates and restarts latest code"
+desc "Force deploys, migrates and restarts latest code on Heroku"
 task :force_deploy do
   @git_push_arguments ||= []
   @git_push_arguments << '--force'
@@ -134,21 +130,21 @@ task :capture do
   end
 end
 
-desc "Opens a remote console"
+desc "Opens a remote heroku console"
 task :console do
   each_heroku_app do |name, app, repo|
     system_with_echo "heroku console --app #{app}"
   end
 end
 
-desc "Restarts remote servers"
+desc "Restarts remote heroku servers"
 task :restart do
   each_heroku_app do |name, app, repo|
     system_with_echo "heroku restart --app #{app}"
   end
 end
 
-desc "Migrates and restarts remote servers"
+desc "Migrates and restarts remote heroku servers"
 task :migrate do
   each_heroku_app do |name, app, repo|
     system_with_echo "heroku rake --app #{app} db:migrate && heroku restart --app #{app}"
@@ -200,6 +196,3 @@ def each_heroku_app
     exit(1)
   end
 end
-=======
-require File.expand_path(File.join(File.dirname(__FILE__), '..', 'heroku_san', 'tasks'))
->>>>>>> glennr/lib_task

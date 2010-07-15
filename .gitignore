@@ -1,3 +1,4 @@
 doc
 pkg
 Thumbs.db
+*.gemspec
