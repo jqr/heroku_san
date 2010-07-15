@@ -30,10 +30,10 @@ In config/heroku.yml you will need add the Heroku apps that you would like to at
     staging: awesomeapp-staging
     demo: awesomeapp-demo
     
-If this is a fresh application, heroku_san can create all the applications for 
-you.
+If this is a fresh project, heroku_san can create all the applications for 
+you, and set the RACK_ENV.
 
-  rake all heroku:create
+  rake all heroku:create heroku:rack_env
 
 == Usage
 
