@@ -21,24 +21,28 @@ task :all do
 end
 
 namespace :heroku do
+  desc "Creates the Heroku app"
+  task :create do
+    each_heroku_app do |name, app, repo|
+      system_with_echo "heroku create #{app}"
+    end
+  end
+
   desc "Generate the Heroku gems manifest from gem dependencies"
   task :gems => 'gems:base' do
     RAILS_ENV='production'
     Rake::Task[:environment].invoke
-    list = []
-    if (RAILS_GEM_VERSION rescue false)
-      list << "rails --version #{RAILS_GEM_VERSION}\n"
-    else
-      list << "rails\n"
+    gems = Rails.configuration.gems.reject { |g| g.frozen? && !g.framework_gem? }
+    list = gems.collect do |g| 
+      command, *options = g.send(:install_command)
+      options.join(" ")
     end
-    list << Rails.configuration.gems.reject{|g| g.frozen? && !g.framework_gem?}.map do |gem|
-      command, *options = gem.send(:install_command)
-      options.join(" ") + "\n"
-    end
+
+    list.unshift(%Q{rails --version "= #{Rails.version}"})
+
     File.open(File.join(RAILS_ROOT, '.gems'), 'w') do |f|
-      f.write(list)
+      f.write(list.join("\n"))
     end
-    puts ".gems has been updated with your application's gem dependencies."
   end
 
   desc 'Add git remotes for all apps in this project'
@@ -102,7 +106,7 @@ namespace :heroku do
   end
 end
 
-desc "Deploys, migrates and restarts latest code on Heroku"
+desc "Deploys, migrates and restarts latest code"
 task :deploy do
   each_heroku_app do |name, app, repo|
     branch = `git branch`.scan(/^\* (.*)\n/).to_s
@@ -116,7 +120,7 @@ task :deploy do
   end
 end
 
-desc "Force deploys, migrates and restarts latest code on Heroku"
+desc "Force deploys, migrates and restarts latest code"
 task :force_deploy do
   @git_push_arguments ||= []
   @git_push_arguments << '--force'
@@ -130,21 +134,21 @@ task :capture do
   end
 end
 
-desc "Opens a remote heroku console"
+desc "Opens a remote console"
 task :console do
   each_heroku_app do |name, app, repo|
     system_with_echo "heroku console --app #{app}"
   end
 end
 
-desc "Restarts remote heroku servers"
+desc "Restarts remote servers"
 task :restart do
   each_heroku_app do |name, app, repo|
     system_with_echo "heroku restart --app #{app}"
   end
 end
 
-desc "Migrates and restarts remote heroku servers"
+desc "Migrates and restarts remote servers"
 task :migrate do
   each_heroku_app do |name, app, repo|
     system_with_echo "heroku rake --app #{app} db:migrate && heroku restart --app #{app}"
