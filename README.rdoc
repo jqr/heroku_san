@@ -83,7 +83,7 @@ Frequently used tasks are not namespaced, everything else lives under heroku.
 == Links
 
 Homepage:: http://github.com/fastestforward/heroku_san
-Bug Tracker:: http://heroku_san.lighthouseapp.com/projects/56301-heroku_san/tickets
+Issue Tracker:: http://github.com/fastestforward/heroku_san/issues
 
 == Contributors
 
