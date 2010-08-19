@@ -1,4 +1,4 @@
-HEROKU_CONFIG_FILE = File.join(RAILS_ROOT, 'config', 'heroku.yml')
+HEROKU_CONFIG_FILE = Rails.root.join('config', 'heroku.yml')
 
 HEROKU_SETTINGS =
   if File.exists?(HEROKU_CONFIG_FILE)
@@ -40,7 +40,7 @@ namespace :heroku do
 
     list.unshift(%Q{rails --version "= #{Rails.version}"})
 
-    File.open(File.join(RAILS_ROOT, '.gems'), 'w') do |f|
+    File.open(Rails.root.join('.gems'), 'w') do |f|
       f.write(list.join("\n"))
     end
   end
@@ -160,12 +160,12 @@ namespace :db do
     each_heroku_app do |name, app, repo|
       system_with_echo "heroku pgdumps:capture --app #{app}"
       dump = `heroku pgdumps --app #{app}`.split("\n").last.split(" ").first
-      system_with_echo "mkdir -p #{RAILS_ROOT}/db/dumps"
-      file = "#{RAILS_ROOT}/db/dumps/#{dump}.sql.gz"
+      system_with_echo "mkdir -p #{Rails.root}/db/dumps"
+      file = "#{Rails.root}/db/dumps/#{dump}.sql.gz"
       url = `heroku pgdumps:url --app #{app} #{dump}`.chomp
       system_with_echo "wget", url, "-O", file
       system_with_echo "rake db:drop db:create"
-      system_with_echo "gunzip -c #{file} | #{RAILS_ROOT}/script/dbconsole"
+      system_with_echo "gunzip -c #{file} | #{Rails.root}/script/dbconsole"
       system_with_echo "rake jobs:clear"
     end
   end
