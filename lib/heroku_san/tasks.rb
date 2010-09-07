@@ -107,7 +107,7 @@ namespace :heroku do
 end
 
 desc "Deploys, migrates and restarts latest code"
-task :deploy do
+task :deploy => :before_deploy do
   each_heroku_app do |name, app, repo|
     branch = `git branch`.scan(/^\* (.*)\n/).to_s
     if branch.present?
@@ -118,6 +118,15 @@ task :deploy do
       exit(1)
     end
   end
+  Rake::Task[:after_deploy].execute
+end
+
+desc "Callback before deploys"
+task :before_deploy do
+end
+
+desc "Callback after deploys"
+task :after_deploy do
 end
 
 desc "Force deploys, migrates and restarts latest code"

@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{heroku_san}
-  s.version = "0.2.1"
+  s.version = "0.2.3"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Elijah Miller", "Glenn Roberts"]
-  s.date = %q{2010-07-20}
+  s.date = %q{2010-08-30}
   s.description = %q{Manage multiple Heroku instances/apps for a single Rails app using Rake}
   s.email = %q{glenn.roberts@siyelo.com}
   s.extra_rdoc_files = [
