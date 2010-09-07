@@ -109,7 +109,7 @@ end
 desc "Deploys, migrates and restarts latest code"
 task :deploy => :before_deploy do
   each_heroku_app do |name, app, repo|
-    branch = `git branch`.scan(/^\* (.*)\n/).to_s
+    branch = `git branch`.scan(/^\* (.*)\n/).flatten.first.to_s
     if branch.present?
       @git_push_arguments ||= []
       system_with_echo "git push #{repo} #{@git_push_arguments.join(' ')} #{branch}:master && heroku rake --app #{app} db:migrate && heroku restart --app #{app}"
