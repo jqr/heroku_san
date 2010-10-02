@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Elijah Miller", "Glenn Roberts"]
-  s.date = %q{2010-09-07}
+  s.date = %q{2010-10-02}
   s.description = %q{Manage multiple Heroku instances/apps for a single Rails app using Rake}
   s.email = %q{glenn.roberts@siyelo.com}
   s.extra_rdoc_files = [
@@ -26,14 +26,12 @@ Gem::Specification.new do |s|
      "TODO",
      "VERSION",
      "heroku_san.gemspec",
-     "init.rb",
      "install.rb",
      "lib/heroku_san.rb",
+     "lib/heroku_san/railtie.rb",
      "lib/heroku_san/tasks.rb",
      "lib/tasks/heroku.rake",
-     "lib/templates/heroku.example.yml",
-     "rails/init.rb",
-     "uninstall.rb"
+     "lib/templates/heroku.example.yml"
   ]
   s.homepage = %q{http://github.com/glennr/heroku_san}
   s.rdoc_options = ["--charset=UTF-8"]
