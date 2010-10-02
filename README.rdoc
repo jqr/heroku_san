@@ -22,13 +22,9 @@ To install as a plugin:
 
 == Configure
 
-In config/heroku.yml you will need add the Heroku apps that you would like to attach to this project. Here is an example of an app called 'awesomeapp' with three Heroku apps attached.
-
-  apps:
-    # shorthand: heroku app
-    production: awesomeapp
-    staging: awesomeapp-staging
-    demo: awesomeapp-demo
+In config/heroku.yml you will need add the Heroku apps that you would like to attach to this project. You can generate this file and edit it by running:
+  
+  rake heroku:create_config
 
 If this is a fresh project, heroku_san can create all the applications for
 you, and set the RACK_ENV.
