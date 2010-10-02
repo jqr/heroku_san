@@ -4,6 +4,17 @@ Helpful rake tasks for Heroku.
 
 == Install
 
+=== Rails 3
+
+Add this to your Gemfile:
+
+  group :development do
+    gem 'heroku'
+    gem 'heroku_san'
+  end
+
+=== Rails 2
+
 To install add the following to config/environment.rb:
 
   config.gem 'heroku_san'
