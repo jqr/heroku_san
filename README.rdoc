@@ -9,7 +9,6 @@ Helpful rake tasks for Heroku.
 Add this to your Gemfile:
 
   group :development do
-    gem 'heroku'
     gem 'heroku_san'
   end
 
