@@ -9,7 +9,7 @@ begin
     gem.email = "glenn.roberts@siyelo.com"
     gem.homepage = "http://github.com/glennr/heroku_san"
     gem.authors = ["Elijah Miller", "Glenn Roberts"]
-    gem.files = Dir["{lib}/**/*", "install.rb", "VERSION", "LICENSE"]
+    gem.files = Dir["{lib}/**/*", "VERSION", "LICENSE"]
     gem.extra_rdoc_files = []
     gem.add_dependency("heroku")
   end
