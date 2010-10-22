@@ -6,7 +6,7 @@ begin
     gem.name = "heroku_san"
     gem.summary = %Q{A bunch of useful Rake tasks for managing your Heroku apps}
     gem.description = %Q{Manage multiple Heroku instances/apps for a single Rails app using Rake}
-    gem.email = "glenn.roberts@siyelo.com"
+    gem.email = "elijah.miller@gmail.com"
     gem.homepage = "http://github.com/glennr/heroku_san"
     gem.authors = ["Elijah Miller", "Glenn Roberts"]
     gem.files = Dir["{lib}/**/*", "VERSION", "LICENSE"]
