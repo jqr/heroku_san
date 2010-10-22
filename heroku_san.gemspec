@@ -11,11 +11,14 @@ Gem::Specification.new do |s|
   s.authors = ["Elijah Miller", "Glenn Roberts"]
   s.date = %q{2010-10-22}
   s.description = %q{Manage multiple Heroku instances/apps for a single Rails app using Rake}
-  s.email = %q{glenn.roberts@siyelo.com}
+  s.email = %q{elijah.miller@gmail.com}
   s.files = [
-    "LICENSE",
+    "CHANGELOG",
+     "LICENSE",
+     "README.rdoc",
+     "Rakefile",
+     "TODO",
      "VERSION",
-     "install.rb",
      "lib/heroku_san.rb",
      "lib/heroku_san/railtie.rb",
      "lib/heroku_san/tasks.rb",
