@@ -113,13 +113,30 @@ namespace :heroku do
   end
 end
 
-desc "Deploys, migrates and restarts latest code"
-task :deploy => :before_deploy do
+desc "Deploys the given commit, migrates and restarts (default: HEAD)"
+task :deploy, :commit, :needs => :before_deploy do |t, args|
+  args.with_defaults(:commit => "HEAD")
+  system_with_echo "git update-ref refs/heroku_san/deploy #{args[:commit]}"
   each_heroku_app do |name, app, repo|
     @git_push_arguments ||= []
-    system_with_echo "git push #{repo} #{@git_push_arguments.join(' ')} HEAD:master && heroku rake --app #{app} db:migrate && heroku restart --app #{app}"
+    system_with_echo "git push #{repo} #{@git_push_arguments.join(' ')} refs/heroku_san/deploy:master && heroku rake --app #{app} db:migrate && heroku restart --app #{app}"
   end
+  system_with_echo "git update-ref -d refs/heroku_san/deploy"
   Rake::Task[:after_deploy].execute
+end
+
+namespace :deploy do
+  desc "Force-deploys the given commit, migrates and restarts (default: HEAD)"
+  task :force, :commit do |t, args|
+    @git_push_arguments ||= []
+    @git_push_arguments << '--force'
+    Rake::Task[:deploy].execute(args)
+  end
+end
+
+# Deprecated.
+task :force_deploy do
+  Rake::Task[:'deploy:force'].invoke
 end
 
 desc "Callback before deploys"
@@ -128,13 +145,6 @@ end
 
 desc "Callback after deploys"
 task :after_deploy do
-end
-
-desc "Force deploys, migrates and restarts latest code"
-task :force_deploy do
-  @git_push_arguments ||= []
-  @git_push_arguments << '--force'
-  Rake::Task[:deploy].execute
 end
 
 desc "Captures a bundle on Heroku"
