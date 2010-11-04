@@ -24,7 +24,7 @@ namespace :heroku do
   desc "Creates the Heroku app"
   task :create do
     each_heroku_app do |name, app, repo|
-      system_with_echo "heroku create #{app}"
+      sh "heroku create #{app}"
     end
   end
 
@@ -58,7 +58,7 @@ namespace :heroku do
     $stdout.flush
     email = $stdin.gets
     each_heroku_app do |name, app, repo|
-      system_with_echo "heroku sharing:add --app #{app} #{email}"
+      sh "heroku sharing:add --app #{app} #{email}"
     end
   end
 
@@ -68,7 +68,7 @@ namespace :heroku do
     $stdout.flush
     email = $stdin.gets
     each_heroku_app do |name, app, repo|
-      system_with_echo "heroku sharing:remove --app #{app} #{email}"
+      sh "heroku sharing:remove --app #{app} #{email}"
     end
   end
 
@@ -88,7 +88,7 @@ namespace :heroku do
       puts command
       config = Hash[`#{command}`.scan(/^(.+?)\s*=>\s*(.+)$/)]
       if config['RACK_ENV'] != name
-        system_with_echo "heroku config:add --app #{app} RACK_ENV=#{name}"
+        sh "heroku config:add --app #{app} RACK_ENV=#{name}"
       end
     end
   end
@@ -101,14 +101,14 @@ namespace :heroku do
     else
       puts "Copied example config to config/heroku.yml"
       FileUtils.cp(example, HEROKU_CONFIG_FILE)
-      system_with_echo("#{ENV['EDITOR']} #{HEROKU_CONFIG_FILE}")
+      sh("#{ENV['EDITOR']} #{HEROKU_CONFIG_FILE}")
     end
   end
 
   desc 'Runs a rake task remotely'
   task :rake, :task do |t, args|
     each_heroku_app do |name, app, repo|
-      system_with_echo "heroku rake --app #{app} #{args[:task]}"
+      sh "heroku rake --app #{app} #{args[:task]}"
     end
   end
 end
@@ -116,12 +116,14 @@ end
 desc "Deploys the given commit, migrates and restarts (default: HEAD)"
 task :deploy, :commit, :needs => :before_deploy do |t, args|
   args.with_defaults(:commit => "HEAD")
-  system_with_echo "git update-ref refs/heroku_san/deploy #{args[:commit]}"
+  sh "git update-ref refs/heroku_san/deploy #{args[:commit]}"
   each_heroku_app do |name, app, repo|
     @git_push_arguments ||= []
-    system_with_echo "git push #{repo} #{@git_push_arguments.join(' ')} refs/heroku_san/deploy:master && heroku rake --app #{app} db:migrate && heroku restart --app #{app}"
+    sh "git push #{repo} #{@git_push_arguments.join(' ')} refs/heroku_san/deploy:master"
+    sh "heroku rake --app #{app} db:migrate"
+    sh "heroku restart --app #{app}"
   end
-  system_with_echo "git update-ref -d refs/heroku_san/deploy"
+  sh "git update-ref -d refs/heroku_san/deploy"
   Rake::Task[:after_deploy].execute
 end
 
@@ -150,50 +152,46 @@ end
 desc "Captures a bundle on Heroku"
 task :capture do
   each_heroku_app do |name, app, repo|
-    system_with_echo "heroku bundles:capture --app #{app}"
+    sh "heroku bundles:capture --app #{app}"
   end
 end
 
 desc "Opens a remote console"
 task :console do
   each_heroku_app do |name, app, repo|
-    system_with_echo "heroku console --app #{app}"
+    sh "heroku console --app #{app}"
   end
 end
 
 desc "Restarts remote servers"
 task :restart do
   each_heroku_app do |name, app, repo|
-    system_with_echo "heroku restart --app #{app}"
+    sh "heroku restart --app #{app}"
   end
 end
 
 desc "Migrates and restarts remote servers"
 task :migrate do
   each_heroku_app do |name, app, repo|
-    system_with_echo "heroku rake --app #{app} db:migrate && heroku restart --app #{app}"
+    sh "heroku rake --app #{app} db:migrate"
+    sh "heroku restart --app #{app}"
   end
 end
 
 namespace :db do
   task :pull do
     each_heroku_app do |name, app, repo|
-      system_with_echo "heroku pgdumps:capture --app #{app}"
+      sh "heroku pgdumps:capture --app #{app}"
       dump = `heroku pgdumps --app #{app}`.split("\n").last.split(" ").first
-      system_with_echo "mkdir -p #{Rails.root}/db/dumps"
+      sh "mkdir -p #{Rails.root}/db/dumps"
       file = "#{Rails.root}/db/dumps/#{dump}.sql.gz"
       url = `heroku pgdumps:url --app #{app} #{dump}`.chomp
-      system_with_echo "wget", url, "-O", file
-      system_with_echo "rake db:drop db:create"
-      system_with_echo "gunzip -c #{file} | #{Rails.root}/script/dbconsole"
-      system_with_echo "rake jobs:clear"
+      sh "wget", url, "-O", file
+      sh "rake db:drop db:create"
+      sh "gunzip -c #{file} | #{Rails.root}/script/dbconsole"
+      sh "rake jobs:clear"
     end
   end
-end
-
-def system_with_echo(*args)
-  puts args.join(' ')
-  system(*args)
 end
 
 def each_heroku_app
