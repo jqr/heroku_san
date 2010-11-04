@@ -104,6 +104,13 @@ namespace :heroku do
       system_with_echo("#{ENV['EDITOR']} #{HEROKU_CONFIG_FILE}")
     end
   end
+
+  desc 'Runs a rake task remotely'
+  task :rake, :task do |t, args|
+    each_heroku_app do |name, app, repo|
+      system_with_echo "heroku rake --app #{app} #{args[:task]}"
+    end
+  end
 end
 
 desc "Deploys, migrates and restarts latest code"
