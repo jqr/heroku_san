@@ -233,9 +233,12 @@ end
 def push(commit, repo)
   commit ||= "HEAD"
   @git_push_arguments ||= []
-  sh "git update-ref refs/heroku_san/deploy #{commit}"
-  sh "git push #{repo} #{@git_push_arguments.join(' ')} refs/heroku_san/deploy:refs/heads/master"
-  sh "git update-ref -d refs/heroku_san/deploy"
+  begin
+    sh "git update-ref refs/heroku_san/deploy #{commit}"
+    sh "git push #{repo} #{@git_push_arguments.join(' ')} refs/heroku_san/deploy:refs/heads/master"
+  ensure
+    sh "git update-ref -d refs/heroku_san/deploy"
+  end
 end
 
 def migrate(app)
