@@ -111,24 +111,36 @@ namespace :heroku do
       sh "heroku rake --app #{app} #{args[:task]}"
     end
   end
+
+  desc "Pushes the given commit (default: HEAD)"
+  task :push, :commit do |t, args|
+    each_heroku_app do |name, app, repo|
+      push(args[:commit], repo)
+    end
+  end
+
+  namespace :push do
+    desc "Force-pushes the given commit (default: HEAD)"
+    task :force, :commit do |t, args|
+      @git_push_arguments ||= []
+      @git_push_arguments << '--force'
+      Rake::Task[:'heroku:push'].execute(args)
+    end
+  end
+
 end
 
-desc "Deploys the given commit, migrates and restarts (default: HEAD)"
+desc "Pushes the given commit, migrates and restarts (default: HEAD)"
 task :deploy, :commit, :needs => :before_deploy do |t, args|
-  args.with_defaults(:commit => "HEAD")
-  sh "git update-ref refs/heroku_san/deploy #{args[:commit]}"
   each_heroku_app do |name, app, repo|
-    @git_push_arguments ||= []
-    sh "git push #{repo} #{@git_push_arguments.join(' ')} refs/heroku_san/deploy:master"
-    sh "heroku rake --app #{app} db:migrate"
-    sh "heroku restart --app #{app}"
+    push(args[:commit], repo)
+    migrate(app)
   end
-  sh "git update-ref -d refs/heroku_san/deploy"
   Rake::Task[:after_deploy].execute
 end
 
 namespace :deploy do
-  desc "Force-deploys the given commit, migrates and restarts (default: HEAD)"
+  desc "Force-pushes the given commit, migrates and restarts (default: HEAD)"
   task :force, :commit do |t, args|
     @git_push_arguments ||= []
     @git_push_arguments << '--force'
@@ -173,8 +185,7 @@ end
 desc "Migrates and restarts remote servers"
 task :migrate do
   each_heroku_app do |name, app, repo|
-    sh "heroku rake --app #{app} db:migrate"
-    sh "heroku restart --app #{app}"
+    migrate(app)
   end
 end
 
@@ -217,4 +228,17 @@ def each_heroku_app
       
     exit(1)
   end
+end
+
+def push(commit, repo)
+  commit ||= "HEAD"
+  @git_push_arguments ||= []
+  sh "git update-ref refs/heroku_san/deploy #{commit}"
+  sh "git push #{repo} #{@git_push_arguments.join(' ')} refs/heroku_san/deploy:refs/heads/master"
+  sh "git update-ref -d refs/heroku_san/deploy"
+end
+
+def migrate(app)
+  sh "heroku rake --app #{app} db:migrate"
+  sh "heroku restart --app #{app}"
 end
