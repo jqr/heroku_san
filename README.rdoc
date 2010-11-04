@@ -67,7 +67,8 @@ A full list of tasks provided:
 
   rake all                   # Select all Heroku apps for later command
   rake console               # Opens a remote console
-  rake deploy                # Deploys, migrates and restarts latest code.
+  rake deploy[commit]        # Pushes the given commit, migrates and restarts (default: HEAD)
+  rake deploy:force[commit]  # Force-pushes the given commit, migrates and restarts (default: HEAD)
   rake after_deploy          # Callback after deploys
   rake before_deploy         # Callback before deploys
   rake capture               # Captures a bundle on Heroku
@@ -75,8 +76,11 @@ A full list of tasks provided:
   rake heroku:create         # Creates the Heroku app
   rake heroku:create_config  # Creates an example configuration file
   rake heroku:gems           # Generate the Heroku gems manifest from gem dependencies
+  rake heroku:push           # Pushes the given commit (default: HEAD)
+  rake heroku:push:force     # Force-pushes the given commit (default: HEAD)
   rake heroku:remotes        # Add git remotes for all apps in this project
   rake heroku:rack_env       # Add proper RACK_ENV to each application
+  rake heroku:rake[task]     # Runs a rake task remotely
   rake heroku:share          # Adds a collaborator
   rake heroku:unshare        # Removes a collaborator
   rake migrate               # Migrates and restarts remote servers
