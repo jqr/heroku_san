@@ -24,7 +24,7 @@ namespace :heroku do
   desc "Creates the Heroku app"
   task :create do
     each_heroku_app do |name, app, repo|
-      system_with_echo "heroku create #{app}"
+      sh "heroku create #{app}"
     end
   end
 
@@ -58,7 +58,7 @@ namespace :heroku do
     $stdout.flush
     email = $stdin.gets
     each_heroku_app do |name, app, repo|
-      system_with_echo "heroku sharing:add --app #{app} #{email}"
+      sh "heroku sharing:add --app #{app} #{email}"
     end
   end
 
@@ -68,7 +68,7 @@ namespace :heroku do
     $stdout.flush
     email = $stdin.gets
     each_heroku_app do |name, app, repo|
-      system_with_echo "heroku sharing:remove --app #{app} #{email}"
+      sh "heroku sharing:remove --app #{app} #{email}"
     end
   end
 
@@ -88,7 +88,7 @@ namespace :heroku do
       puts command
       config = Hash[`#{command}`.scan(/^(.+?)\s*=>\s*(.+)$/)]
       if config['RACK_ENV'] != name
-        system_with_echo "heroku config:add --app #{app} RACK_ENV=#{name}"
+        sh "heroku config:add --app #{app} RACK_ENV=#{name}"
       end
     end
   end
@@ -101,24 +101,56 @@ namespace :heroku do
     else
       puts "Copied example config to config/heroku.yml"
       FileUtils.cp(example, HEROKU_CONFIG_FILE)
-      system_with_echo("#{ENV['EDITOR']} #{HEROKU_CONFIG_FILE}")
+      sh("#{ENV['EDITOR']} #{HEROKU_CONFIG_FILE}")
     end
+  end
+
+  desc 'Runs a rake task remotely'
+  task :rake, :task do |t, args|
+    each_heroku_app do |name, app, repo|
+      sh "heroku rake --app #{app} #{args[:task]}"
+    end
+  end
+
+  desc "Pushes the given commit (default: HEAD)"
+  task :push, :commit do |t, args|
+    each_heroku_app do |name, app, repo|
+      push(args[:commit], repo)
+    end
+  end
+
+  namespace :push do
+    desc "Force-pushes the given commit (default: HEAD)"
+    task :force, :commit do |t, args|
+      @git_push_arguments ||= []
+      @git_push_arguments << '--force'
+      Rake::Task[:'heroku:push'].execute(args)
+    end
+  end
+
+end
+
+desc "Pushes the given commit, migrates and restarts (default: HEAD)"
+task :deploy, :commit, :needs => :before_deploy do |t, args|
+  each_heroku_app do |name, app, repo|
+    push(args[:commit], repo)
+    migrate(app)
+  end
+  Rake::Task[:after_deploy].execute
+end
+
+namespace :deploy do
+  desc "Force-pushes the given commit, migrates and restarts (default: HEAD)"
+  task :force, :commit do |t, args|
+    @git_push_arguments ||= []
+    @git_push_arguments << '--force'
+    Rake::Task[:deploy].execute(args)
   end
 end
 
-desc "Deploys, migrates and restarts latest code"
-task :deploy => :before_deploy do
-  each_heroku_app do |name, app, repo|
-    branch = `git branch`.scan(/^\* (.*)\n/).flatten.first.to_s
-    if branch.present?
-      @git_push_arguments ||= []
-      system_with_echo "git push #{repo} #{@git_push_arguments.join(' ')} #{branch}:master && heroku rake --app #{app} db:migrate && heroku restart --app #{app}"
-    else
-      puts "Unable to determine the current git branch, please checkout the branch you'd like to deploy"
-      exit(1)
-    end
-  end
-  Rake::Task[:after_deploy].execute
+# Deprecated.
+task :force_deploy do
+  Rake::Task[:'deploy:force'].invoke
 end
 
 desc "Callback before deploys"
@@ -129,60 +161,48 @@ desc "Callback after deploys"
 task :after_deploy do
 end
 
-desc "Force deploys, migrates and restarts latest code"
-task :force_deploy do
-  @git_push_arguments ||= []
-  @git_push_arguments << '--force'
-  Rake::Task[:deploy].execute
-end
-
 desc "Captures a bundle on Heroku"
 task :capture do
   each_heroku_app do |name, app, repo|
-    system_with_echo "heroku bundles:capture --app #{app}"
+    sh "heroku bundles:capture --app #{app}"
   end
 end
 
 desc "Opens a remote console"
 task :console do
   each_heroku_app do |name, app, repo|
-    system_with_echo "heroku console --app #{app}"
+    sh "heroku console --app #{app}"
   end
 end
 
 desc "Restarts remote servers"
 task :restart do
   each_heroku_app do |name, app, repo|
-    system_with_echo "heroku restart --app #{app}"
+    sh "heroku restart --app #{app}"
   end
 end
 
 desc "Migrates and restarts remote servers"
 task :migrate do
   each_heroku_app do |name, app, repo|
-    system_with_echo "heroku rake --app #{app} db:migrate && heroku restart --app #{app}"
+    migrate(app)
   end
 end
 
 namespace :db do
   task :pull do
     each_heroku_app do |name, app, repo|
-      system_with_echo "heroku pgdumps:capture --app #{app}"
+      sh "heroku pgdumps:capture --app #{app}"
       dump = `heroku pgdumps --app #{app}`.split("\n").last.split(" ").first
-      system_with_echo "mkdir -p #{Rails.root}/db/dumps"
+      sh "mkdir -p #{Rails.root}/db/dumps"
       file = "#{Rails.root}/db/dumps/#{dump}.sql.gz"
       url = `heroku pgdumps:url --app #{app} #{dump}`.chomp
-      system_with_echo "wget", url, "-O", file
-      system_with_echo "rake db:drop db:create"
-      system_with_echo "gunzip -c #{file} | #{Rails.root}/script/dbconsole"
-      system_with_echo "rake jobs:clear"
+      sh "wget", url, "-O", file
+      sh "rake db:drop db:create"
+      sh "gunzip -c #{file} | #{Rails.root}/script/dbconsole"
+      sh "rake jobs:clear"
     end
   end
-end
-
-def system_with_echo(*args)
-  puts args.join(' ')
-  system(*args)
 end
 
 def each_heroku_app
@@ -208,4 +228,20 @@ def each_heroku_app
       
     exit(1)
   end
+end
+
+def push(commit, repo)
+  commit ||= "HEAD"
+  @git_push_arguments ||= []
+  begin
+    sh "git update-ref refs/heroku_san/deploy #{commit}"
+    sh "git push #{repo} #{@git_push_arguments.join(' ')} refs/heroku_san/deploy:refs/heads/master"
+  ensure
+    sh "git update-ref -d refs/heroku_san/deploy"
+  end
+end
+
+def migrate(app)
+  sh "heroku rake --app #{app} db:migrate"
+  sh "heroku restart --app #{app}"
 end
