@@ -62,7 +62,7 @@ namespace :heroku do
     end
   end
 
-  desc 'Adds a collaborator'
+  desc 'Removes a collaborator'
   task :unshare do
     print "Email address of collaborator to remove: "
     $stdout.flush
