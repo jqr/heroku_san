@@ -192,7 +192,7 @@ end
 desc "Shows the Heroku logs"
 task :logs do
   each_heroku_app do |name, app, repo|
-    system_with_echo "heroku logs --app #{app}"
+    sh "heroku logs --app #{app}"
   end
 end
 
