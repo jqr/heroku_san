@@ -99,6 +99,9 @@ Issue Tracker:: http://github.com/fastestforward/heroku_san/issues
 * Elijah Miller (elijah.miller@gmail.com)
 * Glenn Roberts (glenn.roberts@siyelo.com)
 * Damien Mathieu (42@dmathieu.com)
+* Matthew Hassfurder (matthew.hassfurder@gmail.com)
+* Peter Jaros
+* Lee Semel
 
 == License
 
