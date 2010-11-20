@@ -83,6 +83,7 @@ A full list of tasks provided:
   rake heroku:rake[task]     # Runs a rake task remotely
   rake heroku:share          # Adds a collaborator
   rake heroku:unshare        # Removes a collaborator
+  rake logs                  # Shows the Heroku logs
   rake migrate               # Migrates and restarts remote servers
   rake restart               # Restarts remote servers
 
