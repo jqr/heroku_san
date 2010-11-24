@@ -76,6 +76,8 @@ A full list of tasks provided:
   rake heroku:create         # Creates the Heroku app
   rake heroku:create_config  # Creates an example configuration file
   rake heroku:gems           # Generate the Heroku gems manifest from gem dependencies
+  rake heroku:maintenance    # Enable maintenance mode
+  rake heroku:maintenance_off# Disable maintenance mode
   rake heroku:push           # Pushes the given commit (default: HEAD)
   rake heroku:push:force     # Force-pushes the given commit (default: HEAD)
   rake heroku:remotes        # Add git remotes for all apps in this project

@@ -128,14 +128,14 @@ namespace :heroku do
     end
   end
 
-  desc "Turn maintenance on"
+  desc "Enable maintenance mode"
   task :maintenance do
     each_heroku_app do |name, app, repo|
       maintenance(app, 'on')
     end
   end
 
-  desc "Turn maintenance off"
+  desc "Disable maintenance mode"
   task :maintenance_off do
     each_heroku_app do |name, app, repo|
       maintenance(app, 'off')
