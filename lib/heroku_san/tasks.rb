@@ -144,7 +144,7 @@ namespace :deploy do
   task :force, :commit do |t, args|
     @git_push_arguments ||= []
     @git_push_arguments << '--force'
-    Rake::Task[:deploy].execute(args)
+    Rake::Task[:deploy].invoke(args)
   end
 end
 
