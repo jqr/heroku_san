@@ -128,6 +128,19 @@ namespace :heroku do
     end
   end
 
+  desc "Turn maintenance on"
+  task :maintenance do
+    each_heroku_app do |name, app, repo|
+      maintenance(app, 'on')
+    end
+  end
+
+  desc "Turn maintenance off"
+  task :maintenance_off do
+    each_heroku_app do |name, app, repo|
+      maintenance(app, 'off')
+    end
+  end
 end
 
 desc "Pushes the given commit, migrates and restarts (default: HEAD)"
@@ -251,4 +264,8 @@ end
 def migrate(app)
   sh "heroku rake --app #{app} db:migrate"
   sh "heroku restart --app #{app}"
+end
+
+def maintenance(app, action)
+  sh "heroku maintenance:#{action} --app #{app}"
 end
