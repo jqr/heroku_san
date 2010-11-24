@@ -105,6 +105,7 @@ Issue Tracker:: http://github.com/fastestforward/heroku_san/issues
 * Peter Jaros
 * Lee Semel
 * Michael Haddad (michael@ludditetechnology.com)
+* Les Hill (leshill@gmail.com)
 
 == License
 
