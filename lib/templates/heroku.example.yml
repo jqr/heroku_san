@@ -3,3 +3,6 @@ apps:
   production: awesomeapp
   staging: awesomeapp-staging
   demo: awesomeapp-demo
+
+config:
+  BUNDLE_WITHOUT: "development:test"

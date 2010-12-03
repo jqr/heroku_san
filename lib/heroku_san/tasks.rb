@@ -105,6 +105,15 @@ namespace :heroku do
     end
   end
 
+  desc 'Add config:vars to each application.'
+  task :config do
+    each_heroku_app do |name, app, repo|
+      (HEROKU_SETTINGS['config'] || []).each do |var, value|
+        sh("heroku config:add --app #{app} #{var}=#{value}")
+      end
+    end
+  end
+  
   desc 'Runs a rake task remotely'
   task :rake, :task do |t, args|
     each_heroku_app do |name, app, repo|
