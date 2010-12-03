@@ -7,7 +7,7 @@ HEROKU_SETTINGS =
     {}
   end
 
-(HEROKU_SETTINGS['apps'] || []).each do |name, app|
+(HEROKU_SETTINGS.keys || []).each do |name|
   desc "Select #{name} Heroku app for later commands"
   task name do
     @heroku_apps ||= []
@@ -17,7 +17,7 @@ end
 
 desc 'Select all Heroku apps for later command'
 task :all do
-  @heroku_apps = HEROKU_SETTINGS['apps'].keys
+  @heroku_apps = HEROKU_SETTINGS.keys
 end
 
 namespace :heroku do
@@ -107,9 +107,9 @@ namespace :heroku do
 
   desc 'Add config:vars to each application.'
   task :config do
-    each_heroku_app do |name, app, repo|
-      (HEROKU_SETTINGS['config'] || []).each do |var, value|
-        sh("heroku config:add --app #{app} #{var}=#{value}")
+    each_heroku_app do |name, app, repo, config|
+      (config).each do |var, value|
+        sh "heroku config:add --app #{app} #{var}=#{value}"
       end
     end
   end
@@ -235,15 +235,16 @@ namespace :db do
 end
 
 def each_heroku_app
-  if @heroku_apps.blank? && HEROKU_SETTINGS['apps'].size == 1
-    app = HEROKU_SETTINGS['apps'].keys.first
+  if @heroku_apps.blank? && HEROKU_SETTINGS.keys.size == 1
+    app = HEROKU_SETTINGS.keys.first
     puts "Defaulting to #{app} app since only one app is defined"
     @heroku_apps = [app]
   end
   if @heroku_apps.present?
     @heroku_apps.each do |name|
-      app = HEROKU_SETTINGS['apps'][name]
-      yield(name, app, "git@heroku.com:#{app}.git")
+      app = HEROKU_SETTINGS[name]['app']
+      config = HEROKU_SETTINGS[name]['config'] || []
+      yield(name, app, "git@heroku.com:#{app}.git", config)
     end
     puts
   else
