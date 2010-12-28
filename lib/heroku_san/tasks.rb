@@ -1,13 +1,20 @@
 HEROKU_CONFIG_FILE = Rails.root.join('config', 'heroku.yml')
 
-HEROKU_SETTINGS =
+@app_settings = 
   if File.exists?(HEROKU_CONFIG_FILE)
     YAML.load_file(HEROKU_CONFIG_FILE)
   else
     {}
   end
 
-(HEROKU_SETTINGS.keys || []).each do |name|
+if @app_settings.has_key? 'apps'
+  @app_settings = @app_settings['apps']
+  @app_settings.each_pair do |shorthand, app_name|
+    @app_settings[shorthand] = {'app' => app_name}
+  end
+end
+
+(@app_settings.keys || []).each do |name|
   desc "Select #{name} Heroku app for later commands"
   task name do
     @heroku_apps ||= []
@@ -17,7 +24,7 @@ end
 
 desc 'Select all Heroku apps for later command'
 task :all do
-  @heroku_apps = HEROKU_SETTINGS.keys
+  @heroku_apps = @app_settings.keys
 end
 
 namespace :heroku do
@@ -235,15 +242,15 @@ namespace :db do
 end
 
 def each_heroku_app
-  if @heroku_apps.blank? && HEROKU_SETTINGS.keys.size == 1
-    app = HEROKU_SETTINGS.keys.first
+  if @heroku_apps.blank? && @app_settings.keys.size == 1
+    app = @app_settings.keys.first
     puts "Defaulting to #{app} app since only one app is defined"
     @heroku_apps = [app]
   end
   if @heroku_apps.present?
     @heroku_apps.each do |name|
-      app = HEROKU_SETTINGS[name]['app']
-      config = HEROKU_SETTINGS[name]['config'] || []
+      app = @app_settings[name]['app']
+      config = @app_settings[name]['config'] || []
       yield(name, app, "git@heroku.com:#{app}.git", config)
     end
     puts
