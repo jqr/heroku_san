@@ -9,13 +9,13 @@
 production: 
   app: awesomeapp
   config:
-    - BUNDLE_WITHOUT: "development:test"
-    - GOOGLE_ANALYTICS: "UA-12345678-1"
+    BUNDLE_WITHOUT: "development:test"
+    GOOGLE_ANALYTICS: "UA-12345678-1"
 
 staging:
   app: awesomeapp-staging
   config: &default
-    - BUNDLE_WITHOUT: "development:test"
+    BUNDLE_WITHOUT: "development:test"
 
 demo: 
   app: awesomeapp-demo
