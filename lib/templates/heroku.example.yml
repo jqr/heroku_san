@@ -11,11 +11,15 @@ production:
   config:
     BUNDLE_WITHOUT: "development:test"
     GOOGLE_ANALYTICS: "UA-12345678-1"
+  addons: &addons
+    cron: "daily"
+    ssl: "piggyback"
 
 staging:
   app: awesomeapp-staging
   config: &default
     BUNDLE_WITHOUT: "development:test"
+  addons: *addons
 
 demo: 
   app: awesomeapp-demo

@@ -121,6 +121,15 @@ namespace :heroku do
     end
   end
   
+  desc 'Add addons to each application.'
+  task :addons do
+    each_heroku_app do |name, app, repo, config, addons|
+      (addons).each do |var, value|
+        sh "heroku addons:add --app #{app} #{var}:#{value}"
+      end
+    end
+  end
+
   desc 'Runs a rake task remotely'
   task :rake, :task do |t, args|
     each_heroku_app do |name, app, repo|
@@ -251,7 +260,8 @@ def each_heroku_app
     @heroku_apps.each do |name|
       app = @app_settings[name]['app']
       config = @app_settings[name]['config'] || []
-      yield(name, app, "git@heroku.com:#{app}.git", config)
+      addons = @app_settings[name]['addons'] || []
+      yield(name, app, "git@heroku.com:#{app}.git", config, addons)
     end
     puts
   else
