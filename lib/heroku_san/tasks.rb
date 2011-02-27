@@ -116,7 +116,7 @@ namespace :heroku do
   task :config do
     each_heroku_app do |name, app, repo, config|
       (config).each do |var, value|
-        sh "heroku config:add --app #{app} #{var}=#{value}"
+        sh "heroku config:add --app #{app} #{var}=\"#{value}\""
       end
     end
   end
