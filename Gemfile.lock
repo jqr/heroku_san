@@ -36,7 +36,6 @@ GEM
     builder (2.1.2)
     childprocess (0.1.6)
       ffi (~> 0.6.3)
-    configuration (1.2.0)
     cucumber (0.10.0)
       builder (>= 2.1.2)
       diff-lcs (~> 1.1.2)
@@ -51,22 +50,12 @@ GEM
     gherkin (2.3.3)
       json (~> 1.4.6)
     git (1.2.5)
-    heroku (1.15.1)
-      json_pure (>= 1.2.0, < 1.5.0)
-      launchy (~> 0.3.2)
-      rest-client (>= 1.4.0, < 1.7.0)
-    heroku_san (1.0.7)
-      heroku
     i18n (0.5.0)
     jeweler (1.5.2)
       bundler (~> 1.0.0)
       git (>= 1.2.5)
       rake
     json (1.4.6)
-    json_pure (1.4.6)
-    launchy (0.3.7)
-      configuration (>= 0.0.5)
-      rake (>= 0.8.1)
     mail (2.2.13)
       activesupport (>= 2.3.6)
       i18n (>= 0.4.0)
@@ -93,8 +82,6 @@ GEM
       rake (>= 0.8.7)
       thor (~> 0.14.4)
     rake (0.8.7)
-    rest-client (1.6.1)
-      mime-types (>= 1.16)
     rspec (2.3.0)
       rspec-core (~> 2.3.0)
       rspec-expectations (~> 2.3.0)
@@ -115,7 +102,6 @@ PLATFORMS
 DEPENDENCIES
   aruba
   cucumber
-  heroku_san
   jeweler
-  rails (>= 3)
+  rails (>= 2)
   rspec

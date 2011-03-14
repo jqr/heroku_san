@@ -1,6 +1,5 @@
 source :gemcutter
 
-gem 'heroku_san'
 gem 'rails', ">= 2"
 
 group :development do
