@@ -3,7 +3,7 @@ HEROKU_CONFIG_FILE = Rails.root.join('config', 'heroku.yml')
 @app_settings = 
   if File.exists?(HEROKU_CONFIG_FILE)
     if defined?(ERB)
-      YAML.load_file(ERB.new(HEROKU_CONFIG_FILE).result)
+      YAML.load(ERB.new(File.read(HEROKU_CONFIG_FILE)).result)
     else
       YAML.load_file(HEROKU_CONFIG_FILE)
     end
