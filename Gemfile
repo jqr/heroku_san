@@ -1,13 +1,4 @@
-source :gemcutter
+source :rubygems
 
-gem 'rails', ">= 2"
-
-group :development do
-  gem 'jeweler'
-end
-
-group :test do
-  gem 'aruba'
-  gem 'cucumber'
-  gem 'rspec'
-end
+# Specify dependencies in heroku_san.gemspec
+gemspec
