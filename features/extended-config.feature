@@ -19,7 +19,7 @@ Feature: Extended config
         app: awesomeapp-demo
       """
 
-    When I run `rake heroku:config:list`
+    When I run `rake all heroku:config:list:local`
 
     Then the output should contain "production TEST_REMOTE: 'hello world'"
     And the output should contain "staging TEST_REMOTE: 'goodbye world'"
@@ -46,7 +46,7 @@ Feature: Extended config
         app: awesomeapp-demo
       """
 
-    When I run `rake heroku:config:list`
+    When I run `rake all heroku:config:list:local`
 
     Then the output should contain "production TEST_LOCAL: 'hello world'"
     And  the output should contain "staging TEST_LOCAL: 'goodbye world'"
@@ -73,7 +73,7 @@ Feature: Extended config
           TEST_REMOTE: 'overridden by remote'
       """
 
-    When I run `rake heroku:config:list`
+    When I run `rake all heroku:config:list:local`
 
     Then the output should contain "production TEST_LOCAL: 'hello world'"
     And the output should contain "production TEST_REMOTE: 'hello world'"
