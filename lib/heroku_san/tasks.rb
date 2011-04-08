@@ -18,6 +18,27 @@ if @app_settings.has_key? 'apps'
   end
 end
 
+@config_repo = @app_settings.delete('config_repo')
+def retrieve_configuration
+  unless @config_repo.nil?
+    #load external config
+    require 'tmpdir'
+    tmp_config_dir = Dir.mktmpdir
+    tmp_config_file = File.join tmp_config_dir, 'config.yml'
+    sh "git clone #{@config_repo} #{tmp_config_dir}"
+    @extra_config = 
+      if File.exists?(tmp_config_file)
+        if defined?(ERB)
+          YAML.load(ERB.new(File.read(tmp_config_file)).result)
+        else
+          YAML.load_file(tmp_config_file)
+        end
+      else
+        {}
+      end
+  end
+end
+
 (@app_settings.keys || []).each do |name|
   desc "Select #{name} Heroku app for later commands"
   task name do
@@ -118,9 +139,32 @@ namespace :heroku do
 
   desc 'Add config:vars to each application.'
   task :config do
+    retrieve_configuration
     each_heroku_app do |name, app, repo, config|
       (config).each do |var, value|
         sh "heroku config:add --app #{app} #{var}=#{value}"
+      end
+    end
+  end
+
+  namespace :config do
+    desc "Lists config variables as set on Heroku"
+    task :list do
+      each_heroku_app do |name, app|
+        puts "#{name}:"
+        sh "heroku config --app #{app} --long"
+      end
+    end
+
+    namespace :list do
+      desc "Lists local config variables without setting them"
+      task :local do
+        retrieve_configuration
+        each_heroku_app do |name, app, repo, config|
+          (config).each do |var, value|
+            puts "#{name} #{var}: '#{value}'"
+          end
+        end
       end
     end
   end
@@ -254,7 +298,8 @@ def each_heroku_app
   if @heroku_apps.present?
     @heroku_apps.each do |name|
       app = @app_settings[name]['app']
-      config = @app_settings[name]['config'] || []
+      config = @app_settings[name]['config'] || {}
+      config.merge!(@extra_config[name]) if (@extra_config && @extra_config[name])
       yield(name, app, "git@heroku.com:#{app}.git", config)
     end
     puts
