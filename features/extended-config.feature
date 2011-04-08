@@ -21,8 +21,8 @@ Feature: Extended config
 
     When I run `rake all heroku:config:list:local`
 
-    Then the output should contain "production TEST_REMOTE: 'hello world'"
-    And the output should contain "staging TEST_REMOTE: 'goodbye world'"
+    Then the output should contain "production TEST_REMOTE: 'hello_world'"
+    And the output should contain "staging TEST_REMOTE: 'goodbye_world'"
 
   Scenario: Config information can be listed
     Given I run `rails new heroku_san_test -O`
@@ -37,19 +37,19 @@ Feature: Extended config
       production:
         app: awesomeapp
         config:
-          TEST_LOCAL: 'hello world'
+          TEST_LOCAL: 'hello_world'
       staging:
         app: awesomeapp-staging
         config:
-          TEST_LOCAL: 'goodbye world'
+          TEST_LOCAL: 'goodbye_world'
       demo:
         app: awesomeapp-demo
       """
 
     When I run `rake all heroku:config:list:local`
 
-    Then the output should contain "production TEST_LOCAL: 'hello world'"
-    And  the output should contain "staging TEST_LOCAL: 'goodbye world'"
+    Then the output should contain "production TEST_LOCAL: 'hello_world'"
+    And  the output should contain "staging TEST_LOCAL: 'goodbye_world'"
 
   Scenario: Config information can be merged between local and remote
     Given I run `rails new heroku_san_test -O`
@@ -65,17 +65,17 @@ Feature: Extended config
       production:
         app: awesomeapp
         config:
-          TEST_LOCAL: 'hello world'
+          TEST_LOCAL: 'hello_world'
       staging:
         app: awesomeapp-staging
         config:
-          TEST_LOCAL: 'goodbye world'
-          TEST_REMOTE: 'overridden by remote'
+          TEST_LOCAL: 'goodbye_world'
+          TEST_REMOTE: 'overridden_by_remote'
       """
 
     When I run `rake all heroku:config:list:local`
 
-    Then the output should contain "production TEST_LOCAL: 'hello world'"
-    And the output should contain "production TEST_REMOTE: 'hello world'"
-    And the output should contain "staging TEST_LOCAL: 'goodbye world'"
-    And the output should contain "staging TEST_REMOTE: 'goodbye world'"
+    Then the output should contain "production TEST_LOCAL: 'hello_world'"
+    And the output should contain "production TEST_REMOTE: 'hello_world'"
+    And the output should contain "staging TEST_LOCAL: 'goodbye_world'"
+    And the output should contain "staging TEST_REMOTE: 'goodbye_world'"
