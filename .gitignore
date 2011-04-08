@@ -5,3 +5,4 @@ Thumbs.db
 tmp
 
 Gemfile.lock
+*.swp
