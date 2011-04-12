@@ -290,11 +290,22 @@ namespace :db do
 end
 
 def each_heroku_app
-  if @heroku_apps.blank? && @app_settings.keys.size == 1
-    app = @app_settings.keys.first
-    puts "Defaulting to #{app} app since only one app is defined"
-    @heroku_apps = [app]
+  if @heroku_apps.blank? 
+    if @app_settings.keys.size == 1
+      app = @app_settings.keys.first
+      puts "Defaulting to #{app} app since only one app is defined"
+      @heroku_apps = [app]
+    else
+      @app_settings.keys.each do |key|
+        active_branch = %x{git branch}.split("\n").select { |b| b =~ /^\*/ }.first.split(" ").last.strip
+        if key == active_branch
+          puts "Defaulting to #{key} as it matches the current branch"
+          @heroku_apps = [key]
+        end
+      end
+    end
   end
+
   if @heroku_apps.present?
     @heroku_apps.each do |name|
       app = @app_settings[name]['app']
