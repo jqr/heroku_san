@@ -10,7 +10,7 @@ Feature: Extended config
       """
     Given a file named "config/heroku.yml" with:
       """
-      config_repo: git://github.com/rahearn/test-credentials.git
+      config_repo: 'file:///<%= File.join(File.expand_path(File.dirname(__FILE__)), '..', '..', '..', 'features', 'data', 'test-config') %>'
       production: 
         app: awesomeapp
       staging:
@@ -61,7 +61,7 @@ Feature: Extended config
       """
     Given a file named "config/heroku.yml" with:
       """
-      config_repo: git://github.com/rahearn/test-credentials.git
+      config_repo: 'file:///<%= File.join(File.expand_path(File.dirname(__FILE__)), '..', '..', '..', 'features', 'data', 'test-config') %>'
       production:
         app: awesomeapp
         config:
