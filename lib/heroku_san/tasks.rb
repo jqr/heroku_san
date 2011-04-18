@@ -120,6 +120,17 @@ namespace :heroku do
     end
   end
 
+  namespace :apps do
+    desc 'Lists configured apps without hitting heroku'
+    task :local => :all do
+      each_heroku_app do |name, app, repo|
+        puts "#{name} is shorthand for the Heroku app #{app} located at:"
+        puts "  #{repo}"
+        puts
+      end
+    end
+  end
+
   desc 'Add proper RACK_ENV to each application'
   task :rack_env => :all do
     each_heroku_app do |name, app, repo|

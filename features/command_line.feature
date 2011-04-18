@@ -18,7 +18,7 @@ Feature: Command Line
         app: awesomeapp-demo
       """
 
-    When I run `rake heroku:apps`
+    When I run `rake heroku:apps:local`
 
     Then the output should contain "production is shorthand for the Heroku app awesomeapp"
     And  the output should contain "staging is shorthand for the Heroku app awesomeapp-staging"
@@ -40,7 +40,7 @@ Feature: Command Line
         demo: awesomeapp-demo
       """
 
-    When I run `rake heroku:apps`
+    When I run `rake heroku:apps:local`
 
     Then the output should contain "production is shorthand for the Heroku app awesomeapp"
     And  the output should contain "staging is shorthand for the Heroku app awesomeapp-staging"
