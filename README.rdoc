@@ -107,6 +107,10 @@ Issue Tracker:: http://github.com/fastestforward/heroku_san/issues
 * Michael Haddad (michael@ludditetechnology.com)
 * Les Hill (leshill@gmail.com)
 * Bryan Ash
+* Barry Hess (barry@bjhess.com)
+* Ryan Ahearn (ryan@craftsoftwaresolutions.com)
+* Jon Wood (jon@blankpad.net)
+* Mat Schaffer (mat@schaffer.me)
 
 == License
 
