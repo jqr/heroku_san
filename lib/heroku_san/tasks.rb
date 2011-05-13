@@ -292,17 +292,35 @@ task :logs do
 end
 
 namespace :db do
+  desc 'Pull the Heroku database'
   task :pull do
+    dbconfig = YAML.load(ERB.new(File.read(Rails.root.join('config/database.yml'))).result)[Rails.env]
+    return if dbconfig['adapter'] != 'postgresql'
+
     each_heroku_app do |name, app, repo|
-      sh "heroku pgdumps:capture --app #{app}"
-      dump = `heroku pgdumps --app #{app}`.split("\n").last.split(" ").first
+      oldest = `heroku pgbackups --app #{app}`.split("\n")[2].split(" ").first
+      sh "heroku pgbackups:destroy #{oldest} --app #{app}"
+
+      sh "heroku pgbackups:capture --app #{app}"
+      dump = `heroku pgbackups --app #{app}`.split("\n").last.split(" ").first
       sh "mkdir -p #{Rails.root}/db/dumps"
-      file = "#{Rails.root}/db/dumps/#{dump}.sql.gz"
-      url = `heroku pgdumps:url --app #{app} #{dump}`.chomp
+      file = "#{Rails.root}/db/dumps/#{dump}"
+      url = `heroku pgbackups:url --app #{app} #{dump}`.chomp
       sh "wget", url, "-O", file
-      sh "rake db:drop db:create"
-      sh "gunzip -c #{file} | #{Rails.root}/script/dbconsole"
+
+      sh "rake db:setup"
+      sh "pg_restore --verbose --clean --no-acl --no-owner -h #{dbconfig['host']} -p #{dbconfig['port']} -U #{dbconfig['username']} -d #{dbconfig['database']} #{file}"
       sh "rake jobs:clear"
+    end
+  end
+
+  desc 'Push local database for Heroku database'
+  task :push do
+    dbconfig = YAML.load(ERB.new(File.read(Rails.root.join('config/database.yml'))).result)[Rails.env]
+    return if dbconfig['adapter'] != 'postgresql'
+
+    each_heroku_app do |name, app, repo|
+      sh "heroku db:push postgres://#{dbconfig['username']}:#{dbconfig['password']}@#{dbconfig['host']}/#{dbconfig['database']} --app #{app}"
     end
   end
 end
