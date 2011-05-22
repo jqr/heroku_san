@@ -1,6 +1,6 @@
 HEROKU_CONFIG_FILE = Rails.root.join('config', 'heroku.yml')
 
-@app_settings = 
+@app_settings =
   if File.exists?(HEROKU_CONFIG_FILE)
     if defined?(ERB)
       YAML.load(ERB.new(File.read(HEROKU_CONFIG_FILE)).result)
@@ -26,7 +26,7 @@ def retrieve_configuration
     tmp_config_dir = Dir.mktmpdir
     tmp_config_file = File.join tmp_config_dir, 'config.yml'
     sh "git clone #{@config_repo} #{tmp_config_dir}"
-    @extra_config = 
+    @extra_config =
       if File.exists?(tmp_config_file)
         if defined?(ERB)
           YAML.load(ERB.new(File.read(tmp_config_file)).result)
@@ -226,7 +226,7 @@ namespace :heroku do
 end
 
 desc "Pushes the given commit, migrates and restarts (default: HEAD)"
-task :deploy, :commit, :needs => :before_deploy do |t, args|
+task :deploy, :commit => :before_deploy do |t, args|
   each_heroku_app do |name, app, repo|
     push(args[:commit], repo)
     migrate(app)
