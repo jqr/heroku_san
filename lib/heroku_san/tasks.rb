@@ -226,7 +226,7 @@ namespace :heroku do
 end
 
 desc "Pushes the given commit, migrates and restarts (default: HEAD)"
-task :deploy, :commit, :needs => :before_deploy do |t, args|
+task :deploy, [:commit] => :before_deploy do |t, args|
   each_heroku_app do |name, app, repo|
     push(args[:commit], repo)
     migrate(app)
