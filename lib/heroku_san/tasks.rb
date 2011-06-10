@@ -126,6 +126,8 @@ namespace :heroku do
       each_heroku_app do |name, app, repo|
         puts "#{name} is shorthand for the Heroku app #{app} located at:"
         puts "  #{repo}"
+        tag = tag(name)
+        puts "  the #{name} TAG is '#{tag}'" if tag
         puts
       end
     end
@@ -197,7 +199,7 @@ namespace :heroku do
   desc "Pushes the given commit (default: HEAD)"
   task :push, :commit do |t, args|
     each_heroku_app do |name, app, repo|
-      push(args[:commit], repo)
+      push(args[:commit] || commit(tag(name)), repo)
     end
   end
 
@@ -226,9 +228,9 @@ namespace :heroku do
 end
 
 desc "Pushes the given commit, migrates and restarts (default: HEAD)"
-task :deploy, :commit, :needs => :before_deploy do |t, args|
+task :deploy, [:commit] => [:before_deploy] do |t, args|
   each_heroku_app do |name, app, repo|
-    push(args[:commit], repo)
+    push(args[:commit] || commit(tag(name)), repo)
     migrate(app)
   end
   Rake::Task[:after_deploy].execute
@@ -363,4 +365,12 @@ end
 
 def maintenance(app, action)
   sh "heroku maintenance:#{action} --app #{app}"
+end
+
+def commit(tag)
+  `git tag -l '#{tag}'`.split("\n").last
+end
+
+def tag(name)
+  tag = @app_settings[name]['tag']
 end
