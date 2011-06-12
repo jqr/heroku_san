@@ -23,18 +23,21 @@ Gem::Specification.new do |s|
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
       s.add_runtime_dependency(%q<rails>, ['>= 2'])
       s.add_runtime_dependency(%q<heroku>)
+      s.add_runtime_dependency(%q<taps>)
       s.add_development_dependency(%q<rails>, ['>= 3'])
       s.add_development_dependency(%q<aruba>)
       s.add_development_dependency(%q<cucumber>)
     else
       s.add_dependency(%q<rails>, ['>= 2'])
       s.add_dependency(%q<heroku>)
+      s.add_dependency(%q<taps>)
       s.add_dependency(%q<aruba>)
       s.add_dependency(%q<cucumber>)
     end
   else
     s.add_dependency(%q<rails>, ['>= 2'])
     s.add_dependency(%q<heroku>)
+    s.add_dependency(%q<taps>)
     s.add_dependency(%q<aruba>)
     s.add_dependency(%q<cucumber>)
   end
