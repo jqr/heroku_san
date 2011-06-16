@@ -1,45 +1,6 @@
-HEROKU_CONFIG_FILE = Rails.root.join('config', 'heroku.yml')
+@heroku_san = HerokuSan.new(Rails.root.join('config', 'heroku.yml'))
 
-@app_settings = 
-  if File.exists?(HEROKU_CONFIG_FILE)
-    if defined?(ERB)
-      YAML.load(ERB.new(File.read(HEROKU_CONFIG_FILE)).result)
-    else
-      YAML.load_file(HEROKU_CONFIG_FILE)
-    end
-  else
-    {}
-  end
-
-if @app_settings.has_key? 'apps'
-  @app_settings = @app_settings['apps']
-  @app_settings.each_pair do |shorthand, app_name|
-    @app_settings[shorthand] = {'app' => app_name}
-  end
-end
-
-@config_repo = @app_settings.delete('config_repo')
-def retrieve_configuration
-  unless @config_repo.nil?
-    #load external config
-    require 'tmpdir'
-    tmp_config_dir = Dir.mktmpdir
-    tmp_config_file = File.join tmp_config_dir, 'config.yml'
-    sh "git clone #{@config_repo} #{tmp_config_dir}"
-    @extra_config = 
-      if File.exists?(tmp_config_file)
-        if defined?(ERB)
-          YAML.load(ERB.new(File.read(tmp_config_file)).result)
-        else
-          YAML.load_file(tmp_config_file)
-        end
-      else
-        {}
-      end
-  end
-end
-
-(@app_settings.keys || []).each do |name|
+@heroku_san.apps.each do |name|
   desc "Select #{name} Heroku app for later commands"
   task name do
     @heroku_apps ||= []
@@ -49,7 +10,7 @@ end
 
 desc 'Select all Heroku apps for later command'
 task :all do
-  @heroku_apps = @app_settings.keys
+  @heroku_apps = @heroku_san.apps
 end
 
 namespace :heroku do
@@ -159,7 +120,6 @@ namespace :heroku do
 
   desc 'Add config:vars to each application.'
   task :config do
-    retrieve_configuration
     each_heroku_app do |name, app, repo, config|
       command = "heroku config:add --app #{app}"
       config.each do |var, value|
@@ -181,7 +141,6 @@ namespace :heroku do
     namespace :list do
       desc "Lists local config variables without setting them"
       task :local do
-        retrieve_configuration
         each_heroku_app do |name, app, repo, config|
           (config).each do |var, value|
             puts "#{name} #{var}: '#{value}'"
@@ -313,12 +272,12 @@ end
 
 def each_heroku_app
   if @heroku_apps.blank? 
-    if @app_settings.keys.size == 1
-      app = @app_settings.keys.first
+    if @heroku_san.apps.size == 1
+      app = @heroku_san.apps.first
       puts "Defaulting to #{app} app since only one app is defined"
       @heroku_apps = [app]
     else
-      @app_settings.keys.each do |key|
+      @heroku_san.apps.each do |key|
         active_branch = %x{git branch}.split("\n").select { |b| b =~ /^\*/ }.first.split(" ").last.strip
         if key == active_branch
           puts "Defaulting to #{key} as it matches the current branch"
@@ -330,10 +289,7 @@ def each_heroku_app
 
   if @heroku_apps.present?
     @heroku_apps.each do |name|
-      app = @app_settings[name]['app']
-      config = @app_settings[name]['config'] || {}
-      config.merge!(@extra_config[name]) if (@extra_config && @extra_config[name])
-      yield(name, app, "git@heroku.com:#{app}.git", config)
+      yield(name, @heroku_san.app_settings[name]['app'], "git@heroku.com:#{app}.git", @heroku_san.app_settings[name]['config'])
     end
     puts
   else
@@ -374,5 +330,5 @@ def commit(tag)
 end
 
 def tag(name)
-  tag = @app_settings[name]['tag']
+  tag = @heroku_san.app_settings[name]['tag']
 end

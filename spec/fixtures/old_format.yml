@@ -1,0 +1,10 @@
+#
+# Format:
+# 
+# apps:
+#   shorthand: <Heroku app name>
+#
+apps:
+  production: awesomeapp
+  staging: awesomeapp-staging
+  demo: awesomeapp-demo
