@@ -387,7 +387,7 @@ end
 
 # `heroku rake` has been superseded by `heroku run` on cedar
 def run_or_rake(app)
-  if (/^\* (.*)/.match `heroku stack --app careers-qa`)[1] =~ /^cedar/
+  if (/^\* (.*)/.match `heroku stack --app #{app}`)[1] =~ /^cedar/
     "run --app #{app} rake"
   else
     "rake --app #{app}"
