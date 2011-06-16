@@ -268,7 +268,7 @@ end
 desc "Opens a remote console"
 task :console do
   each_heroku_app do |name, app, repo|
-    sh "heroku #{run_or_rake(app)} console"
+    sh "heroku #{run_or_rake(app, false)} console"
   end
 end
 
@@ -386,9 +386,9 @@ def maintenance(app, action)
 end
 
 # `heroku rake` has been superseded by `heroku run` on cedar
-def run_or_rake(app)
+def run_or_rake(app, include_rake = true)
   if (/^\* (.*)/.match `heroku stack --app #{app}`)[1] =~ /^cedar/
-    "run --app #{app} rake"
+    "run --app #{app}#{" rake" if include_rake}"
   else
     "rake --app #{app}"
   end
