@@ -377,7 +377,7 @@ def push(commit, repo)
 end
 
 def migrate(app)
-  sh "heroku rake --app #{app} db:migrate"
+  sh "heroku run --app #{app} rake db:migrate"
   sh "heroku restart --app #{app}"
 end
 
