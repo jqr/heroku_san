@@ -151,7 +151,11 @@ namespace :heroku do
     else
       puts "Copied example config to config/heroku.yml"
       FileUtils.cp(example, HEROKU_CONFIG_FILE)
-      sh("#{ENV['EDITOR']} #{HEROKU_CONFIG_FILE}")
+      if ENV['EDITOR'].present?
+        sh("#{ENV['EDITOR']} #{HEROKU_CONFIG_FILE}")
+      else
+        puts "Please edit config/heroku.yml with your application's settings."
+      end
     end
   end
 
