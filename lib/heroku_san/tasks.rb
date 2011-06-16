@@ -293,6 +293,12 @@ task :logs do
   end
 end
 
+task :show_run_or_rake do
+  each_heroku_app do |name, app, repo|
+    puts "#{app} uses '#{run_or_rake(app)}'"
+  end
+end
+
 namespace :db do
   desc 'Pull the Heroku database'
   task :pull do
