@@ -192,7 +192,7 @@ namespace :heroku do
   desc 'Runs a rake task remotely'
   task :rake, :task do |t, args|
     each_heroku_app do |name, app, repo|
-      sh "heroku rake --app #{app} #{args[:task]}"
+      sh "heroku run --app #{app} rake #{args[:task]}"
     end
   end
 
