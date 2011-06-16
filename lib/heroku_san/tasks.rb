@@ -192,7 +192,7 @@ namespace :heroku do
   desc 'Runs a rake task remotely'
   task :rake, :task do |t, args|
     each_heroku_app do |name, app, repo|
-      sh "heroku run --app #{app} rake #{args[:task]}"
+      sh "heroku #{run_or_rake(app)} #{args[:task]}"
     end
   end
 
@@ -268,7 +268,7 @@ end
 desc "Opens a remote console"
 task :console do
   each_heroku_app do |name, app, repo|
-    sh "heroku console --app #{app}"
+    sh "heroku #{run_or_rake(app)} console"
   end
 end
 
@@ -377,10 +377,19 @@ def push(commit, repo)
 end
 
 def migrate(app)
-  sh "heroku run --app #{app} rake db:migrate"
+  sh "heroku #{run_or_rake(app)} db:migrate"
   sh "heroku restart --app #{app}"
 end
 
 def maintenance(app, action)
   sh "heroku maintenance:#{action} --app #{app}"
+end
+
+# `heroku rake` has been superseded by `heroku run` on cedar
+def run_or_rake(app)
+  if (/^\* (.*)/.match `heroku stack --app careers-qa`)[1] =~ /^cedar/
+    "run --app #{app} rake"
+  else
+    "rake --app #{app}"
+  end
 end
