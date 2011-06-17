@@ -18,7 +18,7 @@ Feature: Command Line
         app: awesomeapp-demo
       """
 
-    When I run `rake heroku:apps:local`
+    When I run `rake --trace heroku:apps:local`
 
     Then the output should contain "production is shorthand for the Heroku app awesomeapp"
     And  the output should contain "staging is shorthand for the Heroku app awesomeapp-staging"
@@ -40,7 +40,7 @@ Feature: Command Line
         demo: awesomeapp-demo
       """
 
-    When I run `rake heroku:apps:local`
+    When I run `rake --trace heroku:apps:local`
 
     Then the output should contain "production is shorthand for the Heroku app awesomeapp"
     And  the output should contain "staging is shorthand for the Heroku app awesomeapp-staging"
@@ -66,7 +66,7 @@ Feature: Command Line
         app: awesomeapp-demo
       """
 
-    When I run `rake all heroku:apps:local`
+    When I run `rake --trace all heroku:apps:local`
 
     Then the output should contain "the production TAG is 'ci/*'"
     And  the output should contain "the staging TAG is 'staging/*'"
