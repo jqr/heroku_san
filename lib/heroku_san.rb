@@ -1,9 +1,15 @@
 require 'heroku_san/railtie.rb' if defined?(Rails) && Rails::VERSION::MAJOR == 3
+require 'rake'
 
-class HerokuSan  
+class HerokuSan
   attr_reader :app_settings
+  include Rake::DSL
+
+  class NoApps < StandardError; end
     
   def initialize(config_file)
+    @apps = []
+
     @app_settings = parse_yaml(config_file)
     
     # support heroku_san format
@@ -19,7 +25,7 @@ class HerokuSan
       require 'tmpdir'
       tmp_config_dir = Dir.mktmpdir
       tmp_config_file = File.join tmp_config_dir, 'config.yml'
-      `git clone #{config_repo} #{tmp_config_dir}`
+      sh "git clone #{config_repo} #{tmp_config_dir}"
       extra_config = parse_yaml(tmp_config_file)
     else
       extra_config = {}
@@ -29,15 +35,49 @@ class HerokuSan
     @app_settings.keys.each do |name|
       @app_settings[name]['config'] ||= {}
       @app_settings[name]['config'].merge!(extra_config[name]) if extra_config[name]
-    end
-
-    @app_settings
+    end    
   end
 
-  def apps
+  def all
     @app_settings.keys
   end
   
+  def <<(*app)
+    app.flatten.each do |a|
+      @apps << a if all.include?(a)
+    end
+    self
+  end
+  
+  def apps
+    if !@apps.empty?
+      @apps
+    else
+      case all.size
+      when 1
+        $stdout.puts "Defaulting to #{all.first.inspect} since only one app is defined"
+        all
+      else
+        active_branch = self.active_branch
+        all.select do |app| 
+          app == active_branch and ($stdout.puts("Defaulting to #{app.inspect} as it matches the current branch") || true)
+        end
+      end
+    end
+  end
+  
+  def each_app
+    raise NoApps if apps.empty?
+    apps.each do |name|
+      app = @app_settings[name]['app']
+      yield(name, app, "git@heroku.com:#{app}.git", @app_settings[name]['config'])
+    end
+  end
+  
+  def active_branch
+    %x{git branch}.split("\n").select { |b| b =~ /^\*/ }.first.split(" ").last.strip
+  end
+
   private
   
   def parse_yaml(config_file)

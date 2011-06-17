@@ -1,0 +1,6 @@
+production: 
+  app: awesomeapp
+  tag: production/*
+  config:
+    BUNDLE_WITHOUT: "development:test"
+    GOOGLE_ANALYTICS: "UA-12345678-1"

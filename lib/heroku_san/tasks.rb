@@ -1,16 +1,15 @@
 @heroku_san = HerokuSan.new(Rails.root.join('config', 'heroku.yml'))
 
-@heroku_san.apps.each do |name|
+@heroku_san.all.each do |name|
   desc "Select #{name} Heroku app for later commands"
   task name do
-    @heroku_apps ||= []
-    @heroku_apps << name
+    @heroku_san << name
   end
 end
 
 desc 'Select all Heroku apps for later command'
 task :all do
-  @heroku_apps = @heroku_san.apps
+  @heroku_san << @heroku_san.all
 end
 
 namespace :heroku do
@@ -270,39 +269,19 @@ namespace :db do
   end
 end
 
-def each_heroku_app
-  if @heroku_apps.blank? 
-    if @heroku_san.apps.size == 1
-      app = @heroku_san.apps.first
-      puts "Defaulting to #{app} app since only one app is defined"
-      @heroku_apps = [app]
-    else
-      @heroku_san.apps.each do |key|
-        active_branch = %x{git branch}.split("\n").select { |b| b =~ /^\*/ }.first.split(" ").last.strip
-        if key == active_branch
-          puts "Defaulting to #{key} as it matches the current branch"
-          @heroku_apps = [key]
-        end
-      end
-    end
-  end
+def each_heroku_app(&block)
+  @heroku_san.each_app(&block)
+  puts
+rescue HerokuSan::NoApps => e
+  puts "You must first specify at least one Heroku app:
+    rake <app> [<app>] <command>
+    rake production restart
+    rake demo staging deploy"
 
-  if @heroku_apps.present?
-    @heroku_apps.each do |name|
-      yield(name, @heroku_san.app_settings[name]['app'], "git@heroku.com:#{app}.git", @heroku_san.app_settings[name]['config'])
-    end
-    puts
-  else
-    puts "You must first specify at least one Heroku app:
-      rake <app> [<app>] <command>
-      rake production restart
-      rake demo staging deploy"
+  puts "\nYou can use also command all Heroku apps for this project:
+    rake all heroku:share"
 
-    puts "\nYou can use also command all Heroku apps for this project:
-      rake all heroku:share"
-
-    exit(1)
-  end
+  exit(1)
 end
 
 def push(commit, repo)
