@@ -50,13 +50,13 @@ describe HerokuSan do
     describe "#apps extra default behaviors" do
       
       specify "on a git branch that matches an app name" do
-        heroku_san.should_receive(:active_branch).and_return("staging")
+        heroku_san.should_receive(:git_active_branch).and_return("staging")
         $stdout.should_receive(:puts).with('Defaulting to "staging" as it matches the current branch')
         heroku_san.apps.should == %w[staging]
       end
       
       specify "on a git branch that doesn't matches an app name" do
-        heroku_san.should_receive(:active_branch).and_return("master")
+        heroku_san.should_receive(:git_active_branch).and_return("master")
         heroku_san.apps.should == %w[]
       end
       
@@ -88,6 +88,17 @@ describe HerokuSan do
         end
       end
       
+    end
+
+    it "#migrate" do
+      heroku_san.should_receive(:sh).with("heroku rake db:migrate --app awesomeapp")
+      heroku_san.should_receive(:sh).with("heroku restart --app awesomeapp")
+      heroku_san.migrate('awesomeapp')
+    end
+    
+    it "#maintenance" do
+      heroku_san.should_receive(:sh).with("heroku maintenance:<<action>> --app awesomeapp")
+      heroku_san.maintenance('awesomeapp', '<<action>>')
     end
   end
   

@@ -1,11 +1,11 @@
 require 'heroku_san/railtie.rb' if defined?(Rails) && Rails::VERSION::MAJOR == 3
-require 'rake'
+require 'heroku_san/git'
 
 class HerokuSan
   attr_reader :app_settings
-  include Rake::DSL
-
   class NoApps < StandardError; end
+
+  include Git
     
   def initialize(config_file)
     @apps = []
@@ -25,7 +25,7 @@ class HerokuSan
       require 'tmpdir'
       tmp_config_dir = Dir.mktmpdir
       tmp_config_file = File.join tmp_config_dir, 'config.yml'
-      sh "git clone #{config_repo} #{tmp_config_dir}"
+      git_clone(config_repo, tmp_config_dir)
       extra_config = parse_yaml(tmp_config_file)
     else
       extra_config = {}
@@ -58,7 +58,7 @@ class HerokuSan
         $stdout.puts "Defaulting to #{all.first.inspect} since only one app is defined"
         all
       else
-        active_branch = self.active_branch
+        active_branch = self.git_active_branch
         all.select do |app| 
           app == active_branch and ($stdout.puts("Defaulting to #{app.inspect} as it matches the current branch") || true)
         end
@@ -74,11 +74,16 @@ class HerokuSan
     end
   end
   
-  def active_branch
-    %x{git branch}.split("\n").select { |b| b =~ /^\*/ }.first.split(" ").last.strip
+  def migrate(app)
+    sh "heroku rake db:migrate --app #{app}"
+    sh "heroku restart --app #{app}"
   end
-
-  private
+  
+  def maintenance(app, action)
+    sh "heroku maintenance:#{action} --app #{app}"
+  end
+  
+private
   
   def parse_yaml(config_file)
     if File.exists?(config_file)

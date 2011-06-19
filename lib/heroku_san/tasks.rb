@@ -1,3 +1,6 @@
+require 'heroku_san/git'
+include Git
+
 @heroku_san = HerokuSan.new(Rails.root.join('config', 'heroku.yml'))
 
 @heroku_san.all.each do |name|
@@ -163,30 +166,37 @@ namespace :heroku do
   desc "Pushes the given commit (default: HEAD)"
   task :push, :commit do |t, args|
     each_heroku_app do |name, app, repo|
-      push(args[:commit] || commit(tag(name)), repo)
+      git_push(args[:commit] || git_tag(tag(name)), repo)
     end
   end
 
   namespace :push do
     desc "Force-pushes the given commit (default: HEAD)"
     task :force, :commit do |t, args|
-      @git_push_arguments ||= []
-      @git_push_arguments << '--force'
-      Rake::Task[:'heroku:push'].execute(args)
+      each_heroku_app do |name, app, repo|
+        git_push(args[:commit] || git_tag(tag(name)), repo, %w[--force])
+      end
     end
   end
 
   desc "Enable maintenance mode"
   task :maintenance do
-    each_heroku_app do |name, app, repo|
-      maintenance(app, 'on')
+    each_heroku_app do |name, app|
+      @heroku_san.maintenance(app, 'on')
+    end
+  end
+
+  desc "Enable maintenance mode"
+  task :maintenance_on do
+    each_heroku_app do |name, app|
+      @heroku_san.maintenance(app, 'on')
     end
   end
 
   desc "Disable maintenance mode"
   task :maintenance_off do
-    each_heroku_app do |name, app, repo|
-      maintenance(app, 'off')
+    each_heroku_app do |name, app|
+      @heroku_san.maintenance(app, 'off')
     end
   end
 end
@@ -194,18 +204,20 @@ end
 desc "Pushes the given commit, migrates and restarts (default: HEAD)"
 task :deploy, [:commit] => [:before_deploy] do |t, args|
   each_heroku_app do |name, app, repo|
-    push(args[:commit] || commit(tag(name)), repo)
-    migrate(app)
+    git_push(args[:commit] || git_tag(tag(name)), repo)
+    @heroku_san.migrate(app)
   end
   Rake::Task[:after_deploy].execute
 end
 
 namespace :deploy do
   desc "Force-pushes the given commit, migrates and restarts (default: HEAD)"
-  task :force, :commit do |t, args|
-    @git_push_arguments ||= []
-    @git_push_arguments << '--force'
-    Rake::Task[:deploy].invoke(args[:commit])
+  task :force, [:commit] => [:before_deploy] do |t, args|
+    each_heroku_app do |name, app, repo|
+      git_push(args[:commit] || git_tag(tag(name)), repo, %w[--force])
+      @heroku_san.migrate(app)
+    end
+    Rake::Task[:after_deploy].execute
   end
 end
 
@@ -246,7 +258,7 @@ end
 desc "Migrates and restarts remote servers"
 task :migrate do
   each_heroku_app do |name, app, repo|
-    migrate(app)
+    @heroku_san.migrate(app)
   end
 end
 
@@ -288,30 +300,6 @@ rescue HerokuSan::NoApps => e
   exit(1)
 end
 
-def push(commit, repo)
-  commit ||= "HEAD"
-  @git_push_arguments ||= []
-  begin
-    sh "git update-ref refs/heroku_san/deploy #{commit}"
-    sh "git push #{repo} #{@git_push_arguments.join(' ')} refs/heroku_san/deploy:refs/heads/master"
-  ensure
-    sh "git update-ref -d refs/heroku_san/deploy"
-  end
-end
-
-def migrate(app)
-  sh "heroku rake --app #{app} db:migrate"
-  sh "heroku restart --app #{app}"
-end
-
-def maintenance(app, action)
-  sh "heroku maintenance:#{action} --app #{app}"
-end
-
-def commit(tag)
-  `git tag -l '#{tag}'`.split("\n").last
-end
-
-def tag(name)
-  tag = @heroku_san.app_settings[name]['tag']
+def tag(app)
+  tag = @heroku_san.app_settings[app]['tag']
 end
