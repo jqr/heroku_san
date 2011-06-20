@@ -29,11 +29,11 @@ describe GitTest do
 
   describe "#git_tag" do
     it "returns the latest tag that matches the pattern" do
-      subject.should_receive("`").with("git tag -l 'pattern*'").and_return("x\n\y\n\z\n")
+      subject.should_receive("`").with("git tag -l 'pattern*'") { "x\n\y\n\z\n" }
       subject.git_tag('pattern*').should == "z"
     end
     it "returns nil if no tags match the pattern" do
-      subject.should_receive("`").with("git tag -l 'pattern*'").and_return("\n")
+      subject.should_receive("`").with("git tag -l 'pattern*'") { "\n" }
       subject.git_tag('pattern*').should == nil
     end
   end
