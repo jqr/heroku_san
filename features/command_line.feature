@@ -62,3 +62,10 @@ Feature: Command Line
   Scenario: heroku:create_config
     When I run `rake --trace heroku:create_config`
     Then a file named "config/heroku.yml" should exist
+    And the output should match /Copied example config to ".*.config.heroku.yml"/
+    And the output should match /Please edit ".*.config.heroku.yml" with your application's settings./
+  
+  Scenario: heroku:create_config with an EDITOR set in the environment
+    When I run `rake EDITOR=echo --trace heroku:create_config`
+    And the output should match /Copied example config to ".*.config.heroku.yml"/
+    And the output should match /^echo .*.config.heroku.yml$/
