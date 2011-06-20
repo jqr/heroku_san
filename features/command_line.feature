@@ -1,6 +1,6 @@
 Feature: Command Line
 
-  Scenario: Config file can be formatted like Rails' database.yml
+  Background:
     Given I run `rails new heroku_san_test -O`
     And I cd to "heroku_san_test"
     And I overwrite "Gemfile" with:
@@ -8,6 +8,8 @@ Feature: Command Line
       source :rubygems
       gem 'heroku_san', :path => '../../../.'
       """
+
+  Scenario: Config file can be formatted like Rails' database.yml
     Given a file named "config/heroku.yml" with:
       """
       production: 
@@ -25,13 +27,6 @@ Feature: Command Line
     And  the output should contain "demo is shorthand for the Heroku app awesomeapp-demo"
 
   Scenario: Config file still accepts the heroku_san format
-    Given I run `rails new heroku_san_test -O`
-    And I cd to "heroku_san_test"
-    And I overwrite "Gemfile" with:
-      """
-      source :rubygems
-      gem 'heroku_san', :path => '../../../.'
-      """
     Given a file named "config/heroku.yml" with:
       """
       apps:
@@ -47,13 +42,6 @@ Feature: Command Line
     And  the output should contain "demo is shorthand for the Heroku app awesomeapp-demo"
 
   Scenario: Tag information can be listed
-    Given I run `rails new heroku_san_test -O`
-    And I cd to "heroku_san_test"
-    And I overwrite "Gemfile" with:
-      """
-      source :rubygems
-      gem 'heroku_san', :path => '../../../.'
-      """
     Given a file named "config/heroku.yml" with:
       """
       production:

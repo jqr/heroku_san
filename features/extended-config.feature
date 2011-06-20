@@ -1,6 +1,6 @@
 Feature: Extended config
 
-  Scenario: Config information can be pulled from a separate git repository
+  Background:
     Given I run `rails new heroku_san_test -O`
     And I cd to "heroku_san_test"
     And I overwrite "Gemfile" with:
@@ -8,6 +8,7 @@ Feature: Extended config
       source :rubygems
       gem 'heroku_san', :path => '../../../.'
       """
+  Scenario: Config information can be pulled from a separate git repository
     Given a file named "config/heroku.yml" with:
       """
       config_repo: 'file:///<%= File.join(File.expand_path(File.dirname(__FILE__)), '..', '..', '..', 'features', 'data', 'test-config') %>'
@@ -25,13 +26,6 @@ Feature: Extended config
     And the output should contain "staging TEST_REMOTE: 'goodbye_world'"
 
   Scenario: Config information can be listed
-    Given I run `rails new heroku_san_test -O`
-    And I cd to "heroku_san_test"
-    And I overwrite "Gemfile" with:
-      """
-      source :rubygems
-      gem 'heroku_san', :path => '../../../.'
-      """
     Given a file named "config/heroku.yml" with:
       """
       production:
@@ -52,13 +46,6 @@ Feature: Extended config
     And  the output should contain "staging TEST_LOCAL: 'goodbye_world'"
 
   Scenario: Config information can be merged between local and remote
-    Given I run `rails new heroku_san_test -O`
-    And I cd to "heroku_san_test"
-    And I overwrite "Gemfile" with:
-      """
-      source :rubygems
-      gem 'heroku_san', :path => '../../../.'
-      """
     Given a file named "config/heroku.yml" with:
       """
       config_repo: 'file:///<%= File.join(File.expand_path(File.dirname(__FILE__)), '..', '..', '..', 'features', 'data', 'test-config') %>'
