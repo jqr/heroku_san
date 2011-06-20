@@ -1,0 +1,24 @@
+#
+# Format:
+# 
+# <heroku_san shorthand name>:
+#   app: <Heroku app name>
+#   tag: <git tag pattern>
+#   config:
+#     - <Heroku config:var name>: <Heroku config:var value>
+#
+production: 
+  app: awesomeapp
+  tag: production/*
+  config:
+    BUNDLE_WITHOUT: "development:test"
+    GOOGLE_ANALYTICS: "UA-12345678-1"
+
+staging:
+  app: awesomeapp-staging
+  config: &default
+    BUNDLE_WITHOUT: "development:test"
+
+demo: 
+  app: awesomeapp-demo
+  config: *default

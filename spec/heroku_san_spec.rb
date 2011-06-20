@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'tmpdir'
 
 describe HerokuSan do
   specify ".new with a missing config file" do
@@ -8,7 +9,9 @@ describe HerokuSan do
   end
   
   context "using the example config file" do
-    let(:heroku_san) { HerokuSan.new(File.join(SPEC_ROOT, "../lib/templates", "heroku.example.yml")) }
+    let(:heroku_config_file) { File.join(SPEC_ROOT, "fixtures", "example.yml") }
+    let(:template_config_file) { File.join(SPEC_ROOT, "..", "lib/templates", "heroku.example.yml")}
+    let(:heroku_san) { HerokuSan.new(heroku_config_file) }
     
     it "#all" do
       heroku_san.all.should =~ %w[production staging demo]
@@ -99,6 +102,22 @@ describe HerokuSan do
     it "#maintenance" do
       heroku_san.should_receive(:sh).with("heroku maintenance:<<action>> --app awesomeapp")
       heroku_san.maintenance('awesomeapp', '<<action>>')
+    end
+
+    describe "#create_config" do
+      it "creates a new file using the example file" do
+        Dir.mktmpdir do |dir|
+          tmp_config_file = File.join dir, 'config.yml'
+          heroku_san = HerokuSan.new(tmp_config_file)
+          FileUtils.should_receive(:cp).with(template_config_file, heroku_san.config_file)
+          heroku_san.create_config.should be_true
+        end
+      end
+      
+      it "does not overwrite an existing file" do
+        FileUtils.should_not_receive(:cp)
+        heroku_san.create_config.should be_false
+      end
     end
   end
   

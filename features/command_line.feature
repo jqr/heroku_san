@@ -59,3 +59,6 @@ Feature: Command Line
     Then the output should contain "the production TAG is 'ci/*'"
     And  the output should contain "the staging TAG is 'staging/*'"
 
+  Scenario: heroku:create_config
+    When I run `rake --trace heroku:create_config`
+    Then a file named "config/heroku.yml" should exist

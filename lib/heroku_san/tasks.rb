@@ -110,17 +110,15 @@ namespace :heroku do
 
   desc 'Creates an example configuration file'
   task :create_config do
-    example = File.join(File.dirname(__FILE__), '..', 'templates', 'heroku.example.yml')
-    if File.exists?(HEROKU_CONFIG_FILE)
-      puts "config/heroku.yml already exists"
-    else
+    if @heroku_san.create_config
       puts "Copied example config to config/heroku.yml"
-      FileUtils.cp(example, HEROKU_CONFIG_FILE)
       if ENV['EDITOR'].present?
         sh("#{ENV['EDITOR']} #{HEROKU_CONFIG_FILE}")
       else
         puts "Please edit config/heroku.yml with your application's settings."
       end
+    else
+      puts "config/heroku.yml already exists"
     end
   end
 

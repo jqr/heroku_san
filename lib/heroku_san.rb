@@ -2,13 +2,14 @@ require 'heroku_san/railtie.rb' if defined?(Rails) && Rails::VERSION::MAJOR == 3
 require 'heroku_san/git'
 
 class HerokuSan
-  attr_reader :app_settings
+  attr_reader :app_settings, :config_file
   class NoApps < StandardError; end
 
   include Git
     
   def initialize(config_file)
     @apps = []
+    @config_file = config_file
 
     @app_settings = parse_yaml(config_file)
     
@@ -81,6 +82,16 @@ class HerokuSan
   
   def maintenance(app, action)
     sh "heroku maintenance:#{action} --app #{app}"
+  end
+  
+  def create_config
+    template = File.join(File.dirname(__FILE__), 'templates', 'heroku.example.yml')
+    if File.exists?(@config_file)
+      false
+    else
+      FileUtils.cp(template, @config_file)
+      true
+    end
   end
   
 private
