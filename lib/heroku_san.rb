@@ -4,6 +4,7 @@ require 'heroku_san/git'
 class HerokuSan
   attr_reader :app_settings, :config_file
   class NoApps < StandardError; end
+  class Deprecated < StandardError; end
 
   include Git
     
