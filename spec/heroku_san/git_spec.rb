@@ -37,4 +37,15 @@ describe GitTest do
       subject.git_tag('pattern*').should == nil
     end
   end
+  
+  describe "#git_rev_parse" do
+    it "returns the rev based on the tag" do
+      subject.should_receive("`").with("git rev-parse prod/1234567890") { "sha\n" }
+      subject.git_rev_parse('prod/1234567890').should == "sha"
+    end
+    it "returns nil for a blank tag" do
+      subject.should_receive("`").with("git rev-parse ") { "\n" }
+      subject.git_rev_parse(nil).should == nil
+    end
+  end
 end

@@ -22,7 +22,15 @@ module Git
     end
   end
   
-  def git_tag(tag)
-    %x{git tag -l '#{tag}'}.split("\n").last
+  def git_tag(glob)
+    %x{git tag -l '#{glob}'}.split("\n").last
+  end
+  
+  def git_rev_parse(ref)
+    %x{git rev-parse #{ref}}.split("\n").first
+  end
+  
+  def git_parsed_tag(tag)
+    git_rev_parse(git_tag(tag))
   end
 end
