@@ -24,10 +24,10 @@ Gem::Specification.new do |s|
       s.add_runtime_dependency(%q<rails>, ['>= 2'])
       s.add_runtime_dependency(%q<heroku>)
       s.add_runtime_dependency(%q<rake>)
-      s.add_development_dependency(%q<rails>, ['>= 3'])
       s.add_development_dependency(%q<aruba>)
       s.add_development_dependency(%q<cucumber>)
       s.add_development_dependency(%q<rake>)
+      s.add_development_dependency(%q<bundler>, ['1.0.7'])
     else
       s.add_dependency(%q<rails>, ['>= 2'])
       s.add_dependency(%q<heroku>)
