@@ -35,6 +35,8 @@ Feature: Works with Heroku
     When I run `curl -s http://heroku-san-demo-staging.heroku.com`
     And the output should contain "Ruby on Rails: Welcome aboard"
 
+    When I run `rake production deploy:force`
+    Then the output should match /^git update-ref refs.heroku_san.deploy \w{40}$/
     # Runs a before_deploy
     # Runs an after_deploy
     # Adds a collaborator
