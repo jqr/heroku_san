@@ -30,6 +30,7 @@ Feature: Works with Heroku
 
     When I run `git co staging`
     And I run `rake deploy`
+    Then the output should contain "Defaulting to 'staging' as it matches the current branch"
     Then the output should match /(http:.*-staging.heroku.com deployed to Heroku)|(Everything up-to-date)/
     When I run `curl -s http://heroku-san-demo-staging.heroku.com`
     And the output should contain "Ruby on Rails: Welcome aboard"

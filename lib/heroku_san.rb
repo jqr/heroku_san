@@ -62,7 +62,7 @@ class HerokuSan
       else
         active_branch = self.git_active_branch
         all.select do |app| 
-          app == active_branch and ($stdout.puts("Defaulting to #{app.inspect} as it matches the current branch") || true)
+          app == active_branch and ($stdout.puts("Defaulting to '#{app}' as it matches the current branch") || true)
         end
       end
     end

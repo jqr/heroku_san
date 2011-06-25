@@ -51,7 +51,7 @@ describe HerokuSan do
     describe "#apps extra default behaviors" do
       specify "on a git branch that matches an app name" do
         heroku_san.should_receive(:git_active_branch) { "staging" }
-        $stdout.should_receive(:puts).with('Defaulting to "staging" as it matches the current branch')
+        $stdout.should_receive(:puts).with("Defaulting to 'staging' as it matches the current branch")
         heroku_san.apps.should == %w[staging]
       end
       
