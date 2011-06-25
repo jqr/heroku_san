@@ -23,10 +23,12 @@ module Git
   end
   
   def git_tag(glob)
+    return nil if glob.nil?
     %x{git tag -l '#{glob}'}.split("\n").last
   end
   
   def git_rev_parse(ref)
+    return nil if ref.nil?
     %x{git rev-parse #{ref}}.split("\n").first
   end
   

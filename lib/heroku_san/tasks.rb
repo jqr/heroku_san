@@ -182,21 +182,21 @@ namespace :heroku do
   desc "Enable maintenance mode"
   task :maintenance do
     each_heroku_app do |stage, app|
-      @heroku_san.maintenance(app, 'on')
+      @heroku_san.maintenance(app, :on)
     end
   end
 
   desc "Enable maintenance mode"
   task :maintenance_on do
     each_heroku_app do |stage, app|
-      @heroku_san.maintenance(app, 'on')
+      @heroku_san.maintenance(app, :on)
     end
   end
 
   desc "Disable maintenance mode"
   task :maintenance_off do
     each_heroku_app do |stage, app|
-      @heroku_san.maintenance(app, 'off')
+      @heroku_san.maintenance(app, :off)
     end
   end
 end

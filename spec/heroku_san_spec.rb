@@ -32,7 +32,6 @@ describe HerokuSan do
     end
     
     describe "Adding an app to the deploy list" do
-      
       it "appends known shorthands to apps" do
         heroku_san.apps.should == []
         heroku_san << 'production'
@@ -47,11 +46,9 @@ describe HerokuSan do
         heroku_san << heroku_san.all
         heroku_san.apps.should == heroku_san.all
       end
-      
     end
     
     describe "#apps extra default behaviors" do
-      
       specify "on a git branch that matches an app name" do
         heroku_san.should_receive(:git_active_branch) { "staging" }
         $stdout.should_receive(:puts).with('Defaulting to "staging" as it matches the current branch')
@@ -70,11 +67,9 @@ describe HerokuSan do
           heroku_san.apps.should == %w[production]
         end
       end
-      
     end
     
-    describe "#each_app" do
-      
+    describe "#each_app" do    
       it "raises an error is no apps were specified" do
         expect { heroku_san.each_app do |w,x,y,z| true; end }.to raise_error HerokuSan::NoApps
       end
@@ -90,7 +85,6 @@ describe HerokuSan do
           block.action(name, app, repos, config)
         end
       end
-      
     end
 
     it "#migrate" do
@@ -99,9 +93,22 @@ describe HerokuSan do
       heroku_san.migrate('awesomeapp')
     end
     
-    it "#maintenance" do
-      heroku_san.should_receive(:sh).with("heroku maintenance:<<action>> --app awesomeapp")
-      heroku_san.maintenance('awesomeapp', '<<action>>')
+    describe "#maintenance" do      
+      it ":on" do
+        heroku_san.should_receive(:sh).with("heroku maintenance:on --app awesomeapp")
+        heroku_san.maintenance('awesomeapp', :on)
+      end
+
+      it ":off" do
+        heroku_san.should_receive(:sh).with("heroku maintenance:off --app awesomeapp")
+        heroku_san.maintenance('awesomeapp', :off)
+      end
+      
+      it ":busy raises an ArgumentError" do
+        expect do
+          heroku_san.maintenance('awesomeapp', :busy) 
+        end.to raise_error ArgumentError, "Action #{:busy.inspect} must be one of (:on, :off)"      
+      end
     end
 
     describe "#create_config" do
@@ -120,6 +127,4 @@ describe HerokuSan do
       end
     end
   end
-  
-  
 end

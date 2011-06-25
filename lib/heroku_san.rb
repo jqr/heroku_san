@@ -82,6 +82,7 @@ class HerokuSan
   end
   
   def maintenance(app, action)
+    raise ArgumentError, "Action #{action.inspect} must be one of (:on, :off)", caller if ![:on, :off].include?(action)
     sh "heroku maintenance:#{action} --app #{app}"
   end
   
