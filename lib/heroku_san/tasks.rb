@@ -165,7 +165,7 @@ namespace :heroku do
     each_heroku_app do |name, app, repo, config|
       command = "heroku config:add --app #{app}"
       config.each do |var, value|
-        command += " #{var}=#{value}"
+        command += " #{var.upcase}='#{value}'"
       end
       sh(command)
     end
