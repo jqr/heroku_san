@@ -185,14 +185,14 @@ namespace :heroku do
       task :local do
         retrieve_configuration
         each_heroku_app do |name, app, repo, config|
-          (config).each do |var, value|
+          config.each do |var, value|
             puts "#{name} #{var}: '#{value}'"
           end
         end
       end
     end
   end
-  
+
   desc 'Runs a rake task remotely'
   task :rake, :task do |t, args|
     each_heroku_app do |name, app, repo|
@@ -332,7 +332,7 @@ namespace :db do
 end
 
 def each_heroku_app
-  if @heroku_apps.blank? 
+  if @heroku_apps.blank?
     if @app_settings.keys.size == 1
       app = @app_settings.keys.first
       puts "Defaulting to #{app} app since only one app is defined"
