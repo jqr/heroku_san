@@ -159,7 +159,7 @@ namespace :heroku do
   desc 'Runs a rake task remotely'
   task :rake, [:task] do |t, args|
     each_heroku_app do |stage, app, repo|
-      sh "heroku run:rake #{args.task} --app #{app}"
+      @heroku_san.run(app, 'rake', args.task)
     end
   end
 
@@ -245,7 +245,7 @@ end
 desc "Opens a remote console"
 task :console do
   each_heroku_app do |stage, app, repo|
-    sh "heroku console --app #{app}"
+    @heroku_san.run(app, 'console')
   end
 end
 

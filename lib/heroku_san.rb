@@ -77,7 +77,7 @@ class HerokuSan
   end
   
   def migrate(app)
-    sh "heroku rake db:migrate --app #{app}"
+    run(app, 'rake', 'db:migrate')
     sh "heroku restart --app #{app}"
   end
   
@@ -93,6 +93,19 @@ class HerokuSan
     else
       FileUtils.cp(template, @config_file)
       true
+    end
+  end
+  
+  def stack(app)
+    stage, config = @app_settings.find{|stage, settings| settings['app'] == app}
+    config['stack'] || %x"heroku stack --app #{app}".split("\n").select { |b| b =~ /^\* / }.first.gsub(/^\* /, '')
+  end
+  
+  def run(app, command, args = nil)
+    if stack(app) =~ /cedar/
+      sh "heroku run #{command} #{args} --app #{app}"
+    else
+      sh "heroku run:#{command} #{args} --app #{app}"
     end
   end
   

@@ -88,9 +88,9 @@ describe HerokuSan do
     end
 
     it "#migrate" do
-      heroku_san.should_receive(:sh).with("heroku rake db:migrate --app awesomeapp")
-      heroku_san.should_receive(:sh).with("heroku restart --app awesomeapp")
-      heroku_san.migrate('awesomeapp')
+      heroku_san.should_receive(:sh).with("heroku run:rake db:migrate --app awesomeapp-staging")
+      heroku_san.should_receive(:sh).with("heroku restart --app awesomeapp-staging")
+      heroku_san.migrate('awesomeapp-staging')
     end
     
     describe "#maintenance" do      
@@ -108,6 +108,38 @@ describe HerokuSan do
         expect do
           heroku_san.maintenance('awesomeapp', :busy) 
         end.to raise_error ArgumentError, "Action #{:busy.inspect} must be one of (:on, :off)"      
+      end
+    end
+    
+    context "celadon cedar stack has a different API" do
+      describe "#stack" do
+        it "returns the name of the stack from heroku" do
+          heroku_san.should_receive("`").with("heroku stack --app awesomeapp") {
+<<EOT
+  aspen-mri-1.8.6
+* bamboo-mri-1.9.2
+  bamboo-ree-1.8.7
+  cedar (beta)
+EOT
+          }
+          heroku_san.stack('awesomeapp').should == 'bamboo-mri-1.9.2'
+        end
+      
+        it "returns the stack name from the config if it is set there" do
+          heroku_san.should_not_receive("`")
+          heroku_san.stack('awesomeapp-staging').should == 'bamboo-ree-1.8.7'
+        end
+      end
+          
+      describe "#run" do
+        it "runs commands using the pre-cedar format" do
+          heroku_san.should_receive(:sh).with("heroku run:rake foo bar bleh --app awesomeapp-staging")
+          heroku_san.run('awesomeapp-staging', 'rake', 'foo bar bleh')
+        end
+        it "runs commands using the new cedar format" do
+          heroku_san.should_receive(:sh).with("heroku run worker foo bar bleh --app awesomeapp-demo")
+          heroku_san.run('awesomeapp-demo', 'worker', 'foo bar bleh')
+        end
       end
     end
 
