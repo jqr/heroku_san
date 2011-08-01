@@ -10,7 +10,10 @@ describe HerokuSan do
   
   context "using the example config file" do
     let(:heroku_config_file) { File.join(SPEC_ROOT, "fixtures", "example.yml") }
-    let(:template_config_file) { File.join(SPEC_ROOT, "..", "lib/templates", "heroku.example.yml")}
+    let(:template_config_file) { 
+      path = File.join(SPEC_ROOT, "..", "lib/templates", "heroku.example.yml")
+      (File.respond_to? :realpath) ? File.realpath(path) : path
+    }
     let(:heroku_san) { HerokuSan.new(heroku_config_file) }
     
     it "#all" do
@@ -74,39 +77,44 @@ describe HerokuSan do
         expect { heroku_san.each_app do |w,x,y,z| true; end }.to raise_error HerokuSan::NoApps
       end
       
-      it "yields to a block with four args" do
+      it "yields to a block with args" do
         heroku_san << 'production'
         block = double('block')
         block.should_receive(:action).with('production',
-                                           'awesomeapp', 
                                            'git@heroku.com:awesomeapp.git', 
                                             heroku_san.app_settings['production']['config'])
-        heroku_san.each_app do |name, app, repos, config|
-          block.action(name, app, repos, config)
+        heroku_san.each_app do |stage, repos, config|
+          block.action(stage, repos, config)
         end
+      end
+    end
+    
+    describe "#[]" do
+      it "returns a config section" do
+        heroku_san['production'].should == heroku_san.app_settings['production']
       end
     end
 
     it "#migrate" do
       heroku_san.should_receive(:sh).with("heroku run:rake db:migrate --app awesomeapp-staging")
       heroku_san.should_receive(:sh).with("heroku restart --app awesomeapp-staging")
-      heroku_san.migrate('awesomeapp-staging')
+      heroku_san.migrate('staging')
     end
     
     describe "#maintenance" do      
       it ":on" do
         heroku_san.should_receive(:sh).with("heroku maintenance:on --app awesomeapp")
-        heroku_san.maintenance('awesomeapp', :on)
+        heroku_san.maintenance('production', :on)
       end
 
       it ":off" do
         heroku_san.should_receive(:sh).with("heroku maintenance:off --app awesomeapp")
-        heroku_san.maintenance('awesomeapp', :off)
+        heroku_san.maintenance('production', :off)
       end
       
       it ":busy raises an ArgumentError" do
         expect do
-          heroku_san.maintenance('awesomeapp', :busy) 
+          heroku_san.maintenance('production', :busy) 
         end.to raise_error ArgumentError, "Action #{:busy.inspect} must be one of (:on, :off)"      
       end
     end
@@ -122,24 +130,31 @@ describe HerokuSan do
   cedar (beta)
 EOT
           }
-          heroku_san.stack('awesomeapp').should == 'bamboo-mri-1.9.2'
+          heroku_san.stack('production').should == 'bamboo-mri-1.9.2'
         end
       
         it "returns the stack name from the config if it is set there" do
           heroku_san.should_not_receive("`")
-          heroku_san.stack('awesomeapp-staging').should == 'bamboo-ree-1.8.7'
+          heroku_san.stack('staging').should == 'bamboo-ree-1.8.7'
         end
       end
           
       describe "#run" do
         it "runs commands using the pre-cedar format" do
           heroku_san.should_receive(:sh).with("heroku run:rake foo bar bleh --app awesomeapp-staging")
-          heroku_san.run('awesomeapp-staging', 'rake', 'foo bar bleh')
+          heroku_san.run('staging', 'rake', 'foo bar bleh')
         end
         it "runs commands using the new cedar format" do
           heroku_san.should_receive(:sh).with("heroku run worker foo bar bleh --app awesomeapp-demo")
-          heroku_san.run('awesomeapp-demo', 'worker', 'foo bar bleh')
+          heroku_san.run('demo', 'worker', 'foo bar bleh')
         end
+      end
+    end
+    
+    describe "#create" do
+      it "creates an app on heroku" do
+        heroku_san.should_receive(:sh).with("heroku apps:create awesomeapp")
+        heroku_san.create('production')
       end
     end
 
@@ -158,5 +173,56 @@ EOT
         heroku_san.create_config.should be_false
       end
     end
+    
+    describe "#sharing_add" do
+      it "add collaborators" do
+        heroku_san.should_receive(:sh).with("heroku sharing:add email@example.com --app awesomeapp")
+        heroku_san.sharing_add('production', 'email@example.com')
+      end
+    end
+
+    describe "#sharing_remove" do
+      it "removes collaborators" do
+        heroku_san.should_receive(:sh).with("heroku sharing:remove email@example.com --app awesomeapp")
+        heroku_san.sharing_remove('production', 'email@example.com')
+      end
+    end
+    
+    describe "#long_config" do
+      it "prints out the remote config" do
+        heroku_san.should_receive(:sh).with("heroku config --long --app awesomeapp") {
+<<EOT
+BUNDLE_WITHOUT      => development:test
+DATABASE_URL        => postgres://thnodhxrzn:T0-UwxLyFgXcnBSHmyhv@ec2-50-19-216-194.compute-1.amazonaws.com/thnodhxrzn
+LANG                => en_US.UTF-8
+RACK_ENV            => production
+SHARED_DATABASE_URL => postgres://thnodhxrzn:T0-UwxLyFgXcnBSHmyhv@ec2-50-19-216-194.compute-1.amazonaws.com/thnodhxrzn
+EOT
+        }
+        heroku_san.long_config('production')
+      end
+    end
+    
+    describe "#capture" do
+      it "captures a bundle" do
+        heroku_san.should_receive(:sh).with("heroku bundles:capture --app awesomeapp")
+        heroku_san.capture('production')
+      end
+    end
+    
+    describe "#restart" do
+      it "restarts an app" do
+        heroku_san.should_receive(:sh).with("heroku restart --app awesomeapp")
+        heroku_san.restart('production')
+      end
+    end
+    
+    describe "#logs" do
+      it "returns log files" do
+        heroku_san.should_receive(:sh).with("heroku logs --app awesomeapp")
+        heroku_san.logs('production')
+      end
+    end
+    
   end
 end

@@ -40,6 +40,20 @@ class HerokuSan
     end    
   end
 
+  def create_config
+    template = File.join(File.dirname(__FILE__), 'templates', 'heroku.example.yml')
+    if File.exists?(@config_file)
+      false
+    else
+      FileUtils.cp(template, @config_file)
+      true
+    end
+  end
+  
+  def [](stage)
+    @app_settings[stage]
+  end
+  
   def all
     @app_settings.keys
   end
@@ -70,46 +84,67 @@ class HerokuSan
   
   def each_app
     raise NoApps if apps.empty?
-    apps.each do |name|
-      app = @app_settings[name]['app']
-      yield(name, app, "git@heroku.com:#{app}.git", @app_settings[name]['config'])
+    apps.each do |stage|
+      yield(stage, "git@heroku.com:#{self[stage]['app']}.git", self[stage]['config'])
     end
   end
   
-  def migrate(app)
-    run(app, 'rake', 'db:migrate')
-    sh "heroku restart --app #{app}"
+  def stack(stage)
+    self[stage]['stack'] ||= %x"heroku stack --app #{self[stage]['app']}".split("\n").select { |b| b =~ /^\* / }.first.gsub(/^\* /, '')
   end
   
-  def maintenance(app, action)
+  def run(stage, command, args = nil)
+    if stack(stage) =~ /cedar/
+      sh_heroku stage, "run #{command} #{args}"
+    else
+      sh_heroku stage, "run:#{command} #{args}"
+    end
+  end
+  
+  def create(stage)
+    sh "heroku apps:create #{self[stage]['app']}"
+  end  
+
+  def migrate(stage)
+    run(stage, 'rake', 'db:migrate')
+    sh_heroku stage, "restart"
+  end
+  
+  def maintenance(stage, action)
     raise ArgumentError, "Action #{action.inspect} must be one of (:on, :off)", caller if ![:on, :off].include?(action)
-    sh "heroku maintenance:#{action} --app #{app}"
+    
+    sh_heroku stage, "maintenance:#{action}"
   end
   
-  def create_config
-    template = File.join(File.dirname(__FILE__), 'templates', 'heroku.example.yml')
-    if File.exists?(@config_file)
-      false
-    else
-      FileUtils.cp(template, @config_file)
-      true
-    end
+  def sharing_add(stage, email)
+    sh_heroku stage, "sharing:add #{email}"
   end
   
-  def stack(app)
-    stage, config = @app_settings.find{|stage, settings| settings['app'] == app}
-    config['stack'] || %x"heroku stack --app #{app}".split("\n").select { |b| b =~ /^\* / }.first.gsub(/^\* /, '')
+  def sharing_remove(stage, email)
+    sh_heroku stage, "sharing:remove #{email}"
   end
   
-  def run(app, command, args = nil)
-    if stack(app) =~ /cedar/
-      sh "heroku run #{command} #{args} --app #{app}"
-    else
-      sh "heroku run:#{command} #{args} --app #{app}"
-    end
+  def long_config(stage)
+    sh_heroku stage, 'config --long'
+  end
+  
+  def capture(stage)
+    sh_heroku stage, 'bundles:capture'
+  end
+  
+  def restart(stage)
+    sh_heroku stage, 'restart'
+  end
+  
+  def logs(stage)
+    sh_heroku stage, 'logs'
   end
   
 private
+  
+  def sh_heroku stage, command
+    sh "heroku #{command} --app #{self[stage]['app']}"
+  end
   
   def parse_yaml(config_file)
     if File.exists?(config_file)

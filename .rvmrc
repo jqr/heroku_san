@@ -1,1 +1,1 @@
-rvm ruby-1.8.7-head@heroku_san --create
+rvm gemset use heroku_san --create
