@@ -11,9 +11,6 @@ Feature: Works with Heroku
 
     When I run `rake demo heroku:maintenance_on`
     Then the output should contain "Maintenance mode enabled."
-
-    When I run `rake demo migrate`
-    Then the output should contain "Migrating to CreateDroids"
     
     When I run `rake demo restart`
     Then the output should contain "Restarting processes... done"
