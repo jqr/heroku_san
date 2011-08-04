@@ -1,4 +1,4 @@
-class HerokuSan
+module HerokuSan
   class Stage
     attr_reader :name
     

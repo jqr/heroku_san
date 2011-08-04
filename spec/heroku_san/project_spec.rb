@@ -1,9 +1,9 @@
 require 'spec_helper'
 require 'tmpdir'
 
-describe HerokuSan do
+describe HerokuSan::Project do
   specify ".new with a missing config file" do
-    heroku_san = HerokuSan.new("/u/should/never/get/here")
+    heroku_san = HerokuSan::Project.new("/u/should/never/get/here")
     heroku_san.all.should == []
   end
   
@@ -13,14 +13,14 @@ describe HerokuSan do
       path = File.join(SPEC_ROOT, "..", "lib/templates", "heroku.example.yml")
       (File.respond_to? :realpath) ? File.realpath(path) : path
     }
-    let(:heroku_san) { HerokuSan.new(heroku_config_file) }
+    let(:heroku_san) { HerokuSan::Project.new(heroku_config_file) }
     
     it "#all" do
       heroku_san.all.should =~ %w[production staging demo]
     end
     
     context "using the heroku_san format" do
-      let(:heroku_san) { HerokuSan.new(File.join(SPEC_ROOT, "fixtures", "old_format.yml")) }
+      let(:heroku_san) { HerokuSan::Project.new(File.join(SPEC_ROOT, "fixtures", "old_format.yml")) }
 
       it "returns a list of apps" do
         heroku_san.all.should =~ %w[production staging demo]
@@ -57,7 +57,7 @@ describe HerokuSan do
       end
       
       context "but only a single configured app" do        
-        let(:heroku_san) { HerokuSan.new(File.join(SPEC_ROOT, "fixtures", "single_app.yml")) }
+        let(:heroku_san) { HerokuSan::Project.new(File.join(SPEC_ROOT, "fixtures", "single_app.yml")) }
         it "returns the app" do
           $stdout.should_receive(:puts).with('Defaulting to "production" since only one app is defined')
           heroku_san.apps.should == %w[production]
@@ -92,8 +92,8 @@ describe HerokuSan do
       it "creates a new file using the example file" do
         Dir.mktmpdir do |dir|
           tmp_config_file = File.join dir, 'config.yml'
-          heroku_san = HerokuSan.new(tmp_config_file)
-          FileUtils.should_receive(:cp).with(template_config_file, tmp_config_file)
+          heroku_san = HerokuSan::Project.new(tmp_config_file)
+          FileUtils.should_receive(:cp).with(File.expand_path(template_config_file), tmp_config_file)
           heroku_san.create_config.should be_true
         end
       end

@@ -1,7 +1,7 @@
-require 'heroku_san/git'
+require 'git'
 include Git
 
-@heroku_san = HerokuSan.new(Rails.root.join('config', 'heroku.yml'))
+@heroku_san = HerokuSan::Project.new(Rails.root.join('config', 'heroku.yml'))
 
 @heroku_san.all.each do |stage|
   desc "Select #{stage} Heroku app for later commands"
@@ -152,7 +152,7 @@ namespace :heroku do
   desc "Pushes the given commit (default: HEAD)"
   task :push, :commit do |t, args|
     each_heroku_app do |stage|
-      git_push(args[:commit] || git_parsed_tag(stage.tag), repo)
+      git_push(args[:commit] || git_parsed_tag(stage.tag), stage.repo)
     end
   end
 
@@ -160,7 +160,7 @@ namespace :heroku do
     desc "Force-pushes the given commit (default: HEAD)"
     task :force, :commit do |t, args|
       each_heroku_app do |stage|
-        git_push(args[:commit] || git_parsed_tag(stage.tag), repo, %w[--force])
+        git_push(args[:commit] || git_parsed_tag(stage.tag), stage.repo, %w[--force])
       end
     end
   end
@@ -190,7 +190,7 @@ end
 desc "Pushes the given commit, migrates and restarts (default: HEAD)"
 task :deploy, [:commit] => [:before_deploy] do |t, args|
   each_heroku_app do |stage|
-    git_push(args[:commit] || git_parsed_tag(stage.tag), repo)
+    git_push(args[:commit] || git_parsed_tag(stage.tag), stage.repo)
     stage.migrate
   end
   Rake::Task[:after_deploy].execute
@@ -200,7 +200,7 @@ namespace :deploy do
   desc "Force-pushes the given commit, migrates and restarts (default: HEAD)"
   task :force, [:commit] => [:before_deploy] do |t, args|
     each_heroku_app do |stage|
-      git_push(args[:commit] || git_parsed_tag(stage.tag), repo, %w[--force])
+      git_push(args[:commit] || git_parsed_tag(stage.tag), stage.repo, %w[--force])
       stage.migrate
     end
     Rake::Task[:after_deploy].execute

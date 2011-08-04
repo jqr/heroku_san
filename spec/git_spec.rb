@@ -1,5 +1,5 @@
 require 'spec_helper'
-require 'heroku_san/git'
+require 'git'
 
 class GitTest; include Git; end
 
