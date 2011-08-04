@@ -18,8 +18,8 @@ end
 namespace :heroku do
   desc "Creates the Heroku app"
   task :create do
-    each_heroku_app do |stage, repo, config|
-      @heroku_san.create(stage)
+    each_heroku_app do |stage|
+      stage.create
     end
   end
 
@@ -30,8 +30,8 @@ namespace :heroku do
 
   desc 'Add git remotes for all apps in this project'
   task :remotes do
-    each_heroku_app do |stage, repo, config|
-      sh "git remote add #{stage} #{repo}"
+    each_heroku_app do |stage|
+      sh "git remote add #{stage.name} #{stage.repo}"
     end
   end
 
@@ -40,8 +40,8 @@ namespace :heroku do
     print "Email address of collaborator to add: "
     $stdout.flush
     email = $stdin.gets
-    each_heroku_app do |stage, repo, config|
-      @heroku_san.sharing_add(stage, email)
+    each_heroku_app do |stage|
+      stage.sharing_add email
     end
   end
 
@@ -50,18 +50,18 @@ namespace :heroku do
     print "Email address of collaborator to remove: "
     $stdout.flush
     email = $stdin.gets
-    each_heroku_app do |stage, repo, config|
-      @heroku_san.sharing_remove(stage, email)
+    each_heroku_app do |stage|
+      stage.sharing_remove email
     end
   end
 
   desc 'Lists configured apps'
   task :apps => :all do
-    each_heroku_app do |stage, repo, config|
-      puts  "#{stage} is shorthand for the Heroku app #{@heroku_san[stage]['app']} located at:"
-      puts  "  #{repo}"
+    each_heroku_app do |stage|
+      puts  "#{stage.name} is shorthand for the Heroku app #{stage.app} located at:"
+      puts  "  #{stage.repo}"
       print "  @ "
-      rev = `git ls-remote -h #{repo}`.split(' ').first
+      rev = `git ls-remote -h #{stage.repo}`.split(' ').first
       if rev.blank?
         puts 'not deployed'
       else
@@ -74,11 +74,10 @@ namespace :heroku do
   namespace :apps do
     desc 'Lists configured apps without hitting heroku'
     task :local => :all do
-      each_heroku_app do |stage, repo, config|
-        puts "#{stage} is shorthand for the Heroku app #{@heroku_san[stage]['app']} located at:"
-        puts "  #{repo}"
-        tag = @heroku_san[stage]['tag']
-        puts "  the #{stage} TAG is '#{tag}'" if tag
+      each_heroku_app do |stage|
+        puts "#{stage.name} is shorthand for the Heroku app #{stage.app} located at:"
+        puts "  #{stage.repo}"
+        puts "  the #{stage.name} TAG is '#{stage.tag}'" if stage.tag
         puts
       end
     end
@@ -86,12 +85,12 @@ namespace :heroku do
 
   desc 'Add proper RACK_ENV to each application'
   task :rack_env => :all do
-    each_heroku_app do |stage, repo, config|
-      command = "heroku config --app #{@heroku_san[stage]['app']}"
+    each_heroku_app do |stage|
+      command = "heroku config --app #{stage.app}"
       puts command
       config = Hash[`#{command}`.scan(/^(.+?)\s*=>\s*(.+)$/)]
-      if config['RACK_ENV'] != stage
-        sh "heroku config:add --app #{@heroku_san[stage]['app']} RACK_ENV=#{stage}"
+      if config['RACK_ENV'] != stage.name
+        sh "heroku config:add --app #{stage.app} RACK_ENV=#{stage.name}"
       end
     end
   end
@@ -113,8 +112,8 @@ namespace :heroku do
 
   desc 'Add config:vars to each application.'
   task :config do
-    each_heroku_app do |stage, repo, config|
-      command = "heroku config:add --app #{@heroku_san[stage]['app']}"
+    each_heroku_app do |stage|
+      command = "heroku config:add --app #{stage.app}"
       config.each do |var, value|
         command += " #{var}=#{value}"
       end
@@ -125,18 +124,18 @@ namespace :heroku do
   namespace :config do
     desc "Lists config variables as set on Heroku"
     task :list do
-      each_heroku_app do |stage, repo, config|
-        puts "#{stage}:"
-        @heroku_san.long_config(stage)
+      each_heroku_app do |stage|
+        puts "#{stage.name}:"
+        stage.long_config
       end
     end
 
     namespace :list do
       desc "Lists local config variables without setting them"
       task :local do
-        each_heroku_app do |stage, repo, config|
-          (config).each do |var, value|
-            puts "#{stage} #{var}: '#{value}'"
+        each_heroku_app do |stage|
+          (stage.config).each do |var, value|
+            puts "#{stage.name} #{var}: '#{value}'"
           end
         end
       end
@@ -145,54 +144,54 @@ namespace :heroku do
   
   desc 'Runs a rake task remotely'
   task :rake, [:task] do |t, args|
-    each_heroku_app do |stage, repo, config|
-      @heroku_san.run(stage, 'rake', args.task)
+    each_heroku_app do |stage|
+      stage.run 'rake', args.task
     end
   end
 
   desc "Pushes the given commit (default: HEAD)"
   task :push, :commit do |t, args|
-    each_heroku_app do |stage, repo, config|
-      git_push(args[:commit] || git_parsed_tag(@heroku_san[stage]['tag']), repo)
+    each_heroku_app do |stage|
+      git_push(args[:commit] || git_parsed_tag(stage.tag), repo)
     end
   end
 
   namespace :push do
     desc "Force-pushes the given commit (default: HEAD)"
     task :force, :commit do |t, args|
-      each_heroku_app do |stage, repo, config|
-        git_push(args[:commit] || git_parsed_tag(@heroku_san[stage]['tag']), repo, %w[--force])
+      each_heroku_app do |stage|
+        git_push(args[:commit] || git_parsed_tag(stage.tag), repo, %w[--force])
       end
     end
   end
 
   desc "Enable maintenance mode"
   task :maintenance do
-    each_heroku_app do |stage, repo, config|
-      @heroku_san.maintenance(stage, :on)
+    each_heroku_app do |stage|
+      stage.maintenance :on
     end
   end
 
   desc "Enable maintenance mode"
   task :maintenance_on do
-    each_heroku_app do |stage, repo, config|
-      @heroku_san.maintenance(stage, :on)
+    each_heroku_app do |stage|
+      stage.maintenance :on
     end
   end
 
   desc "Disable maintenance mode"
   task :maintenance_off do
-    each_heroku_app do |stage, repo, config|
-      @heroku_san.maintenance(stage, :off)
+    each_heroku_app do |stage|
+      stage.maintenance :off
     end
   end
 end
 
 desc "Pushes the given commit, migrates and restarts (default: HEAD)"
 task :deploy, [:commit] => [:before_deploy] do |t, args|
-  each_heroku_app do |stage, repo, config|
-    git_push(args[:commit] || git_parsed_tag(@heroku_san[stage]['tag']), repo)
-    @heroku_san.migrate(stage)
+  each_heroku_app do |stage|
+    git_push(args[:commit] || git_parsed_tag(stage.tag), repo)
+    stage.migrate
   end
   Rake::Task[:after_deploy].execute
 end
@@ -200,9 +199,9 @@ end
 namespace :deploy do
   desc "Force-pushes the given commit, migrates and restarts (default: HEAD)"
   task :force, [:commit] => [:before_deploy] do |t, args|
-    each_heroku_app do |stage, repo, config|
-      git_push(args[:commit] || git_parsed_tag(@heroku_san[stage]['tag']), repo, %w[--force])
-      @heroku_san.migrate(stage)
+    each_heroku_app do |stage|
+      git_push(args[:commit] || git_parsed_tag(stage.tag), repo, %w[--force])
+      stage.migrate
     end
     Rake::Task[:after_deploy].execute
   end
@@ -222,47 +221,45 @@ end
 
 desc "Captures a bundle on Heroku"
 task :capture do
-  each_heroku_app do |stage, repo, config|
-    @heroku_san.capture(stage)
-  end
+  raise Deprecated
 end
 
 desc "Opens a remote console"
 task :console do
-  each_heroku_app do |stage, repo, config|
-    @heroku_san.run(stage, 'console')
+  each_heroku_app do |stage|
+    stage.run 'console'
   end
 end
 
 desc "Restarts remote servers"
 task :restart do
-  each_heroku_app do |stage, repo, config|
-    @heroku_san.restart(stage)
+  each_heroku_app do |stage|
+    stage.restart
   end
 end
 
 desc "Migrates and restarts remote servers"
 task :migrate do
-  each_heroku_app do |stage, repo, config|
-    @heroku_san.migrate(stage)
+  each_heroku_app do |stage|
+    stage.migrate
   end
 end
 
 desc "Shows the Heroku logs"
 task :logs do
-  each_heroku_app do |stage, repo, config|
-    @heroku_san.logs(stage)
+  each_heroku_app do |stage|
+    stage.logs
   end
 end
 
 namespace :db do
   task :pull do
-    each_heroku_app do |stage, repo, config|
-      sh "heroku pgdumps:capture --app #{@heroku_san[stage]['app']}"
-      dump = `heroku pgdumps --app #{@heroku_san[stage]['app']}`.split("\n").last.split(" ").first
+    each_heroku_app do |stage|
+      sh "heroku pgdumps:capture --app #{stage.app}"
+      dump = `heroku pgdumps --app #{stage.app}`.split("\n").last.split(" ").first
       sh "mkdir -p #{Rails.root}/db/dumps"
       file = "#{Rails.root}/db/dumps/#{dump}.sql.gz"
-      url = `heroku pgdumps:url --app #{@heroku_san[stage]['app']} #{dump}`.chomp
+      url = `heroku pgdumps:url --app #{stage.app} #{dump}`.chomp
       sh "wget", url, "-O", file
       sh "rake db:drop db:create"
       sh "gunzip -c #{file} | #{Rails.root}/script/dbconsole"
