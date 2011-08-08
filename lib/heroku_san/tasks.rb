@@ -161,11 +161,12 @@ namespace :heroku do
 
   desc 'Add config:vars to each application.'
   task :config do
+    require "shellwords"
     retrieve_configuration
     each_heroku_app do |name, app, repo, config|
       command = "heroku config:add --app #{app}"
       config.each do |var, value|
-        command += " #{var}=#{value}"
+        command += " #{var}=#{Shellwords.escape(value)}"
       end
       sh(command)
     end
