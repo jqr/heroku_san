@@ -121,7 +121,7 @@ namespace :heroku do
   end
 
   namespace :apps do
-    desc 'Lists configured apps without hitting heroku'
+    desc 'Lists configured apps without hitting Heroku'
     task :local => :all do
       each_heroku_app do |name, app, repo|
         puts "#{name} is shorthand for the Heroku app #{app} located at:"
@@ -159,7 +159,7 @@ namespace :heroku do
     end
   end
 
-  desc 'Add config:vars to each application.'
+  desc 'Add config:vars to each application'
   task :config do
     retrieve_configuration
     each_heroku_app do |name, app, repo, config|
@@ -320,7 +320,7 @@ namespace :db do
     end
   end
 
-  desc 'Push local database for Heroku database'
+  desc 'Push local database to Heroku database'
   task :push do
     dbconfig = YAML.load(ERB.new(File.read(Rails.root.join('config/database.yml'))).result)[Rails.env]
     return if dbconfig['adapter'] != 'postgresql'
