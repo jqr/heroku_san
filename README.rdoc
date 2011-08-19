@@ -28,14 +28,17 @@ Rake tasks are not automatically loaded from gems, so you’ll need to add the f
 
 == Configure
 
-In config/heroku.yml you will need add the Heroku apps that you would like to attach to this project. You can generate this file and edit it by running:
-  
+In config/heroku.yml you will need to add the Heroku apps that you would like to attach to this project. You can generate this file by running:
+
   rake heroku:create_config
 
-If this is a fresh project, heroku_san can create all the applications for
-you, and set the RACK_ENV.
+Customize the file for your project. If this is a fresh project, heroku_san can create all the applications for you, and set each one's RACK_ENV.
 
   rake all heroku:create heroku:rack_env
+
+Configure your Heroku apps according to config/heroku.yml by running:
+
+  rake all heroku:config
 
 == Usage
 
@@ -65,29 +68,35 @@ Need to add remotes for each app?
 
 A full list of tasks provided:
 
-  rake all                   # Select all Heroku apps for later command
-  rake console               # Opens a remote console
-  rake deploy[commit]        # Pushes the given commit, migrates and restarts (default: HEAD)
-  rake deploy:force[commit]  # Force-pushes the given commit, migrates and restarts (default: HEAD)
-  rake after_deploy          # Callback after deploys
-  rake before_deploy         # Callback before deploys
-  rake capture               # Captures a bundle on Heroku
-  rake heroku:apps           # Lists configured apps
-  rake heroku:create         # Creates the Heroku app
-  rake heroku:create_config  # Creates an example configuration file
-  rake heroku:gems           # Generate the Heroku gems manifest from gem dependencies
-  rake heroku:maintenance    # Enable maintenance mode
-  rake heroku:maintenance_off# Disable maintenance mode
-  rake heroku:push           # Pushes the given commit (default: HEAD)
-  rake heroku:push:force     # Force-pushes the given commit (default: HEAD)
-  rake heroku:remotes        # Add git remotes for all apps in this project
-  rake heroku:rack_env       # Add proper RACK_ENV to each application
-  rake heroku:rake[task]     # Runs a rake task remotely
-  rake heroku:share          # Adds a collaborator
-  rake heroku:unshare        # Removes a collaborator
-  rake logs                  # Shows the Heroku logs
-  rake migrate               # Migrates and restarts remote servers
-  rake restart               # Restarts remote servers
+  rake after_deploy              # Callback after deploys
+  rake all                       # Select all Heroku apps for later command
+  rake before_deploy             # Callback before deploys
+  rake capture                   # Captures a bundle on Heroku
+  rake console                   # Opens a remote console
+  rake db:pull                   # Pull the Heroku database
+  rake db:push                   # Push local database to Heroku database
+  rake deploy[commit]            # Pushes the given commit, migrates and restarts (default: HEAD)
+  rake deploy:force[commit]      # Force-pushes the given commit, migrates and restarts (default: HEAD)
+  rake heroku:apps               # Lists configured apps
+  rake heroku:apps:local         # Lists configured apps without hitting Heroku
+  rake heroku:config             # Add config:vars to each application
+  rake heroku:config:list        # Lists config variables as set on Heroku
+  rake heroku:config:list:local  # Lists local config variables without setting them
+  rake heroku:create             # Creates the Heroku app
+  rake heroku:create_config      # Creates an example configuration file
+  rake heroku:gems               # Generate the Heroku gems manifest from gem dependencies
+  rake heroku:maintenance        # Enable maintenance mode
+  rake heroku:maintenance_off    # Disable maintenance mode
+  rake heroku:push[commit]       # Pushes the given commit (default: HEAD)
+  rake heroku:push:force[commit] # Force-pushes the given commit (default: HEAD)
+  rake heroku:rack_env           # Add proper RACK_ENV to each application
+  rake heroku:rake[task]         # Runs a rake task remotely
+  rake heroku:remotes            # Add git remotes for all apps in this project
+  rake heroku:share              # Adds a collaborator
+  rake heroku:unshare            # Removes a collaborator
+  rake logs                      # Shows the Heroku logs
+  rake migrate                   # Migrates and restarts remote servers
+  rake restart                   # Restarts remote servers
 
 Frequently used tasks are not namespaced, everything else lives under heroku.
 
