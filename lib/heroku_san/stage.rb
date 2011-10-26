@@ -50,11 +50,11 @@ module HerokuSan
     end
 
     def sharing_add(email)
-      sh_heroku "sharing:add #{email}"
+      sh_heroku "sharing:add #{email.chomp}"
     end
   
     def sharing_remove(email)
-      sh_heroku "sharing:remove #{email}"
+      sh_heroku "sharing:remove #{email.chomp}"
     end
   
     def long_config

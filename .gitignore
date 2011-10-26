@@ -3,6 +3,6 @@ doc
 pkg
 Thumbs.db
 tmp
-
+.idea/**
 Gemfile.lock
 *.swp
