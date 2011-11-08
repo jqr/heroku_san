@@ -1,4 +1,5 @@
 require 'rake'
+require 'rake/dsl_definition'
 
 module Git
   include Rake::DSL
