@@ -56,7 +56,7 @@ namespace :heroku do
   desc "Creates the Heroku app"
   task :create do
     each_heroku_app do |name, app, repo|
-      sh "heroku create #{app}"
+      sh "heroku create #{app} #{("--stack " + stack(app)) if stack(app)}"
     end
   end
 
@@ -196,7 +196,7 @@ namespace :heroku do
   desc 'Runs a rake task remotely'
   task :rake, :task do |t, args|
     each_heroku_app do |name, app, repo|
-      sh "heroku rake --app #{app} #{args[:task]}"
+      sh "heroku #{run_or_rake(app)} #{args[:task]}"
     end
   end
 
@@ -272,7 +272,11 @@ end
 desc "Opens a remote console"
 task :console do
   each_heroku_app do |name, app, repo|
-    sh "heroku console --app #{app}"
+    if stack_is_cedar?(app)
+      sh "heroku run --app #{app} console"
+    else
+      sh "heroku console --app #{app}"
+    end
   end
 end
 
@@ -381,10 +385,30 @@ def push(commit, repo)
 end
 
 def migrate(app)
-  sh "heroku rake --app #{app} db:migrate"
+  sh "heroku #{run_or_rake(app)} db:migrate"
   sh "heroku restart --app #{app}"
 end
 
 def maintenance(app, action)
   sh "heroku maintenance:#{action} --app #{app}"
+end
+
+# `heroku rake foo` has been superseded by `heroku run rake foo` on cedar
+def run_or_rake(app)
+  if stack_is_cedar?(app)
+    "run --app #{app} rake"
+  else
+    "rake --app #{app}"
+  end
+end
+
+def stack_is_cedar?(app)
+  stack(app) =~ /^cedar/
+end
+
+def stack(app)
+  @app_settings.values.detect { |s| s['app'] == app }.tap do |settings|
+    @stack = (settings['stack'] || (/^\* (.*)/.match `heroku stack --app #{app}`)[1] rescue nil)
+  end
+  @stack
 end
