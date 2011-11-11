@@ -1,9 +1,10 @@
 #
 # Format:
 # 
-# <heroku_san shorthand name>:
+# <stage name>:
 #   app: <Heroku app name>
 #   tag: <git tag pattern>
+#   repo: <git repository>
 #   config:
 #     - <Heroku config:var name>: <Heroku config:var value>
 #

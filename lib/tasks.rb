@@ -95,6 +95,17 @@ namespace :heroku do
     end
   end
 
+  desc 'Add config:vars to each application.'
+  task :config do
+    each_heroku_app do |stage|
+      command = "heroku config:add --app #{stage.app}"
+      config.each do |var, value|
+        command += " #{var}=#{value}"
+      end
+      sh(command)
+    end
+  end
+
   desc 'Creates an example configuration file'
   task :create_config do
     filename = %Q{#{@heroku_san.config_file.to_s}}
@@ -107,17 +118,6 @@ namespace :heroku do
       end
     else
       puts "#{filename.inspect} already exists"
-    end
-  end
-
-  desc 'Add config:vars to each application.'
-  task :config do
-    each_heroku_app do |stage|
-      command = "heroku config:add --app #{stage.app}"
-      config.each do |var, value|
-        command += " #{var}=#{value}"
-      end
-      sh(command)
     end
   end
 

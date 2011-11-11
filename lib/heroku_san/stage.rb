@@ -36,7 +36,7 @@ module HerokuSan
     end
     
     def migrate
-      run('rake', 'db:migrate')
+      run 'rake', 'db:migrate'
       sh_heroku "restart"
     end
 
