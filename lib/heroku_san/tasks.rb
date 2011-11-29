@@ -161,11 +161,12 @@ namespace :heroku do
 
   desc 'Add config:vars to each application'
   task :config do
+    require "shellwords"
     retrieve_configuration
     each_heroku_app do |name, app, repo, config|
       command = "heroku config:add --app #{app}"
       config.each do |var, value|
-        command += " #{var}=#{value}"
+        command += " #{var}=#{Shellwords.escape(value)}"
       end
       sh(command)
     end
@@ -192,7 +193,7 @@ namespace :heroku do
       end
     end
   end
-  
+
   desc 'Runs a rake task remotely'
   task :rake, :task do |t, args|
     each_heroku_app do |name, app, repo|
@@ -336,7 +337,7 @@ namespace :db do
 end
 
 def each_heroku_app
-  if @heroku_apps.blank? 
+  if @heroku_apps.blank?
     if @app_settings.keys.size == 1
       app = @app_settings.keys.first
       puts "Defaulting to #{app} app since only one app is defined"
