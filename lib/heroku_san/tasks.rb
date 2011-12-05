@@ -294,12 +294,24 @@ task :migrate do
   end
 end
 
-desc "Shows the Heroku logs"
-task :logs do
-  each_heroku_app do |name, app, repo|
-    sh "heroku logs --app #{app}"
+namespace :logs do
+  desc "Shows the Heroku logs"
+  task :default do
+    each_heroku_app do |name, app, repo|
+      sh "heroku logs --app #{app}"
+    end
+  end
+
+  desc "Tails the Heroku logs (requires logging:expanded)"
+  task :tail do
+    each_heroku_app do |name, app, repo|
+      sh "heroku logs -t --app #{app}"
+    end
   end
 end
+
+desc "Run the default 'logs' task"
+task :logs => 'logs:default'
 
 namespace :db do
   desc 'Pull the Heroku database'
