@@ -4,6 +4,7 @@ Feature: Works with Heroku
   Background:
     Given I run `git clone git://github.com/kmayer/heroku_san_demo.git`
     And I cd to "heroku_san_demo"
+    And I run `bundle install`
 
   Scenario: Remote commands
     When I run `rake demo deploy`
