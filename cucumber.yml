@@ -1,0 +1,2 @@
+default: --tags ~@slow_process
+remote: --tags @slow_process

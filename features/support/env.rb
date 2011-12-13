@@ -6,3 +6,11 @@ require 'aruba/cucumber'
 unless File.readable? File.join(File.dirname(__FILE__), '..', 'data', 'test-config', 'config.yml')
   `git submodule init && git submodule update`
 end
+
+Before do
+  @aruba_timeout_seconds = 15
+end
+  
+Before('@slow_process') do
+  # @aruba_io_wait_seconds = 15
+end
