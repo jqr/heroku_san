@@ -99,7 +99,7 @@ namespace :heroku do
   task :config do
     each_heroku_app do |stage|
       command = "heroku config:add --app #{stage.app}"
-      config.each do |var, value|
+      stage.config.each do |var, value|
         command += " #{var}=#{value}"
       end
       sh(command)
