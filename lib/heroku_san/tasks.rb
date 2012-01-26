@@ -66,10 +66,17 @@ namespace :heroku do
       # Set up addons
       addons = (settings['addons'] || []).flatten
       installed, broken = installed_addons app
-      (addons - installed).each do |addon|
-        sh "heroku addons:add --app #{app} #{addon}" rescue nil
+      needed = addons - installed
+      if needed.any?
+        needed.each do |addon|
+          sh "heroku addons:add --app #{app} #{addon}" rescue nil
+        end
+        installed, broken = installed_addons app
       end
-      installed, broken = installed_addons app
+      puts "Installed addons:"
+      installed.each do |name|
+        puts "* #{name}"
+      end
       broken.each do |name, url|
         puts "Addon #{name} needs to be configured at #{url.sub('http://heroku', 'https://api.heroku')}"
       end
