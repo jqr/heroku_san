@@ -10,6 +10,18 @@
 #   config:
 #     - <Heroku config:var name>: <Heroku config:var value>
 #
+# To share addons:
+#
+# env1:
+#   addons: &addons
+#   - an:addon
+#   # ... other config
+# env2:
+#   addons:
+#   - *addons
+#   - another:addon
+#   # ... other config
+#
 production: 
   app: awesomeapp
   stack: bamboo-ree-1.8.7

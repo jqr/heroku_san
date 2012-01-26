@@ -64,7 +64,7 @@ namespace :heroku do
   task :addons do
     each_heroku_app do |name, app, repo, config, settings|
       # Set up addons
-      addons = settings['addons'] || []
+      addons = (settings['addons'] || []).flatten
       installed, broken = installed_addons app
       (addons - installed).each do |addon|
         sh "heroku addons:add --app #{app} #{addon}" rescue nil
