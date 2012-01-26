@@ -4,8 +4,23 @@
 # <heroku_san shorthand name>:
 #   app: <Heroku app name>
 #   stack: <Heroku stack, optional>
+#   addons:
+#   - addon:name
+#   - another:addon
 #   config:
 #     - <Heroku config:var name>: <Heroku config:var value>
+#
+# To share addons:
+#
+# env1:
+#   addons: &addons
+#   - an:addon
+#   # ... other config
+# env2:
+#   addons:
+#   - *addons
+#   - another:addon
+#   # ... other config
 #
 production: 
   app: awesomeapp

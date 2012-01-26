@@ -121,6 +121,7 @@ Issue Tracker:: http://github.com/fastestforward/heroku_san/issues
 * Jon Wood (jon@blankpad.net)
 * Mat Schaffer (mat@schaffer.me)
 * Jonathan Hironaga (jonathan.hironaga@halogennetwork.com)
+* Matt Burke (spraints@gmail.com)
 
 == License
 
