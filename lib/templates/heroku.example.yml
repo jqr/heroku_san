@@ -4,6 +4,9 @@
 # <heroku_san shorthand name>:
 #   app: <Heroku app name>
 #   stack: <Heroku stack, optional>
+#   addons:
+#   - addon:name
+#   - another:addon
 #   config:
 #     - <Heroku config:var name>: <Heroku config:var value>
 #

@@ -60,6 +60,22 @@ namespace :heroku do
     end
   end
 
+  desc "Set up addons for the app"
+  task :addons do
+    each_heroku_app do |name, app, repo, config, settings|
+      # Set up addons
+      addons = settings['addons'] || []
+      installed, broken = installed_addons app
+      (addons - installed).each do |addon|
+        sh "heroku addons:add --app #{app} #{addon}" rescue nil
+      end
+      installed, broken = installed_addons app
+      broken.each do |name, url|
+        puts "Addon #{name} needs to be configured at #{url.sub('http://heroku', 'https://api.heroku')}"
+      end
+    end
+  end
+
   desc "Generate the Heroku gems manifest from gem dependencies"
   task :gems => 'gems:base' do
     RAILS_ENV='production'
@@ -362,7 +378,8 @@ def each_heroku_app
       else
         repo = "git@heroku.com:#{app}.git"
       end
-      yield(name, app, repo, config)
+      settings = @app_settings[name]
+      yield(name, app, repo, config, settings)
     end
     puts
   else
@@ -375,6 +392,20 @@ def each_heroku_app
       rake all heroku:share"
 
     exit(1)
+  end
+end
+
+def installed_addons app
+  `heroku addons --app #{app}`.lines.inject([[],{}]) do |(installed, broken), line|
+    line = line.chomp
+    if line.empty? || line =~ /^-/
+      # skip
+    else
+      name, url = line.split /\s+/
+      installed << name
+      broken[name] = url if url
+    end
+    [installed, broken]
   end
 end
 
