@@ -203,7 +203,7 @@ namespace :heroku do
   desc "Pushes the given commit (default: HEAD)"
   task :push, :commit do |t, args|
     each_heroku_app do |name, app, repo|
-      push(args[:commit], repo)
+      push(args[:commit], repo, app)
     end
   end
 
@@ -234,7 +234,7 @@ end
 desc "Pushes the given commit, migrates and restarts (default: HEAD)"
 task :deploy, [:commit] => [:before_deploy] do |t, args|
   each_heroku_app do |name, app, repo|
-    push(args[:commit], repo)
+    push(args[:commit], repo, app)
     migrate(app)
   end
   Rake::Task[:after_deploy].execute
@@ -378,12 +378,13 @@ def each_heroku_app
   end
 end
 
-def push(commit, repo)
+def push(commit, repo, app)
   commit ||= "HEAD"
   @git_push_arguments ||= []
   begin
     sh "git update-ref refs/heroku_san/deploy #{commit}"
     sh "git push #{repo} #{@git_push_arguments.join(' ')} refs/heroku_san/deploy:refs/heads/master"
+    sh "heroku config:add COMMIT_SHA=$(git rev-parse refs/heroku_san/deploy) --app #{app}"
   ensure
     sh "git update-ref -d refs/heroku_san/deploy"
   end
