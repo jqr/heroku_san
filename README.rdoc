@@ -121,7 +121,8 @@ Issue Tracker:: http://github.com/fastestforward/heroku_san/issues
 * Jon Wood (jon@blankpad.net)
 * Mat Schaffer (mat@schaffer.me)
 * Jonathan Hironaga (jonathan.hironaga@halogennetwork.com)
+* Ken Mayer (ken@bitwrangler.com)
 
 == License
 
-License:: Copyright (c) 2009 Elijah Miller <mailto:elijah.miller@gmail.com>, released under the MIT license.
+License:: Copyright (c) 2009-2012 Elijah Miller <mailto:elijah.miller@gmail.com>, released under the MIT license.
