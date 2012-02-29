@@ -46,9 +46,18 @@ module HerokuSan
       sh_heroku "restart"
     end
 
-    def maintenance(action)
-      raise ArgumentError, "Action #{action.inspect} must be one of (:on, :off)", caller if ![:on, :off].include?(action)
-      sh_heroku "maintenance:#{action}"
+    def maintenance(action = nil)
+      if block_given?
+        sh_heroku "maintenance:on"
+        begin
+          yield
+        ensure
+          sh_heroku "maintenance:off"
+        end
+      else
+        raise ArgumentError, "Action #{action.inspect} must be one of (:on, :off)", caller if ![:on, :off].include?(action)
+        sh_heroku "maintenance:#{action}"
+      end
     end
     
     def create

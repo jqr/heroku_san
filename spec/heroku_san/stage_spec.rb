@@ -101,6 +101,27 @@ EOT
         subject.maintenance :busy
       end.to raise_error ArgumentError, "Action #{:busy.inspect} must be one of (:on, :off)"      
     end
+    
+    context "with a block" do
+      it "wraps it in a maitenance mode" do
+        subject.should_receive(:sh).with("heroku maintenance:on --app awesomeapp")
+        reactor = mock("Reactor"); reactor.should_receive(:scram).with(:now)
+        subject.should_receive(:sh).with("heroku maintenance:off --app awesomeapp")
+        subject.maintenance do
+          reactor.scram(:now)
+        end
+      end
+      it "ensures that maintenance mode is turned off" do
+        subject.should_receive(:sh).with("heroku maintenance:on --app awesomeapp")
+        reactor = mock("Reactor"); reactor.should_receive(:scram).with(:now).and_raise(RuntimeError)
+        subject.should_receive(:sh).with("heroku maintenance:off --app awesomeapp")
+        expect {
+          subject.maintenance do
+            reactor.scram(:now)
+          end        
+        }.to raise_error
+      end
+    end
   end
 
   describe "#create" do
