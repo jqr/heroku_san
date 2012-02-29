@@ -179,4 +179,20 @@ EOT
     end
   end
 
+  describe "#push_config" do
+    it "updates the configuration settings on Heroku" do
+      subject = HerokuSan::Stage.new('test', {"app" => "awesomeapp", "config" => {FOO: 'bar', DOG: 'emu'}}) 
+      subject.should_receive(:sh).with("heroku config:add FOO=bar DOG=emu --app awesomeapp")
+      subject.push_config
+    end
+    it "properly escapes variables" do
+      subject = HerokuSan::Stage.new('test', {"app" => "awesomeapp", "config" => {FOO: ' bar\emu bat zebra '}})
+      subject.should_receive(:sh).with("heroku config:add FOO=#{Shellwords.escape(' bar\emu bat zebra ')} --app awesomeapp")
+      subject.push_config
+    end
+    it "pushes the options hash" do
+      subject.should_receive(:sh).with("heroku config:add RACK_ENV=magic --app awesomeapp")
+      subject.push_config(RACK_ENV: 'magic')
+    end
+  end
 end

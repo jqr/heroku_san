@@ -90,7 +90,7 @@ namespace :heroku do
       puts command
       config = Hash[`#{command}`.scan(/^(.+?)\s*=>\s*(.+)$/)]
       if config['RACK_ENV'] != stage.name
-        sh "heroku config:add --app #{stage.app} RACK_ENV=#{stage.name}"
+        stage.push_config RACK_ENV: stage.name
       end
     end
   end
@@ -98,11 +98,7 @@ namespace :heroku do
   desc 'Add config:vars to each application.'
   task :config do
     each_heroku_app do |stage|
-      command = "heroku config:add --app #{stage.app}"
-      stage.config.each do |var, value|
-        command += " #{var}=#{value}"
-      end
-      sh(command)
+      stage.push_config
     end
   end
 

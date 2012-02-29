@@ -75,6 +75,11 @@ module HerokuSan
     def long_config
       sh_heroku 'config --long'
     end
+    
+    def push_config(options = {})
+      vars = (options == {} ? self.config : options).map {|var,value| "#{var}=#{Shellwords.escape(value)}"}.join(' ')
+      sh_heroku "config:add #{vars}"
+    end
 
     def restart
       sh_heroku 'restart'
@@ -86,7 +91,7 @@ module HerokuSan
     
   private
   
-    def sh_heroku command
+    def sh_heroku(command)
       sh "heroku #{command} --app #{app}"
     end
   end
