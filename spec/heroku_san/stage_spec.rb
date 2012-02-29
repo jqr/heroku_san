@@ -1,6 +1,7 @@
 require 'spec_helper'
 
 describe HerokuSan::Stage do
+  include Git
   subject { HerokuSan::Stage.new('production', {"app" => "awesomeapp", "stack" => "bamboo-ree-1.8.7"})}
 
   context "initializes" do
@@ -51,6 +52,28 @@ EOT
         subject.should_receive(:sh).with("heroku run worker foo bar bleh --app awesomeapp")
         subject.run 'worker', 'foo bar bleh'
       end
+    end
+  end
+
+  describe "#deploy" do
+    it "deploys to heroku" do
+      subject.should_receive(:git_push).with(git_parsed_tag(subject.tag), subject.repo, [])
+      subject.deploy
+    end
+    
+    it "deploys with a custom sha" do
+      subject.should_receive(:git_push).with('deadbeef', subject.repo, [])
+      subject.deploy('deadbeef')
+    end
+    
+    it "deploys with --force" do
+      subject.should_receive(:git_push).with(git_parsed_tag(subject.tag), subject.repo, %w[--force])
+      subject.deploy(nil, :force)
+    end
+    
+    it "deploys with a custom sha & --force" do
+      subject.should_receive(:git_push).with('deadbeef', subject.repo, %w[--force])
+      subject.deploy('deadbeef', :force)
     end
   end
 

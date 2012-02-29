@@ -1,6 +1,7 @@
 module HerokuSan
   class Stage
     attr_reader :name
+    include Git
     
     def initialize(stage, options = {})
       @name = stage
@@ -33,6 +34,11 @@ module HerokuSan
       else
         sh_heroku "run:#{command} #{args}"
       end
+    end
+    
+    def deploy(sha = nil, force = false)
+      sha ||= git_parsed_tag(self.tag)
+      git_push(sha, self.repo, force ? %w[--force] : [])
     end
     
     def migrate
