@@ -177,6 +177,10 @@ EOT
       subject.should_receive(:sh).with("heroku logs --app awesomeapp")
       subject.logs
     end
+    it "tails log files" do
+      subject.should_receive(:sh).with("heroku logs --tail --app awesomeapp")
+      subject.logs(:tail)
+    end
   end
 
   describe "#push_config" do

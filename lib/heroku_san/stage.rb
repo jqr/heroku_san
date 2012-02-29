@@ -85,8 +85,8 @@ module HerokuSan
       sh_heroku 'restart'
     end
   
-    def logs
-      sh_heroku 'logs'
+    def logs(tail = false)
+      sh_heroku 'logs' + (tail ? ' --tail' : '')
     end
     
   private
