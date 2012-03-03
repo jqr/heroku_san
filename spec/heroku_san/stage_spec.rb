@@ -186,7 +186,7 @@ describe HerokuSan::Stage do
 
   describe "#push_config" do
     it "updates the configuration settings on Heroku" do
-      subject = HerokuSan::Stage.new('test', {"app" => "awesomeapp", "config" => {FOO: 'bar', DOG: 'emu'}}) 
+      subject = HerokuSan::Stage.new('test', {"app" => "awesomeapp", "config" => {:FOO => 'bar', :DOG => 'emu'}}) 
       @heroku_client.should_receive(:add_config_vars).with('awesomeapp', {:FOO => 'bar', :DOG => 'emu'}).and_return("{}")
       subject.push_config
     end
