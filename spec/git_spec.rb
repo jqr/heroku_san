@@ -52,4 +52,23 @@ describe GitTest do
       subject.git_rev_parse(nil).should == nil
     end
   end
+
+  describe "#git_revision" do
+    it "returns the current revision of the repository (on Heroku)" do
+      subject.should_receive("`").with("git ls-remote --heads staging master") { "sha\n" }
+      subject.git_revision('staging').should == 'sha'
+    end
+    
+    it "returns nil if there is no revision (i.e. not deployed yet)" do
+      subject.should_receive("`").with("git ls-remote --heads staging master") { "\n" }
+      subject.git_revision('staging').should == nil
+    end
+  end
+  
+  describe "#git_named_rev" do
+    it "returns symbolic names for given rev" do
+      subject.should_receive("`").with("git name-rev sha") {"sha production/123456\n"}
+      subject.git_named_rev('sha').should == 'sha production/123456'
+    end
+  end
 end

@@ -58,15 +58,10 @@ namespace :heroku do
   desc 'Lists configured apps'
   task :apps => :all do
     each_heroku_app do |stage|
+      rev = stage.revision
       puts  "#{stage.name} is shorthand for the Heroku app #{stage.app} located at:"
       puts  "  #{stage.repo}"
-      print "  @ "
-      rev = `git ls-remote -h #{stage.repo}`.split(' ').first
-      if rev.blank?
-        puts 'not deployed'
-      else
-        puts `git name-rev #{rev}`
-      end
+      puts  "  @ #{rev.blank? ? 'not deployed' : rev}"
       puts
     end
   end

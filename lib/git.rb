@@ -23,17 +23,25 @@ module Git
     end
   end
   
-  def git_tag(glob)
-    return nil if glob.nil?
-    %x{git tag -l '#{glob}'}.split("\n").last
+  def git_parsed_tag(tag)
+    git_rev_parse(git_tag(tag))
   end
   
   def git_rev_parse(ref)
     return nil if ref.nil?
     %x{git rev-parse #{ref}}.split("\n").first
+  end  
+
+  def git_tag(glob)
+    return nil if glob.nil?
+    %x{git tag -l '#{glob}'}.split("\n").last
   end
   
-  def git_parsed_tag(tag)
-    git_rev_parse(git_tag(tag))
+  def git_revision(repo)
+    %x{git ls-remote --heads #{repo} master}.split.first
+  end
+  
+  def git_named_rev(ref)
+    %x{git name-rev #{ref}}.chomp
   end
 end

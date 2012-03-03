@@ -199,4 +199,17 @@ EOT
       subject.push_config(RACK_ENV: 'magic')
     end
   end
+
+  describe "#revision" do
+    it "returns the named remote revision for the stage" do
+      subject.should_receive(:git_revision).with(subject.repo) {"sha"}
+      subject.should_receive(:git_named_rev).with('sha') {"sha production/123456"}
+      subject.revision.should == 'sha production/123456'
+    end
+    it "returns nil if the stage has never been deployed" do
+      subject.should_receive(:git_revision).with(subject.repo) {nil}
+      subject.should_receive(:git_named_rev).with(nil) {''}
+      subject.revision.should == ''
+    end
+  end
 end

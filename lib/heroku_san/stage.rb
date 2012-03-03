@@ -37,8 +37,8 @@ module HerokuSan
     end
     
     def deploy(sha = nil, force = false)
-      sha ||= git_parsed_tag(self.tag)
-      git_push(sha, self.repo, force ? %w[--force] : [])
+      sha ||= git_parsed_tag(tag)
+      git_push(sha, repo, force ? %w[--force] : [])
     end
     
     def migrate
@@ -77,7 +77,7 @@ module HerokuSan
     end
     
     def push_config(options = {})
-      vars = (options == {} ? self.config : options).map {|var,value| "#{var}=#{Shellwords.escape(value)}"}.join(' ')
+      vars = (options == {} ? config : options).map {|var,value| "#{var}=#{Shellwords.escape(value)}"}.join(' ')
       sh_heroku "config:add #{vars}"
     end
 
@@ -87,6 +87,10 @@ module HerokuSan
   
     def logs(tail = false)
       sh_heroku 'logs' + (tail ? ' --tail' : '')
+    end
+    
+    def revision
+      git_named_rev(git_revision(repo))
     end
     
   private
