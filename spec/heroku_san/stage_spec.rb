@@ -191,7 +191,7 @@ describe HerokuSan::Stage do
       subject.push_config
     end
     it "pushes the options hash" do
-      @heroku_client.should_receive(:add_config_vars).with('awesomeapp', {:RACK_ENV => 'magic'}).and_return("{}")
+      @heroku_client.should_receive(:add_config_vars).with('awesomeapp', {'RACK_ENV' => 'magic'}).and_return("{}")
       subject.push_config(RACK_ENV: 'magic')
     end
   end
