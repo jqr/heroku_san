@@ -196,7 +196,7 @@ EOT
     end
     it "pushes the options hash" do
       subject.should_receive(:sh).with("heroku config:add RACK_ENV=magic --app awesomeapp")
-      subject.push_config(RACK_ENV: 'magic')
+      subject.push_config('RACK_ENV' => 'magic')
     end
   end
 
