@@ -1,6 +1,7 @@
 = Heroku San
-
 Helpful rake tasks for Heroku.
+
+[![Build Status](https://secure.travis-ci.org/pedrocarrico/NifGenerator.png?branch=master)](http://travis-ci.org/pedrocarrico/NifGenerator)
 
 == Install
 
