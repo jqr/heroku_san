@@ -8,6 +8,19 @@
 #   repo: <git repository, optional>
 #   config:
 #     - <Heroku config:var name>: <Heroku config:var value>
+#   addons:
+#     - addon:name
+#     - another:addon
+#
+# To share addons:
+#
+# env1:
+#   addons: &addons
+#   - an:addon
+# env2:
+#   addons:
+#   - *addons
+#   - another:addon
 #
 production: 
   app: awesomeapp

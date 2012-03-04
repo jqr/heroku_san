@@ -106,6 +106,26 @@ namespace :heroku do
     end
   end
 
+  desc 'Set up addons for the application'
+  task :addons do
+    each_heroku_app do |stage|
+      addons = HerokuSan::Addons.new stage
+      if addons.needed.any?
+        addons.needed.each do |addon|
+          sh "heroku addons:add --app #{stage.app} #{addon}" rescue nil
+        end
+        addons.refresh
+      end
+      puts "Installed addons:"
+      addons.installed.each do |name|
+        puts "* #{name}"
+      end
+      addons.broken.each do |name, url|
+        puts "Addon #{name} needs to be configured at #{url.sub('http://heroku', 'https://api.heroku')}"
+      end
+    end
+  end
+
   desc 'Creates an example configuration file'
   task :create_config do
     filename = %Q{#{@heroku_san.config_file.to_s}}

@@ -26,6 +26,10 @@ module HerokuSan
     def config
       @options['config'] ||= {}
     end
+
+    def addons
+      (@options['addons'] ||= []).flatten
+    end
     
     def run(command, args = nil)
       if stack =~ /cedar/
