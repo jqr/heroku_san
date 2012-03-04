@@ -95,7 +95,7 @@ EOT
     end
   end
   
-  describe "#maintenance" do      
+  describe "#maintenance" do
     it ":on" do
       subject.should_receive(:sh).with("heroku maintenance:on --app awesomeapp")
       subject.maintenance :on
