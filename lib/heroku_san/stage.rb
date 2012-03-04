@@ -9,7 +9,7 @@ module HerokuSan
     end
     
     def app
-      @options['app']
+      @options['app'] or raise MissingApp, "#{name}: is missing the app: configuration value. I don't know what to access on Heroku."
     end
     
     def repo

@@ -20,6 +20,16 @@ describe HerokuSan::Stage do
     its(:repo)   { should == 'git@heroku.com:awesomeapp-demo.git' }
   end
   
+  describe "#app" do
+    its(:app) { should == 'awesomeapp'}
+    context "blank app" do
+      subject { HerokuSan::Stage.new('production') }
+      it "should raise an error" do
+        expect { subject.app }.to raise_error(HerokuSan::MissingApp, /production: is missing the app: configuration value\./)
+      end
+    end
+  end
+  
   context "celadon cedar stack has a different API" do
     describe "#stack" do
       it "returns the name of the stack from Heroku" do

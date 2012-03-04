@@ -5,5 +5,6 @@ require 'heroku_san/project'
 
 module HerokuSan
   class NoApps < StandardError; end
+  class MissingApp < StandardError; end
   class Deprecated < StandardError; end
 end
