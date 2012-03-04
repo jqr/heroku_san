@@ -271,6 +271,13 @@ namespace :heroku do
       end
     end
   end
+  
+  desc "Run a bash shell on Heroku"
+  task :shell do
+    each_heroku_app do |stage|
+      stage.run 'bash'
+    end
+  end
 end
 
 task :all => 'heroku:stage:all'
@@ -284,6 +291,7 @@ task :migrate => 'heroku:db:migrate'
 task :logs => 'heroku:logs:default'
 task 'logs:tail' => 'heroku:logs:tail'
 task 'heroku:rack_env' => 'heroku:config:rack_env'
+task :shell => 'heroku:shell'
 
 def each_heroku_app(&block)
   @heroku_san.each_app(&block)
