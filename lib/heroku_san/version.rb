@@ -1,3 +1,3 @@
 module HerokuSan
-  VERSION = "2.0.rc.1"
+  VERSION = "2.1.0"
 end
