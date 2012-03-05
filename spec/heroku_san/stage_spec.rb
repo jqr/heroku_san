@@ -8,8 +8,10 @@ describe HerokuSan::Stage do
       {"stack" => "cedar", 
        "app"   => "awesomeapp-demo", 
        "tag"   => "demo/*", 
-       "config"=> {"BUNDLE_WITHOUT"=>"development:test"}
+       "config"=> {"BUNDLE_WITHOUT"=>"development:test"},
+       "addons"=> addons,
       })}
+    let(:addons) { ['one:addon', 'two:addons'] }
 
     its(:name)   { should == 'production' }
     its(:app)    { should == 'awesomeapp-demo' }
@@ -17,6 +19,26 @@ describe HerokuSan::Stage do
     its(:tag)    { should == "demo/*" }
     its(:config) { should == {"BUNDLE_WITHOUT"=>"development:test"} }
     its(:repo)   { should == 'git@heroku.com:awesomeapp-demo.git' }
+    its(:addons) { should == ['one:addon', 'two:addons'] }
+
+    context 'addons' do
+      context 'default' do
+        let(:addons) { nil }
+        its(:addons) { should == [] }
+      end
+      context 'nested' do
+        # This is for when you do:
+        # default_addons: &default_addons
+        #   - a
+        #   - b
+        # env:
+        #   addons:
+        #   - *default_addons
+        #   - other
+        let(:addons) { [ ['a', 'b'], 'other' ] }
+        its(:addons) { should == [ 'a', 'b', 'other' ] }
+      end
+    end
   end
   
   context "celadon cedar stack has a different API" do
