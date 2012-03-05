@@ -7,6 +7,11 @@ Feature: Works with Heroku
     And I run `bundle install`
 
   Scenario: Remote commands
+    When I run `rake demo heroku:addons`
+    Then the output should contain "* logging:basic\n"
+    And the output should contain "* deployhooks:campfire"
+    And the output should contain "Addon deployhooks:campfire needs to be configured at https://api.heroku.com/myapps/heroku-san-demo-demo/addons/deployhooks:campfire"
+
     When I run `rake demo deploy`
     Then the output should match /(http:.*-demo.heroku.com deployed to Heroku)|(Everything up-to-date)/
 
