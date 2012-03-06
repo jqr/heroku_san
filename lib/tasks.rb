@@ -91,7 +91,7 @@ namespace :heroku do
     filename = %Q{#{@heroku_san.config_file.to_s}}
     if @heroku_san.create_config
       puts "Copied example config to #{filename.inspect}"
-      if ENV['EDITOR'].present?
+      if ENV['EDITOR'] && ENV['EDITOR'] != ''
         sh "#{ENV['EDITOR']} #{filename}"
       else
         puts "Please edit #{filename.inspect} with your application's settings."
