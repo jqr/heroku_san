@@ -63,7 +63,7 @@ module HerokuSan
       end
     end
     
-    def create
+    def create # DEPREC?
       if @options['stack']
         heroku.create(app, {:stack => @options['stack']})
       else
@@ -71,11 +71,11 @@ module HerokuSan
       end
     end
 
-    def sharing_add(email)
+    def sharing_add(email) # DEPREC?
       sh_heroku "sharing:add #{email.chomp}"
     end
   
-    def sharing_remove(email)
+    def sharing_remove(email) # DEPREC?
       sh_heroku "sharing:remove #{email.chomp}"
     end
   
