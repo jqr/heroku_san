@@ -1,8 +1,14 @@
 require 'spec_helper'
+require 'heroku/client'
 
 describe HerokuSan::Stage do
   include Git
   subject { HerokuSan::Stage.new('production', {"app" => "awesomeapp", "stack" => "bamboo-ree-1.8.7"})}
+
+  before do
+    @heroku_client = mock(Heroku::Client)
+    Heroku::Auth.stub(:client).and_return(@heroku_client)
+  end
 
   context "initializes" do
     subject { HerokuSan::Stage.new('production', 
@@ -30,38 +36,29 @@ describe HerokuSan::Stage do
     end
   end
   
-  context "celadon cedar stack has a different API" do
-    describe "#stack" do
-      it "returns the name of the stack from Heroku" do
-        subject = HerokuSan::Stage.new('production', {"app" => "awesomeapp"})
-        subject.should_receive("`").with("heroku stack --app awesomeapp") {
-<<EOT
-  aspen-mri-1.8.6
-* bamboo-mri-1.9.2
-  bamboo-ree-1.8.7
-  cedar (beta)
-EOT
-        }
-        subject.stack.should == 'bamboo-mri-1.9.2'
-      end
-    
-      it "returns the stack name from the config if it is set there" do
-        subject = HerokuSan::Stage.new('production', {"app" => "awesomeapp", "stack" => "cedar"})
-        subject.should_not_receive("`")
-        subject.stack.should == 'cedar'
-      end
+  describe "#stack" do
+    it "returns the name of the stack from Heroku" do
+      subject = HerokuSan::Stage.new('production', {"app" => "awesomeapp"})
+      @heroku_client.should_receive(:list_stacks).with('awesomeapp').
+        and_return { [{'name' => 'other'}, {'name' => 'the-one', 'current' => true}] }
+      subject.stack.should == 'the-one'
     end
-        
-    describe "#run" do
-      it "runs commands using the pre-cedar format" do
-        subject.should_receive(:sh).with("heroku run:rake foo bar bleh --app awesomeapp")
-        subject.run 'rake', 'foo bar bleh'
-      end
-      it "runs commands using the new cedar format" do
-        subject = HerokuSan::Stage.new('production', {"app" => "awesomeapp", "stack" => "cedar"})
-        subject.should_receive(:sh).with("heroku run worker foo bar bleh --app awesomeapp")
-        subject.run 'worker', 'foo bar bleh'
-      end
+  
+    it "returns the stack name from the config if it is set there" do
+      subject = HerokuSan::Stage.new('production', {"app" => "awesomeapp", "stack" => "cedar"})
+      subject.stack.should == 'cedar'
+    end
+  end
+
+  describe "#run" do
+    it "runs commands using the pre-cedar format" do
+      subject.should_receive(:sh).with("heroku run:rake foo bar bleh --app awesomeapp")
+      subject.run 'rake', 'foo bar bleh'
+    end
+    it "runs commands using the new cedar format" do
+      subject = HerokuSan::Stage.new('production', {"app" => "awesomeapp", "stack" => "cedar"})
+      subject.should_receive(:sh).with("heroku run worker foo bar bleh --app awesomeapp")
+      subject.run 'worker', 'foo bar bleh'
     end
   end
 
@@ -89,21 +86,21 @@ EOT
 
   describe "#migrate" do
     it "runs rake db:migrate" do
-      subject.should_receive(:sh).with("heroku run:rake db:migrate --app awesomeapp")
-      subject.should_receive(:sh).with("heroku restart --app awesomeapp")
-      subject.migrate
+      @heroku_client.should_receive(:rake).with('awesomeapp', 'db:migrate').and_return "output:"
+      @heroku_client.should_receive(:restart).with('awesomeapp').and_return "restarted"
+      subject.migrate.should == "output:restarted"
     end
   end
   
   describe "#maintenance" do
     it ":on" do
-      subject.should_receive(:sh).with("heroku maintenance:on --app awesomeapp")
-      subject.maintenance :on
+      @heroku_client.should_receive(:maintenance).with('awesomeapp', :on) {'on'}
+      subject.maintenance(:on).should == 'on'
     end
 
     it ":off" do
-      subject.should_receive(:sh).with("heroku maintenance:off --app awesomeapp")
-      subject.maintenance :off
+      @heroku_client.should_receive(:maintenance).with('awesomeapp', :off) {'off'}
+      subject.maintenance(:off).should == 'off'
     end
     
     it "otherwise raises an ArgumentError" do
@@ -114,21 +111,17 @@ EOT
     
     context "with a block" do
       it "wraps it in a maitenance mode" do
-        subject.should_receive(:sh).with("heroku maintenance:on --app awesomeapp")
-        reactor = mock("Reactor"); reactor.should_receive(:scram).with(:now)
-        subject.should_receive(:sh).with("heroku maintenance:off --app awesomeapp")
-        subject.maintenance do
-          reactor.scram(:now)
-        end
+        reactor = mock("Reactor"); reactor.should_receive(:scram).with(:now).ordered
+        @heroku_client.should_receive(:maintenance).with('awesomeapp', :on).ordered
+        @heroku_client.should_receive(:maintenance).with('awesomeapp', :off).ordered
+        subject.maintenance do reactor.scram(:now) end
       end
       it "ensures that maintenance mode is turned off" do
-        subject.should_receive(:sh).with("heroku maintenance:on --app awesomeapp")
+        @heroku_client.should_receive(:maintenance).with('awesomeapp', :on).ordered
         reactor = mock("Reactor"); reactor.should_receive(:scram).with(:now).and_raise(RuntimeError)
-        subject.should_receive(:sh).with("heroku maintenance:off --app awesomeapp")
+        @heroku_client.should_receive(:maintenance).with('awesomeapp', :off).ordered
         expect {
-          subject.maintenance do
-            reactor.scram(:now)
-          end        
+          subject.maintenance do reactor.scram(:now) end        
         }.to raise_error
       end
     end
@@ -136,12 +129,12 @@ EOT
 
   describe "#create" do
     it "creates an app on heroku" do
-      subject.should_receive(:sh).with("heroku apps:create awesomeapp --stack bamboo-ree-1.8.7")
+      @heroku_client.should_receive(:create).with('awesomeapp', {:stack => 'bamboo-ree-1.8.7'})
       subject.create
     end
     it "uses the default stack if none is given" do
       subject = HerokuSan::Stage.new('production', {"app" => "awesomeapp"})
-      subject.should_receive(:sh).with("heroku apps:create awesomeapp")
+      @heroku_client.should_receive(:create).with('awesomeapp')
       subject.create
     end
   end
@@ -161,24 +154,16 @@ EOT
   end
 
   describe "#long_config" do
-    it "prints out the remote config" do
-      subject.should_receive(:sh).with("heroku config --long --app awesomeapp") {
-<<EOT
-BUNDLE_WITHOUT      => development:test
-DATABASE_URL        => postgres://thnodhxrzn:T0-UwxLyFgXcnBSHmyhv@ec2-50-19-216-194.compute-1.amazonaws.com/thnodhxrzn
-LANG                => en_US.UTF-8
-RACK_ENV            => production
-SHARED_DATABASE_URL => postgres://thnodhxrzn:T0-UwxLyFgXcnBSHmyhv@ec2-50-19-216-194.compute-1.amazonaws.com/thnodhxrzn
-EOT
-      }
-      subject.long_config
+    it "returns the remote config" do
+      @heroku_client.should_receive(:config_vars).with('awesomeapp') { {'A' => 'one', 'B' => 'two'} }
+      subject.long_config.should == { 'A' => 'one', 'B' => 'two' }
     end
   end
 
   describe "#restart" do
     it "restarts an app" do
-      subject.should_receive(:sh).with("heroku restart --app awesomeapp")
-      subject.restart
+      @heroku_client.should_receive(:restart).with('awesomeapp').and_return "restarted"
+      subject.restart.should == 'restarted'
     end
   end
   
@@ -196,16 +181,11 @@ EOT
   describe "#push_config" do
     it "updates the configuration settings on Heroku" do
       subject = HerokuSan::Stage.new('test', {"app" => "awesomeapp", "config" => {FOO: 'bar', DOG: 'emu'}}) 
-      subject.should_receive(:sh).with("heroku config:add FOO=bar DOG=emu --app awesomeapp")
-      subject.push_config
-    end
-    it "properly escapes variables" do
-      subject = HerokuSan::Stage.new('test', {"app" => "awesomeapp", "config" => {FOO: ' bar\emu bat zebra '}})
-      subject.should_receive(:sh).with("heroku config:add FOO=#{Shellwords.escape(' bar\emu bat zebra ')} --app awesomeapp")
+      @heroku_client.should_receive(:add_config_vars).with('awesomeapp', {:FOO => 'bar', :DOG => 'emu'})
       subject.push_config
     end
     it "pushes the options hash" do
-      subject.should_receive(:sh).with("heroku config:add RACK_ENV=magic --app awesomeapp")
+      @heroku_client.should_receive(:add_config_vars).with('awesomeapp', {:RACK_ENV => 'magic'})
       subject.push_config(RACK_ENV: 'magic')
     end
   end

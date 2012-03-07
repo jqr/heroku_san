@@ -6,7 +6,7 @@ describe HerokuSan::Project do
     heroku_san = HerokuSan::Project.new("/u/should/never/get/here")
     heroku_san.all.should == []
   end
-  
+    
   context "using the example config file" do
     let(:heroku_config_file) { File.join(SPEC_ROOT, "fixtures", "example.yml") }
     let(:template_config_file) { 
@@ -14,10 +14,9 @@ describe HerokuSan::Project do
       (File.respond_to? :realpath) ? File.realpath(path) : path
     }
     let(:heroku_san) { HerokuSan::Project.new(heroku_config_file) }
-    
-    it "#all" do
-      heroku_san.all.should =~ %w[production staging demo]
-    end
+    subject { heroku_san }
+        
+    its(:all) { should =~ %w[production staging demo] }
     
     context "using the heroku_san format" do
       let(:heroku_san) { HerokuSan::Project.new(File.join(SPEC_ROOT, "fixtures", "old_format.yml")) }

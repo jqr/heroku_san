@@ -8,6 +8,10 @@ module HerokuSan
       @options = options
     end
     
+    def heroku
+      Heroku::Auth.client
+    end
+
     def app
       @options['app'] or raise MissingApp, "#{name}: is missing the app: configuration value. I don't know what to access on Heroku."
     end
@@ -17,7 +21,7 @@ module HerokuSan
     end
     
     def stack
-      @options['stack'] ||= %x"heroku stack --app #{app}".split("\n").select { |b| b =~ /^\* / }.first.gsub(/^\* /, '')
+      @options['stack'] ||= heroku.list_stacks(app).detect{|stack| stack['current']}['name']
     end
     
     def tag
@@ -42,26 +46,29 @@ module HerokuSan
     end
     
     def migrate
-      run 'rake', 'db:migrate'
-      sh_heroku "restart"
+      heroku.rake(app, 'db:migrate') << heroku.restart(app)
     end
 
     def maintenance(action = nil)
       if block_given?
-        sh_heroku "maintenance:on"
+        heroku.maintenance(app, :on)
         begin
           yield
         ensure
-          sh_heroku "maintenance:off"
+          heroku.maintenance(app, :off)
         end
       else
         raise ArgumentError, "Action #{action.inspect} must be one of (:on, :off)", caller if ![:on, :off].include?(action)
-        sh_heroku "maintenance:#{action}"
+        heroku.maintenance(app, action)
       end
     end
     
     def create
-      sh "heroku apps:create #{app}" + (@options['stack'] ? " --stack #{@options['stack']}" : '')
+      if @options['stack']
+        heroku.create(app, {:stack => @options['stack']})
+      else
+        heroku.create(app)
+      end
     end
 
     def sharing_add(email)
@@ -73,16 +80,15 @@ module HerokuSan
     end
   
     def long_config
-      sh_heroku 'config --long'
+      heroku.config_vars(app)
     end
     
-    def push_config(options = {})
-      vars = (options == {} ? config : options).map {|var,value| "#{var}=#{Shellwords.escape(value)}"}.join(' ')
-      sh_heroku "config:add #{vars}"
+    def push_config(options = nil)
+      heroku.add_config_vars(app, options || config)
     end
 
     def restart
-      sh_heroku 'restart'
+      heroku.restart(app)
     end
   
     def logs(tail = false)

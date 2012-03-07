@@ -118,7 +118,7 @@ namespace :heroku do
     task :list do
       each_heroku_app do |stage|
         puts "#{stage.name}:"
-        stage.long_config
+        puts y(stage.long_config)
       end
     end
 
@@ -126,9 +126,7 @@ namespace :heroku do
       desc "Lists local config variables without setting them"
       task :local do
         each_heroku_app do |stage|
-          (stage.config).each do |var, value|
-            puts "#{stage.name} #{var}: '#{value}'"
-          end
+          puts y(stage.config)
         end
       end
     end
