@@ -46,7 +46,11 @@ module HerokuSan
     end
     
     def migrate
-      heroku.rake(app, 'db:migrate') << heroku.restart(app)
+      rake('db:migrate') + restart
+    end
+    
+    def rake(*args)
+      heroku.rake app, args.join(' ')
     end
 
     def maintenance(action = nil)
@@ -88,7 +92,7 @@ module HerokuSan
     end
 
     def restart
-      heroku.restart(app)
+      heroku.ps_restart(app)
     end
   
     def logs(tail = false)

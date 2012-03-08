@@ -20,7 +20,7 @@ namespace :heroku do
   desc "Creates the Heroku app"
   task :create do
     each_heroku_app do |stage|
-      stage.create
+      puts stage.create
     end
   end
 
@@ -82,7 +82,7 @@ namespace :heroku do
   desc 'Add config:vars to each application.'
   task :config do
     each_heroku_app do |stage|
-      stage.push_config
+      puts stage.push_config
     end
   end
 
@@ -109,7 +109,7 @@ namespace :heroku do
         puts command
         config = Hash[`#{command}`.scan(/^(.+?)\s*=>\s*(.+)$/)]
         if config['RACK_ENV'] != stage.name
-          stage.push_config RACK_ENV: stage.name
+          puts stage.push_config RACK_ENV: stage.name
         end
       end
     end
@@ -135,7 +135,7 @@ namespace :heroku do
   desc 'Runs a rake task remotely'
   task :rake, [:task] do |t, args|
     each_heroku_app do |stage|
-      stage.run 'rake', args.task
+      puts stage.rake args.task
     end
   end
 
@@ -165,14 +165,14 @@ namespace :heroku do
   desc "Enable maintenance mode"
   task :maintenance_on do
     each_heroku_app do |stage|
-      stage.maintenance :on
+      puts stage.maintenance :on
     end
   end
 
   desc "Disable maintenance mode"
   task :maintenance_off do
     each_heroku_app do |stage|
-      stage.maintenance :off
+      puts stage.maintenance :off
     end
   end
 

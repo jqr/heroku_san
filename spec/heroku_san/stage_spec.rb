@@ -87,7 +87,7 @@ describe HerokuSan::Stage do
   describe "#migrate" do
     it "runs rake db:migrate" do
       @heroku_client.should_receive(:rake).with('awesomeapp', 'db:migrate').and_return "output:"
-      @heroku_client.should_receive(:restart).with('awesomeapp').and_return "restarted"
+      @heroku_client.should_receive(:ps_restart).with('awesomeapp').and_return "restarted"
       subject.migrate.should == "output:restarted"
     end
   end
@@ -162,7 +162,7 @@ describe HerokuSan::Stage do
 
   describe "#restart" do
     it "restarts an app" do
-      @heroku_client.should_receive(:restart).with('awesomeapp').and_return "restarted"
+      @heroku_client.should_receive(:ps_restart).with('awesomeapp').and_return "restarted"
       subject.restart.should == 'restarted'
     end
   end

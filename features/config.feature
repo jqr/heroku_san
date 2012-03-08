@@ -28,7 +28,7 @@ Feature: Command Line
     And  the output should contain "staging is shorthand for the Heroku app awesomeapp-staging"
     And  the output should contain "demo is shorthand for the Heroku app awesomeapp-demo"
 
-  Scenario: Config file still accepts the heroku_san format
+  Scenario: Config file still accepts the old heroku_san format
     Given a file named "config/heroku.yml" with:
       """
       apps:
