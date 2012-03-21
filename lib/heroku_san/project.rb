@@ -101,6 +101,7 @@ module HerokuSan
     
       # make sure each app has a 'config' section & merge w/extra
       app_settings.keys.each do |name|
+        app_settings[name] ||= {}
         app_settings[name]['config'] ||= {}
         app_settings[name]['config'].merge!(extra_config[name]) if extra_config[name]
       end  

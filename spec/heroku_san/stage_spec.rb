@@ -86,9 +86,10 @@ describe HerokuSan::Stage do
 
   describe "#migrate" do
     it "runs rake db:migrate" do
-      @heroku_client.should_receive(:rake).with('awesomeapp', 'db:migrate').and_return "output:"
+      subject.should_receive(:rake).with('db:migrate').and_return 'output:'
+      # @heroku_client.should_receive(:rake).with('awesomeapp', 'db:migrate').and_return "output:"
       @heroku_client.should_receive(:ps_restart).with('awesomeapp').and_return "restarted"
-      subject.migrate.should == "output:restarted"
+      subject.migrate.should == "restarted"
     end
   end
   
@@ -137,6 +138,11 @@ describe HerokuSan::Stage do
       @heroku_client.should_receive(:create).with('awesomeapp')
       subject.create
     end
+    it "sends a nil app name if none is given (Heroku will generate one)" do
+      subject = HerokuSan::Stage.new('production', {"app" => nil})
+      @heroku_client.should_receive(:create).with(nil).and_return('warm-ocean-9218')
+      subject.create.should == 'warm-ocean-9218'
+    end
   end
   
   describe "#sharing_add" do
@@ -181,11 +187,11 @@ describe HerokuSan::Stage do
   describe "#push_config" do
     it "updates the configuration settings on Heroku" do
       subject = HerokuSan::Stage.new('test', {"app" => "awesomeapp", "config" => {FOO: 'bar', DOG: 'emu'}}) 
-      @heroku_client.should_receive(:add_config_vars).with('awesomeapp', {:FOO => 'bar', :DOG => 'emu'})
+      @heroku_client.should_receive(:add_config_vars).with('awesomeapp', {:FOO => 'bar', :DOG => 'emu'}).and_return("{}")
       subject.push_config
     end
     it "pushes the options hash" do
-      @heroku_client.should_receive(:add_config_vars).with('awesomeapp', {:RACK_ENV => 'magic'})
+      @heroku_client.should_receive(:add_config_vars).with('awesomeapp', {:RACK_ENV => 'magic'}).and_return("{}")
       subject.push_config(RACK_ENV: 'magic')
     end
   end

@@ -20,7 +20,7 @@ namespace :heroku do
   desc "Creates the Heroku app"
   task :create do
     each_heroku_app do |stage|
-      puts stage.create
+      puts "#{stage.name}: Created #{stage.create}"
     end
   end
 
@@ -82,7 +82,7 @@ namespace :heroku do
   desc 'Add config:vars to each application.'
   task :config do
     each_heroku_app do |stage|
-      puts stage.push_config
+      puts y(stage.push_config)
     end
   end
 
@@ -159,20 +159,23 @@ namespace :heroku do
   task :maintenance do
     each_heroku_app do |stage|
       stage.maintenance :on
+      puts "#{stage.name}: Maintenance mode enabled."
     end
   end
 
   desc "Enable maintenance mode"
   task :maintenance_on do
     each_heroku_app do |stage|
-      puts stage.maintenance :on
+      stage.maintenance :on
+      puts "#{stage.name}: Maintenance mode enabled."
     end
   end
 
   desc "Disable maintenance mode"
   task :maintenance_off do
     each_heroku_app do |stage|
-      puts stage.maintenance :off
+      stage.maintenance :off
+      puts "#{stage.name}: Maintenance mode disabled."
     end
   end
 
@@ -225,6 +228,7 @@ namespace :heroku do
   task :restart do
     each_heroku_app do |stage|
       stage.restart
+      puts "#{stage.name}: Restarted."
     end
   end
 

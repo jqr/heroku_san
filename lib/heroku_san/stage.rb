@@ -1,3 +1,6 @@
+require 'heroku'
+require 'json'
+
 module HerokuSan
   class Stage
     attr_reader :name
@@ -46,11 +49,13 @@ module HerokuSan
     end
     
     def migrate
-      rake('db:migrate') + restart
+      rake('db:migrate')
+      restart
     end
     
     def rake(*args)
-      heroku.rake app, args.join(' ')
+      run 'rake', args.join(' ')
+      # heroku.rake app, args.join(' ')
     end
 
     def maintenance(action = nil)
@@ -69,9 +74,9 @@ module HerokuSan
     
     def create # DEPREC?
       if @options['stack']
-        heroku.create(app, {:stack => @options['stack']})
+        heroku.create(@options['app'], {:stack => @options['stack']})
       else
-        heroku.create(app)
+        heroku.create(@options['app'])
       end
     end
 
@@ -88,7 +93,7 @@ module HerokuSan
     end
     
     def push_config(options = nil)
-      heroku.add_config_vars(app, options || config)
+      JSON.parse(heroku.add_config_vars(app, options || config))
     end
 
     def restart
