@@ -12,6 +12,6 @@ Before do
 end
   
 Before('@slow_process') do
-  @aruba_timeout_seconds = 60  
+  @aruba_timeout_seconds = 180 
   # @aruba_io_wait_seconds = 15
 end
