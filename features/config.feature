@@ -6,6 +6,7 @@ Feature: Command Line
     And I overwrite "Gemfile" with:
       """
       source :rubygems
+      gem 'rails'
       gem 'heroku_san', :path => '../../../.'
       """
 

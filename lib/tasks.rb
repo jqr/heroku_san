@@ -126,6 +126,7 @@ namespace :heroku do
       desc "Lists local config variables without setting them"
       task :local do
         each_heroku_app do |stage|
+          puts "#{stage.name}:"
           puts y(stage.config)
         end
       end

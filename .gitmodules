@@ -1,3 +1,0 @@
-[submodule "features/data/test-config"]
-	path = features/data/test-config
-	url = git://github.com/rahearn/test-credentials.git
