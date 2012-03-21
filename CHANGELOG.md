@@ -1,5 +1,10 @@
 # Change log (curated)
 
+## v2.1.1
+  * Bug fixes
+  * Changed most Stage methods to call Heroku::Client methods instead of shelling out
+  * Finished integration tests
+
 ## v2.1.0
 
   * Documentation update
