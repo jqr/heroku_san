@@ -112,8 +112,8 @@ describe HerokuSan::Stage do
     
     context "with a block" do
       it "wraps it in a maitenance mode" do
-        reactor = mock("Reactor"); reactor.should_receive(:scram).with(:now).ordered
         @heroku_client.should_receive(:maintenance).with('awesomeapp', :on).ordered
+        reactor = mock("Reactor"); reactor.should_receive(:scram).with(:now).ordered
         @heroku_client.should_receive(:maintenance).with('awesomeapp', :off).ordered
         subject.maintenance do reactor.scram(:now) end
       end
