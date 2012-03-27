@@ -1,7 +1,7 @@
 = Heroku San
 Helpful rake tasks for Heroku.
 
-{<img src="https://secure.travis-ci.org/kmayer/heroku_san.png?branch=master" alt="Build Status" />}[http://travis-ci.org/kmayer/heroku_san]
+{<img src="https://secure.travis-ci.org/fastestforward/heroku_san.png?branch=master" alt="Build Status" />}[http://travis-ci.org/fastestforward/heroku_san]
 
 == Install
 
