@@ -109,7 +109,7 @@ namespace :heroku do
         puts command
         config = Hash[`#{command}`.scan(/^(.+?)\s*=>\s*(.+)$/)]
         if config['RACK_ENV'] != stage.name
-          puts stage.push_config RACK_ENV: stage.name
+          puts stage.push_config 'RACK_ENV' => stage.name
         end
       end
     end
