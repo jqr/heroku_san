@@ -3,7 +3,7 @@ require 'heroku/client'
 
 describe HerokuSan::Stage do
   include Git
-  subject { HerokuSan::Stage.new('production', {"app" => "awesomeapp", "stack" => "bamboo-ree-1.8.7"})}
+  subject { HerokuSan::Stage.new('production', {"app" => "awesomeapp", "stack" => "bamboo-ree-1.8.7", "addons" => ["one", "two"]})}
   STOCK_CONFIG = {"BUNDLE_WITHOUT"=>"development:test", "LANG"=>"en_US.UTF-8", "RACK_ENV"=>"production"}
   before do
     Heroku::Auth.stub(:api_key) { 'API_KEY' }
@@ -14,7 +14,8 @@ describe HerokuSan::Stage do
       {"stack" => "cedar", 
        "app"   => "awesomeapp-demo", 
        "tag"   => "demo/*", 
-       "config"=> {"BUNDLE_WITHOUT"=>"development:test"}
+       "config"=> {"BUNDLE_WITHOUT"=>"development:test"},
+       "addons"=> ['one:addon', 'two:addons'],
       })}
 
     its(:name)   { should == 'production' }
@@ -23,6 +24,7 @@ describe HerokuSan::Stage do
     its(:tag)    { should == "demo/*" }
     its(:config) { should == {"BUNDLE_WITHOUT"=>"development:test"} }
     its(:repo)   { should == 'git@heroku.com:awesomeapp-demo.git' }
+    its(:addons) { should == ['one:addon', 'two:addons'] }
   end
   
   describe "#app" do
@@ -46,6 +48,26 @@ describe HerokuSan::Stage do
     it "returns the stack name from the config if it is set there" do
       subject = HerokuSan::Stage.new('production', {"app" => "awesomeapp", "stack" => "cedar"})
       subject.stack.should == 'cedar'
+    end
+  end
+
+  describe '#addons' do
+    subject { HerokuSan::Stage.new('production', {'addons' => addons}) }
+    context 'default' do
+      let(:addons) { nil }
+      its(:addons) { should == [] }
+    end
+    context 'nested' do
+      # This is for when you do:
+      # default_addons: &default_addons
+      #   - a
+      #   - b
+      # env:
+      #   addons:
+      #   - *default_addons
+      #   - other
+      let(:addons) { [ ['a', 'b'], 'other' ] }
+      its(:addons) { should == [ 'a', 'b', 'other' ] }
     end
   end
 
@@ -221,6 +243,37 @@ describe HerokuSan::Stage do
       subject.should_receive(:git_revision).with(subject.repo) {nil}
       subject.should_receive(:git_named_rev).with(nil) {''}
       subject.revision.should == ''
+    end
+  end
+
+  describe '#install_addons' do
+    it "installs the addons" do
+      subject.stub(:get_installed_addons => [])
+      subject.should_receive(:sh_heroku).with("addons:add one")
+      subject.should_receive(:sh_heroku).with("addons:add two")
+      subject.install_addons
+    end
+    it "tries to install all addons" do
+      subject.stub(:get_installed_addons => [])
+      subject.should_receive(:sh_heroku).with("addons:add one").and_raise('boom 1')
+      subject.should_receive(:sh_heroku).with("addons:add two").and_raise('boom 2')
+      subject.install_addons
+    end
+    it "only installs missing addons" do
+      subject.stub(:get_installed_addons => [{'name' => 'one'}])
+      subject.should_receive(:sh_heroku).with("addons:add two")
+      subject.install_addons
+    end
+    it "returns a list of installed addons" do
+      addons = [{'name' => 'one'}, {'name' => 'two'}]
+      subject.stub(:get_installed_addons => addons)
+      subject.install_addons.should == addons
+    end
+    it "re-queries addons after installing them" do
+      subject.should_receive(:get_installed_addons).and_return([])
+      subject.stub(:sh_heroku => nil)
+      subject.should_receive(:get_installed_addons).and_return("FINAL RESULT")
+      subject.install_addons.should == "FINAL RESULT"
     end
   end
 end
