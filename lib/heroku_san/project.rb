@@ -43,7 +43,7 @@ module HerokuSan
       if !@apps.empty?
         @apps
       else
-        case all.size
+        @apps = case all.size
         when 1
           $stdout.puts "Defaulting to #{all.first.inspect} since only one app is defined"
           all

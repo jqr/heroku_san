@@ -26,7 +26,7 @@ describe HerokuSan::Project do
       end
     end
         
-    describe "Adding an app to the deploy list" do
+    describe "#apps adds an app to the deploy list" do
       it "appends known shorthands to apps" do
         heroku_san.apps.should == []
         heroku_san << 'production'
@@ -41,25 +41,29 @@ describe HerokuSan::Project do
         heroku_san << heroku_san.all
         heroku_san.apps.should == heroku_san.all
       end
-    end
     
-    describe "#apps extra default behaviors" do
-      specify "on a git branch that matches an app name" do
-        heroku_san.should_receive(:git_active_branch) { "staging" }
-        $stdout.should_receive(:puts).with("Defaulting to 'staging' as it matches the current branch")
-        heroku_san.apps.should == %w[staging]
-      end
+      describe "#apps extra default behaviors" do
+        specify "on a git branch that matches an app name" do
+          heroku_san.should_receive(:git_active_branch) { "staging" }
+          $stdout.should_receive(:puts).with("Defaulting to 'staging' as it matches the current branch")
+          expect {
+            heroku_san.apps.should == %w[staging]
+          }.to change{heroku_san.instance_variable_get('@apps')}.from([]).to(%w[staging])
+        end
       
-      specify "on a git branch that doesn't matches an app name" do
-        heroku_san.should_receive(:git_active_branch) { "master" }
-        heroku_san.apps.should == %w[]
-      end
+        specify "on a git branch that doesn't matches an app name" do
+          heroku_san.should_receive(:git_active_branch) { "master" }
+          heroku_san.apps.should == %w[]
+        end
       
-      context "but only a single configured app" do        
-        let(:heroku_san) { HerokuSan::Project.new(File.join(SPEC_ROOT, "fixtures", "single_app.yml")) }
-        it "returns the app" do
-          $stdout.should_receive(:puts).with('Defaulting to "production" since only one app is defined')
-          heroku_san.apps.should == %w[production]
+        context "but only a single configured app" do        
+          let(:heroku_san) { HerokuSan::Project.new(File.join(SPEC_ROOT, "fixtures", "single_app.yml")) }
+          it "returns the app" do
+            $stdout.should_receive(:puts).with('Defaulting to "production" since only one app is defined')
+            expect {
+              heroku_san.apps.should == %w[production]
+            }.to change{heroku_san.instance_variable_get('@apps')}.from([]).to(%w[production])
+          end
         end
       end
     end

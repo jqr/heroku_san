@@ -1,7 +1,7 @@
 World(Aruba::Api)
 
 Given /^I have a new Rails project$/ do
-  cmd = "rails new heroku_san_test --quiet --force --database=postgresql --skip-bundle --skip-javascript --skip-test-unit --skip-sprockets" #" --template #{template}"
+  cmd = "rails new heroku_san_test --quiet --force --database=postgresql --skip-bundle --skip-javascript --skip-test-unit --skip-sprockets"
   run_simple unescape(cmd)
 end
 
