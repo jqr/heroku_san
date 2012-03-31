@@ -283,18 +283,26 @@ namespace :heroku do
   end
 end
 
-task :all => 'heroku:stage:all'
-task :deploy => 'heroku:deploy'
-task 'deploy:force' => 'heroku:deploy:force'
-task :before_deploy => 'heroku:deploy:before'
-task :after_deploy => 'heroku:deploy:after'
-task :console => 'heroku:console'
-task :restart => 'heroku:restart'
-task :migrate => 'heroku:db:migrate'
-task :logs => 'heroku:logs:default'
-task 'logs:tail' => 'heroku:logs:tail'
-task 'heroku:rack_env' => 'heroku:config:rack_env'
-task :shell => 'heroku:shell'
+
+def alias_task(hash)
+  hash.each_pair do |(new_task, original_task)|
+    the_task = Rake.application[original_task]
+    task new_task, {the_task.arg_names => [original_task]}
+  end
+end
+
+alias_task :all => 'heroku:stage:all'
+alias_task :deploy => 'heroku:deploy'
+alias_task 'deploy:force' => 'heroku:deploy:force'
+alias_task :before_deploy => 'heroku:deploy:before'
+alias_task :after_deploy => 'heroku:deploy:after'
+alias_task :console => 'heroku:console'
+alias_task :restart => 'heroku:restart'
+alias_task :migrate => 'heroku:db:migrate'
+alias_task :logs => 'heroku:logs:default'
+alias_task 'logs:tail' => 'heroku:logs:tail'
+alias_task 'heroku:rack_env' => 'heroku:config:rack_env'
+alias_task :shell => 'heroku:shell'
 
 def each_heroku_app(&block)
   @heroku_san.each_app(&block)

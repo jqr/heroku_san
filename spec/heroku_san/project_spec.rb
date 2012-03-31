@@ -2,7 +2,7 @@ require 'spec_helper'
 require 'tmpdir'
 
 describe HerokuSan::Project do
-  specify ".new with a missing config file" do
+  specify ".new with a missing config file has no stages" do
     heroku_san = HerokuSan::Project.new("/u/should/never/get/here")
     heroku_san.all.should == []
   end
@@ -42,7 +42,7 @@ describe HerokuSan::Project do
         heroku_san.apps.should == heroku_san.all
       end
     
-      describe "#apps extra default behaviors" do
+      describe "extra (default) behaviors" do
         specify "on a git branch that matches an app name" do
           heroku_san.should_receive(:git_active_branch) { "staging" }
           $stdout.should_receive(:puts).with("Defaulting to 'staging' as it matches the current branch")
@@ -56,7 +56,7 @@ describe HerokuSan::Project do
           heroku_san.apps.should == %w[]
         end
       
-        context "but only a single configured app" do        
+        context "with only a single configured app" do        
           let(:heroku_san) { HerokuSan::Project.new(File.join(SPEC_ROOT, "fixtures", "single_app.yml")) }
           it "returns the app" do
             $stdout.should_receive(:puts).with('Defaulting to "production" since only one app is defined')
