@@ -76,7 +76,7 @@ module HerokuSan
     end
     
     def create # DEPREC?
-      params = @options.select{|k,v| %w[app stack].include? k}.stringify_keys
+      params = Hash[@options.select{|k,v| %w[app stack].include? k}].stringify_keys
       params['name'] = params.delete('app')
       response = heroku.post_app(params)
       response.body['name']
