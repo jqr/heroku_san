@@ -4,10 +4,9 @@ require 'heroku/client'
 describe HerokuSan::Stage do
   include Git
   subject { HerokuSan::Stage.new('production', {"app" => "awesomeapp", "stack" => "bamboo-ree-1.8.7"})}
-
+  STOCK_CONFIG = {"BUNDLE_WITHOUT"=>"development:test", "LANG"=>"en_US.UTF-8", "RACK_ENV"=>"production"}
   before do
-    @heroku_client = mock(Heroku::Client)
-    Heroku::Auth.stub(:client).and_return(@heroku_client)
+    Heroku::Auth.stub(:api_key) { 'API_KEY' }
   end
 
   context "initializes" do
@@ -39,9 +38,9 @@ describe HerokuSan::Stage do
   describe "#stack" do
     it "returns the name of the stack from Heroku" do
       subject = HerokuSan::Stage.new('production', {"app" => "awesomeapp"})
-      @heroku_client.should_receive(:list_stacks).with('awesomeapp').
-        and_return { [{'name' => 'other'}, {'name' => 'the-one', 'current' => true}] }
-      subject.stack.should == 'the-one'
+      with_app(subject, 'name' => 'awesomeapp') do |app_data|
+        subject.stack.should == 'bamboo-mri-1.9.2'
+      end
     end
   
     it "returns the stack name from the config if it is set there" do
@@ -86,22 +85,24 @@ describe HerokuSan::Stage do
 
   describe "#migrate" do
     it "runs rake db:migrate" do
-      subject.should_receive(:rake).with('db:migrate').and_return 'output:'
-      # @heroku_client.should_receive(:rake).with('awesomeapp', 'db:migrate').and_return "output:"
-      @heroku_client.should_receive(:ps_restart).with('awesomeapp').and_return "restarted"
-      subject.migrate.should == "restarted"
+      with_app(subject, 'name' => subject.app) do |app_data|
+        subject.should_receive(:rake).with('db:migrate').and_return 'output:'
+        subject.migrate.should == "restarted"
+      end
     end
   end
   
   describe "#maintenance" do
     it ":on" do
-      @heroku_client.should_receive(:maintenance).with('awesomeapp', :on) {'on'}
-      subject.maintenance(:on).should == 'on'
+      with_app(subject, 'name' => subject.app )do |app_data|
+        subject.maintenance(:on).status.should == 200
+      end
     end
 
     it ":off" do
-      @heroku_client.should_receive(:maintenance).with('awesomeapp', :off) {'off'}
-      subject.maintenance(:off).should == 'off'
+      with_app(subject, 'name' => subject.app) do |app_data|
+        subject.maintenance(:off).status.should.should == 200
+      end
     end
     
     it "otherwise raises an ArgumentError" do
@@ -112,36 +113,45 @@ describe HerokuSan::Stage do
     
     context "with a block" do
       it "wraps it in a maitenance mode" do
-        @heroku_client.should_receive(:maintenance).with('awesomeapp', :on).ordered
-        reactor = mock("Reactor"); reactor.should_receive(:scram).with(:now).ordered
-        @heroku_client.should_receive(:maintenance).with('awesomeapp', :off).ordered
-        subject.maintenance do reactor.scram(:now) end
+        with_app(subject, 'name' => subject.app) do |app_data|
+          subject.heroku.should_receive(:post_app_maintenance).with(subject.app, '1').ordered
+          reactor = mock("Reactor"); reactor.should_receive(:scram).with(:now).ordered
+          subject.heroku.should_receive(:post_app_maintenance).with(subject.app, '0').ordered
+          
+          subject.maintenance {reactor.scram(:now)} 
+        end
       end
       it "ensures that maintenance mode is turned off" do
-        @heroku_client.should_receive(:maintenance).with('awesomeapp', :on).ordered
-        reactor = mock("Reactor"); reactor.should_receive(:scram).with(:now).and_raise(RuntimeError)
-        @heroku_client.should_receive(:maintenance).with('awesomeapp', :off).ordered
-        expect {
-          subject.maintenance do reactor.scram(:now) end        
-        }.to raise_error
+        with_app(subject, 'name' => subject.app) do |app_data|
+          subject.heroku.should_receive(:post_app_maintenance).with(subject.app, '1').ordered
+          reactor = mock("Reactor"); reactor.should_receive(:scram).and_raise(RuntimeError)
+          subject.heroku.should_receive(:post_app_maintenance).with(subject.app, '0').ordered
+          
+          expect do subject.maintenance {reactor.scram(:now)} end.to raise_error
+        end
       end
     end
   end
 
   describe "#create" do
+    after do
+      subject.heroku.delete_app(@app)
+    end
+    it "uses the provided name" do
+      (@app = subject.create).should == 'awesomeapp'
+    end
     it "creates an app on heroku" do
-      @heroku_client.should_receive(:create).with('awesomeapp', {:stack => 'bamboo-ree-1.8.7'})
-      subject.create
+      subject = HerokuSan::Stage.new('production')
+      (@app = subject.create).should =~ /generated-name-\d+/
     end
     it "uses the default stack if none is given" do
-      subject = HerokuSan::Stage.new('production', {"app" => "awesomeapp"})
-      @heroku_client.should_receive(:create).with('awesomeapp')
-      subject.create
-    end
-    it "sends a nil app name if none is given (Heroku will generate one)" do
-      subject = HerokuSan::Stage.new('production', {"app" => nil})
-      @heroku_client.should_receive(:create).with(nil).and_return('warm-ocean-9218')
-      subject.create.should == 'warm-ocean-9218'
+      subject = HerokuSan::Stage.new('production')
+      (@app = subject.create).should =~ /generated-name-\d+/
+      subject.heroku.get_stack(@app).body.detect{|stack| stack['current']}['name'].should == 'bamboo-mri-1.9.2'
+    end    
+    it "uses the stack from the config" do
+      (@app = subject.create).should == 'awesomeapp'
+      subject.heroku.get_stack(@app).body.detect{|stack| stack['current']}['name'].should == 'bamboo-ree-1.8.7'
     end
   end
   
@@ -161,15 +171,17 @@ describe HerokuSan::Stage do
 
   describe "#long_config" do
     it "returns the remote config" do
-      @heroku_client.should_receive(:config_vars).with('awesomeapp') { {'A' => 'one', 'B' => 'two'} }
-      subject.long_config.should == { 'A' => 'one', 'B' => 'two' }
+      with_app(subject, 'name' => subject.app) do |app_data|
+        subject.long_config.should == STOCK_CONFIG
+      end
     end
   end
 
   describe "#restart" do
     it "restarts an app" do
-      @heroku_client.should_receive(:ps_restart).with('awesomeapp').and_return "restarted"
-      subject.restart.should == 'restarted'
+      with_app(subject, 'name' => subject.app) do |app_data|
+        subject.restart.should == 'restarted'
+      end
     end
   end
   
@@ -186,13 +198,16 @@ describe HerokuSan::Stage do
 
   describe "#push_config" do
     it "updates the configuration settings on Heroku" do
-      subject = HerokuSan::Stage.new('test', {"app" => "awesomeapp", "config" => {:FOO => 'bar', :DOG => 'emu'}}) 
-      @heroku_client.should_receive(:add_config_vars).with('awesomeapp', {:FOO => 'bar', :DOG => 'emu'}).and_return("{}")
-      subject.push_config
+      subject = HerokuSan::Stage.new('test', {"app" => "awesomeapp", "config" => {:FOO => 'bar', :DOG => 'emu'}})
+      with_app(subject, 'name' => subject.app) do |app_data|
+        subject.push_config.should == STOCK_CONFIG.merge('FOO' => 'bar', 'DOG' => 'emu')
+      end
     end
     it "pushes the options hash" do
-      @heroku_client.should_receive(:add_config_vars).with('awesomeapp', {:RACK_ENV => 'magic'}).and_return("{}")
-      subject.push_config(:RACK_ENV => 'magic')
+      subject = HerokuSan::Stage.new('test', {"app" => "awesomeapp", "config" => {:FOO => 'bar', :DOG => 'emu'}})
+      with_app(subject, 'name' => subject.app) do |app_data|
+        subject.push_config(:RACK_ENV => 'magic').should == STOCK_CONFIG.merge('RACK_ENV' => 'magic')
+      end
     end
   end
 

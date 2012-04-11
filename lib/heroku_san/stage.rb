@@ -1,5 +1,8 @@
 require 'heroku'
+require 'heroku/api'
 require 'json'
+
+MOCK = false unless defined?(MOCK)
 
 module HerokuSan
   class Stage
@@ -12,7 +15,7 @@ module HerokuSan
     end
     
     def heroku
-      Heroku::Auth.client
+      @heroku ||= Heroku::API.new(:api_key => ENV['HEROKU_API_KEY'] || Heroku::Auth.api_key, :mock => MOCK)
     end
 
     def app
@@ -24,7 +27,7 @@ module HerokuSan
     end
     
     def stack
-      @options['stack'] ||= heroku.list_stacks(app).detect{|stack| stack['current']}['name']
+      @options['stack'] ||= heroku.get_stack(app).body.detect{|stack| stack['current']}['name']
     end
     
     def tag
@@ -60,24 +63,23 @@ module HerokuSan
 
     def maintenance(action = nil)
       if block_given?
-        heroku.maintenance(app, :on)
+        heroku.post_app_maintenance(app, '1')
         begin
           yield
         ensure
-          heroku.maintenance(app, :off)
+          heroku.post_app_maintenance(app, '0')
         end
       else
         raise ArgumentError, "Action #{action.inspect} must be one of (:on, :off)", caller if ![:on, :off].include?(action)
-        heroku.maintenance(app, action)
+        heroku.post_app_maintenance(app, {:on => '1', :off => '0'}[action])
       end
     end
     
     def create # DEPREC?
-      if @options['stack']
-        heroku.create(@options['app'], {:stack => @options['stack']})
-      else
-        heroku.create(@options['app'])
-      end
+      params = @options.select{|k,v| %w[app stack].include? k}.stringify_keys
+      params['name'] = params.delete('app')
+      response = heroku.post_app(params)
+      response.body['name']
     end
 
     def sharing_add(email) # DEPREC?
@@ -89,15 +91,16 @@ module HerokuSan
     end
   
     def long_config
-      heroku.config_vars(app)
+      heroku.get_config_vars(app).body
     end
     
     def push_config(options = nil)
-      JSON.parse(heroku.add_config_vars(app, options || config))
+      params = (options || config).stringify_keys
+      heroku.put_config_vars(app, params).body
     end
 
     def restart
-      heroku.ps_restart(app)
+      "restarted" if heroku.post_ps_restart(app).body == 'ok'
     end
   
     def logs(tail = false)
@@ -113,5 +116,21 @@ module HerokuSan
     def sh_heroku(command)
       sh "heroku #{command} --app #{app}"
     end
+  end
+end
+
+# from ActiveSupport
+class Hash
+  # Return a new hash with all keys converted to strings.
+  def stringify_keys
+    dup.stringify_keys!
+  end
+
+  # Destructively convert all keys to strings.
+  def stringify_keys!
+    keys.each do |key|
+      self[key.to_s] = delete(key)
+    end
+    self
   end
 end

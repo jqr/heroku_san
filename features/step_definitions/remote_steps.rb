@@ -112,7 +112,7 @@ end
 
 When /^I deploy my project$/ do
   run_simple 'git init .'
-  run_simple 'rails generate scaffold droids'
+  run_simple 'rails generate scaffold droid'
   append_to_file 'app/views/droids/index.html.erb', %Q{\n<div><code><%= ENV['DROIDS'] -%></code></div>\n}
   run_simple 'git add .'
   run_simple 'git commit -m "Initial commit"'
