@@ -1,6 +1,21 @@
 # Change log (curated)
 
+## v2.1.4
+
+  * Use heroku-api for client calls instead heroku gem
+
+## v2.1.3
+
+  * Bug fixes
+
+## v2.1.2
+
+  * Bug fixes
+  * 1.8.7 backward compatibility
+  * Refactoring
+
 ## v2.1.1
+
   * Bug fixes
   * Changed most Stage methods to call Heroku::Client methods instead of shelling out
   * Finished integration tests
