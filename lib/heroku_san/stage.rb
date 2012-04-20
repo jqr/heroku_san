@@ -37,6 +37,10 @@ module HerokuSan
     def config
       @options['config'] ||= {}
     end
+
+    def addons
+      (@options['addons'] ||= []).flatten
+    end
     
     def run(command, args = nil)
       if stack =~ /cedar/
@@ -97,6 +101,23 @@ module HerokuSan
     def push_config(options = nil)
       params = (options || config).stringify_keys
       heroku.put_config_vars(app, params).body
+    end
+
+    def get_installed_addons
+      heroku.get_addons(app).body
+    end
+
+    def install_addons
+      return if addons.empty?
+      installed_addons = get_installed_addons
+      addons_to_install = addons - installed_addons.map{|a|a['name']}
+      if addons_to_install.any?
+        (addons - installed_addons.map{|a|a['name']}).each do |addon|
+          sh_heroku "addons:add #{addon}" rescue nil
+        end
+        installed_addons = get_installed_addons
+      end
+      installed_addons
     end
 
     def restart
