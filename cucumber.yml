@@ -1,2 +1,2 @@
-default: --tags ~@slow_process
-remote: --tags @slow_process
+default: --tags ~@slow_process --no-source
+remote: --tags @slow_process --no-source
