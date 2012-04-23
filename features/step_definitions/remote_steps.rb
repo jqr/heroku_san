@@ -131,6 +131,25 @@ When /^I list all apps on Heroku$/ do
   assert_partial_output "@ #{sha} master", output
 end
 
+When /^I install an addon$/ do
+  # Install the campfire addon.
+  overwrite_file 'config/heroku.yml', <<END_CONFIG
+test_app:
+  app: #{@app}
+  addons:
+    - deployhooks:campfire
+END_CONFIG
+  run_simple 'rake test_app heroku:addons'
+  output = stdout_from 'rake test_app heroku:addons'
+  puts output
+  # The output should show the default addons...
+  assert_partial_output "logging:basic", output
+  # ... and the new one ...
+  assert_partial_output "deployhooks:campfire", output
+  # ... with a note about needing to configure it.
+  assert_partial_output "https://api.heroku.com/myapps/#{@app}/addons/deployhooks:campfire", output
+end
+
 Then /^heroku_san is green$/ do
   run_simple "heroku apps:destroy #{@app} --confirm #{@app}"
 end

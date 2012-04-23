@@ -86,6 +86,26 @@ namespace :heroku do
     end
   end
 
+  desc 'Install addons for the application.'
+  task :addons do
+    each_heroku_app do |stage|
+      addons = stage.install_addons
+      puts y("#{stage.name} addons" => addons.map { |addon| addon['configured'] ? addon['name'] : { addon['name'] => "Configure at https://api.heroku.com/myapps/#{stage.app}/addons/#{addon['name']}" } })
+    end
+  end
+
+  namespace :addons do
+    desc 'List configured addons, without installing them'
+    task :local do
+      each_heroku_app do |stage|
+        puts "Configured addons for #{stage.name}:"
+        stage.addons.each do |addon|
+          puts "  - #{addon}"
+        end
+      end
+    end
+  end
+
   desc 'Creates an example configuration file'
   task :create_config do
     filename = %Q{#{@heroku_san.config_file.to_s}}

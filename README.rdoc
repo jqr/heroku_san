@@ -69,6 +69,8 @@ Need to add remotes for each app?
 
 A full list of tasks provided:
 
+  rake heroku:addons                # Install addons for the application.
+  rake heroku:addons:local          # List configured addons, without installing them
   rake heroku:apps                  # Lists configured apps
   rake heroku:apps:local            # Lists configured apps without hitting heroku
   rake heroku:config                # Add config:vars to each application.

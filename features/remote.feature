@@ -27,4 +27,5 @@ Feature: heroku_san can control a project on Heroku
     And I turn maintenance off
     And I restart my project
     And I list all apps on Heroku
+    And I install an addon
     Then heroku_san is green
