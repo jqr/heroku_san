@@ -135,6 +135,7 @@ Issue Tracker:: http://github.com/fastestforward/heroku_san/issues
 * Mat Schaffer (mat@schaffer.me)
 * Jonathan Hironaga (jonathan.hironaga@halogennetwork.com)
 * Ken Mayer (ken@bitwrangler.com)
+* Matt Burke (https://github.com/spraints)
 
 == License
 

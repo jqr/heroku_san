@@ -1,5 +1,9 @@
 # Change log (curated)
 
+## v2.2.1
+
+  * New feature: addons from [Matt Burke](https://github.com/spraints)
+
 ## v2.1.4
 
   * Use heroku-api for client calls instead heroku gem
