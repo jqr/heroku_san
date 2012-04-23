@@ -141,9 +141,8 @@ test_app:
 END_CONFIG
   run_simple 'rake test_app heroku:addons'
   output = stdout_from 'rake test_app heroku:addons'
-  puts output
   # The output should show the default addons...
-  assert_partial_output "logging:basic", output
+  assert_partial_output "shared-database:5mb", output
   # ... and the new one ...
   assert_partial_output "deployhooks:campfire", output
   # ... with a note about needing to configure it.
