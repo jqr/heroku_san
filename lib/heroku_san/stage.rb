@@ -103,19 +103,14 @@ module HerokuSan
       heroku.put_config_vars(app, params).body
     end
 
-    def get_installed_addons
+    def installed_addons
       heroku.get_addons(app).body
     end
 
     def install_addons
-      return if addons.empty?
-      installed_addons = get_installed_addons
       addons_to_install = addons - installed_addons.map{|a|a['name']}
-      if addons_to_install.any?
-        (addons - installed_addons.map{|a|a['name']}).each do |addon|
-          sh_heroku "addons:add #{addon}" rescue nil
-        end
-        installed_addons = get_installed_addons
+      addons_to_install.each do |addon|
+        heroku.post_addon(app, addon)
       end
       installed_addons
     end
