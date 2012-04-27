@@ -15,6 +15,7 @@ module HerokuSan
     end
 
     def create_config
+      #$stderr.puts "[WARNING] This task will be deprecated in version 3.0, use 'rails generate heroku_san' instead"
       template = File.expand_path(File.join(File.dirname(__FILE__), '../templates', 'heroku.example.yml'))
       if File.exists?(@config_file)
         false

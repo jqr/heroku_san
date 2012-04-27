@@ -108,6 +108,7 @@ namespace :heroku do
 
   desc 'Creates an example configuration file'
   task :create_config do
+    # FIXME: sh "rails generate heroku_san"
     filename = %Q{#{@heroku_san.config_file.to_s}}
     if @heroku_san.create_config
       puts "Copied example config to #{filename.inspect}"

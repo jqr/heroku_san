@@ -14,7 +14,7 @@ Feature: Extended config
     And I run `git add .`
     And I run `git commit -m 'Initial commit'`
     And I cd to ".."
-    Given I run `rails new heroku_san_test -O`
+    Given I run `rails new heroku_san_test --quiet --force --database=postgresql --skip-bundle --skip-javascript --skip-test-unit --skip-sprockets`
     And I cd to "heroku_san_test"
     And I overwrite "Gemfile" with:
       """
