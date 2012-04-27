@@ -72,3 +72,11 @@ Feature: Command Line
     When I run `rake EDITOR=echo --trace heroku:create_config`
     And the output should match /Copied example config to ".*.config.heroku.yml"/
     And the output should match /^echo .*.config.heroku.yml$/
+
+  Scenario: rails generate heroku_san
+    When I run `rails generate`
+    Then the output should not contain "Could not find generator heroku_san."
+    And the output should contain "HerokuSan:\n  heroku_san"
+    When I run `rails generate heroku_san`
+    Then a file named "config/heroku.yml" should exist
+    And the output should contain "create  config/heroku.yml"
