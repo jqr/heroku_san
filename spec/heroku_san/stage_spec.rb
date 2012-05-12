@@ -83,25 +83,25 @@ describe HerokuSan::Stage do
     end
   end
 
-  describe "#deploy" do
+  describe "#push" do
     it "deploys to heroku" do
       subject.should_receive(:git_push).with(git_parsed_tag(subject.tag), subject.repo, [])
-      subject.deploy
+      subject.push
     end
     
     it "deploys with a custom sha" do
       subject.should_receive(:git_push).with('deadbeef', subject.repo, [])
-      subject.deploy('deadbeef')
+      subject.push('deadbeef')
     end
     
     it "deploys with --force" do
       subject.should_receive(:git_push).with(git_parsed_tag(subject.tag), subject.repo, %w[--force])
-      subject.deploy(nil, :force)
+      subject.push(nil, :force)
     end
     
     it "deploys with a custom sha & --force" do
       subject.should_receive(:git_push).with('deadbeef', subject.repo, %w[--force])
-      subject.deploy('deadbeef', :force)
+      subject.push('deadbeef', :force)
     end
   end
 
@@ -110,6 +110,25 @@ describe HerokuSan::Stage do
       with_app(subject, 'name' => subject.app) do |app_data|
         subject.should_receive(:rake).with('db:migrate').and_return 'output:'
         subject.migrate.should == "restarted"
+      end
+    end
+  end
+  
+  describe "#deploy" do
+    context "using the default strategy" do
+      it "(rails) pushes & migrates" do
+        HerokuSan::Deploy::Rails.any_instance.should_receive(:deploy)
+        subject.deploy
+      end
+    end
+    context "using a custom strategy" do
+      class TestDeployStrategy < HerokuSan::Deploy::Base
+        def deploy; end
+      end
+      subject = HerokuSan::Stage.new('test', {"app" => "awesomeapp", "deploy" => TestDeployStrategy})
+      it "(custom) calls deploy" do
+        TestDeployStrategy.any_instance.should_receive(:deploy)
+        subject.deploy
       end
     end
   end

@@ -1,10 +1,9 @@
-require 'heroku_san'
 require 'rails'
 
 module HerokuSan
   class Railtie < Rails::Railtie
     rake_tasks do
-      load 'tasks.rb'
+      load 'heroku_san/tasks.rb'
     end
   end
 end

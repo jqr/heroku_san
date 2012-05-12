@@ -1,21 +1,23 @@
+require 'active_support/core_ext/string/inflections'
+require 'active_support/core_ext/hash/slice'
+
 module HerokuSan
   class Project
     attr_reader :config_file
   
     include Git
     
-    def initialize(config_file)
+    def initialize(config_file, options = {})
       @apps = []
       @config_file = config_file
       @app_settings = {}
       config = parse(@config_file)
       config.each do |stage, settings|
-        @app_settings[stage] = HerokuSan::Stage.new(stage, settings)
+        @app_settings[stage] = HerokuSan::Stage.new(stage, settings.merge(options.slice(:deploy)))
       end
     end
 
     def create_config
-      #$stderr.puts "[WARNING] This task will be deprecated in version 3.0, use 'rails generate heroku_san' instead"
       template = File.expand_path(File.join(File.dirname(__FILE__), '../templates', 'heroku.example.yml'))
       if File.exists?(@config_file)
         false

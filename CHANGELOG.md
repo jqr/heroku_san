@@ -30,17 +30,17 @@
   * Push `REVISION` to Heroku example
   * Bug fixes
 
-### New tasks
+  ### New tasks
 
-  * rake logs:tail
-  * rake shell
-  * All HerokuSan tasks inside heroku: namespace, with aliases in the global namespace
+    * rake logs:tail
+    * rake shell
+    * All HerokuSan tasks inside heroku: namespace, with aliases in the global namespace
 
-### New methods
+  ### New methods
 
-  * `Stage#deploy`
-  * `Stage#maintenance` can now take a block, and ensures that maintenance mode is off afterwards.
-  * `Stage#push_config`
+    * `Stage#deploy`
+    * `Stage#maintenance` can now take a block, and ensures that maintenance mode is off afterwards.
+    * `Stage#push_config`
   
 ## v2.0.0
 

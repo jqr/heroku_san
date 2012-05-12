@@ -1,6 +1,8 @@
 require 'heroku'
 require 'heroku/api'
 require 'json'
+require 'active_support/core_ext/object/blank'
+require 'active_support/core_ext/hash/keys'
 
 MOCK = false unless defined?(MOCK)
 
@@ -10,8 +12,11 @@ module HerokuSan
     include Git
     
     def initialize(stage, options = {})
+      default_options = {
+        'deploy' => HerokuSan::Deploy::Rails
+      }
       @name = stage
-      @options = options
+      @options = default_options.merge(options.stringify_keys)
     end
     
     def heroku
@@ -50,7 +55,7 @@ module HerokuSan
       end
     end
     
-    def deploy(sha = nil, force = false)
+    def push(sha = nil, force = false)
       sha ||= git_parsed_tag(tag)
       git_push(sha, repo, force ? %w[--force] : [])
     end
@@ -58,6 +63,11 @@ module HerokuSan
     def migrate
       rake('db:migrate')
       restart
+    end
+    
+    def deploy(args = {})
+      strategy = @options['deploy'].new(self, args)
+      strategy.deploy
     end
     
     def rake(*args)
@@ -79,7 +89,7 @@ module HerokuSan
       end
     end
     
-    def create # DEPREC?
+    def create
       params = Hash[@options.select{|k,v| %w[app stack].include? k}].stringify_keys
       params['name'] = params.delete('app')
       response = heroku.post_app(params)
@@ -132,21 +142,5 @@ module HerokuSan
     def sh_heroku(command)
       sh "heroku #{command} --app #{app}"
     end
-  end
-end
-
-# from ActiveSupport
-class Hash
-  # Return a new hash with all keys converted to strings.
-  def stringify_keys
-    dup.stringify_keys!
-  end
-
-  # Destructively convert all keys to strings.
-  def stringify_keys!
-    keys.each do |key|
-      self[key.to_s] = delete(key)
-    end
-    self
   end
 end

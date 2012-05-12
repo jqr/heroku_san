@@ -1,12 +1,18 @@
+require 'heroku_san'
 require 'git'
 include Git
 
-@heroku_san = HerokuSan::Project.new(Rails.root.join('config', 'heroku.yml'))
+if defined?(Rails)
+  HerokuSan.project ||= HerokuSan::Project.new(
+                          Rails.root.join("config", "heroku.yml"),
+                          :deploy => HerokuSan::Deploy::Rails
+                          )
+end
 
-@heroku_san.all.each do |stage|
+HerokuSan.project.all.each do |stage|
   desc "Select #{stage} Heroku app for later commands"
   task "heroku:stage:#{stage}" do
-    @heroku_san << stage
+    HerokuSan.project << stage
   end
   task stage => "heroku:stage:#{stage}"
 end
@@ -14,7 +20,7 @@ end
 namespace :heroku do
   desc 'Select all Heroku apps for later command'
   task 'stage:all' do
-    @heroku_san << @heroku_san.all
+    HerokuSan.project << HerokuSan.project.all
   end
   
   desc "Creates the Heroku app"
@@ -109,8 +115,8 @@ namespace :heroku do
   desc 'Creates an example configuration file'
   task :create_config do
     # FIXME: sh "rails generate heroku_san"
-    filename = %Q{#{@heroku_san.config_file.to_s}}
-    if @heroku_san.create_config
+    filename = %Q{#{HerokuSan.project.config_file.to_s}}
+    if HerokuSan.project.create_config
       puts "Copied example config to #{filename.inspect}"
       if ENV['EDITOR'] && ENV['EDITOR'] != ''
         sh "#{ENV['EDITOR']} #{filename}"
@@ -164,7 +170,7 @@ namespace :heroku do
   desc "Pushes the given commit (default: HEAD)"
   task :push, :commit do |t, args|
     each_heroku_app do |stage|
-      stage.deploy(args[:commit])
+      stage.push(args[:commit])
     end
   end
 
@@ -172,7 +178,7 @@ namespace :heroku do
     desc "Force-pushes the given commit (default: HEAD)"
     task :force, :commit do |t, args|
       each_heroku_app do |stage|
-        stage.deploy(args[:commit], :force)
+        stage.push(args[:commit], :force)
       end
     end
   end
@@ -204,8 +210,7 @@ namespace :heroku do
   desc "Pushes the given commit, migrates and restarts (default: HEAD)"
   task :deploy, [:commit] => [:before_deploy] do |t, args|
     each_heroku_app do |stage|
-      stage.deploy(args[:commit])
-      stage.migrate
+      stage.deploy(args)
     end
     Rake::Task[:after_deploy].execute
   end
@@ -214,8 +219,7 @@ namespace :heroku do
     desc "Force-pushes the given commit, migrates and restarts (default: HEAD)"
     task :force, [:commit] => [:before_deploy] do |t, args|
       each_heroku_app do |stage|
-        stage.deploy(args[:commit], :force)
-        stage.migrate
+        stage.deploy(args.merge(:force => true))
       end
       Rake::Task[:after_deploy].execute
     end
@@ -326,7 +330,7 @@ alias_task 'heroku:rack_env' => 'heroku:config:rack_env'
 alias_task :shell => 'heroku:shell'
 
 def each_heroku_app(&block)
-  @heroku_san.each_app(&block)
+  HerokuSan.project.each_app(&block)
   puts
 rescue HerokuSan::NoApps => e
   puts "You must first specify at least one Heroku app:

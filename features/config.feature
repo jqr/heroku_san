@@ -20,7 +20,8 @@ Feature: Command Line
       demo: 
         app: awesomeapp-demo
       development:
-        app:
+        app: 
+      
       """
 
     When I run `rake --trace heroku:apps:local`
