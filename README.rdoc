@@ -7,7 +7,7 @@ Helpful rake tasks for Heroku.
 
 === Rails 3
 
-Add this to your Gemfile:
+Add this to your `Gemfile`:
 
   group :development do
     gem 'heroku_san'
@@ -15,11 +15,11 @@ Add this to your Gemfile:
 
 === Rails 2
 
-To install add the following to config/environment.rb:
+To install add the following to `config/environment.rb`:
 
   config.gem 'heroku_san'
 
-Rake tasks are not automatically loaded from gems, so you’ll need to add the following to your Rakefile:
+Rake tasks are not automatically loaded from gems, so you’ll need to add the following to your `Rakefile`:
 
   begin
     require 'heroku_san/tasks'
@@ -27,17 +27,39 @@ Rake tasks are not automatically loaded from gems, so you’ll need to add the f
     STDERR.puts "Run `rake gems:install` to install heroku_san"
   end
 
+=== Sinatra
+
+Update your `Gemfile`:
+
+  group :development do
+    gem 'heroku_san'
+  end
+
+Update your `Rakefile`:
+
+  require "bundler/setup"
+  require "heroku_san"
+  config_file = File.join(File.expand_path(File.dirname(__FILE__)), 'config', 'heroku.yml')
+  HerokuSan.project = HerokuSan::Project.new(config_file, :deploy => HerokuSan::Deploy::Sinatra)
+  load "heroku_san/tasks.rb"
+
 == Configure
 
-In config/heroku.yml you will need to add the Heroku apps that you would like to attach to this project. You can generate this file by running:
+In `config/heroku.yml` you will need to add the Heroku apps that you would like to attach to this project. You can generate this file by running:
+
+=== Rails 3
+
+  rails generate heroku_san
+  
+=== Everything else
 
   rake heroku:create_config
 
-Customize the file for your project. If this is a fresh project, heroku_san can create all the applications for you, and set each one's RACK_ENV.
+Customize the file for your project. If this is a fresh project, `heroku_san` can create all the applications for you, and set each one's RACK_ENV.
 
   rake all heroku:create heroku:rack_env
 
-Configure your Heroku apps according to config/heroku.yml by running:
+Configure your Heroku apps according to `config/heroku.yml` by running:
 
   rake all heroku:config
 
@@ -55,7 +77,7 @@ is additive, you can easily select which servers to run a command on.
   rake demo staging restart
 
 A special rake task 'all' is created that causes any further commands to
-execute on all heroku apps.
+execute on all Heroku apps.
 
 Manipulate collaborators on all this project's apps (prompts for email
 address):
@@ -139,4 +161,4 @@ Issue Tracker:: http://github.com/fastestforward/heroku_san/issues
 
 == License
 
-License:: Copyright (c) 2009-2012 Elijah Miller <mailto:elijah.miller@gmail.com>, released under the MIT license.
+License:: Copyright (c) 2008-2012 Elijah Miller <mailto:elijah.miller@gmail.com>, released under the MIT license.
