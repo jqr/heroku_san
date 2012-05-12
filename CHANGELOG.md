@@ -1,5 +1,16 @@
 # Change log (curated)
 
+## v3.0.0
+
+  * New feature: support for Rack apps (e.g. Sinatra)
+  * Removes dependency on Rails
+  * New feature: deploy strategy class for customizing the :deploy target
+  * `Stage#deploy` calls strategy (breaks v2 API)
+  * `Stage#push` pushes to Heroku
+  * If you have a Rails app, you don't have to do anything; the gem will
+    automatically configure itself to use the Rails deploy strategy. See
+    the README for how to configure you Rack app's `Rakefile`
+  
 ## v2.2.1
 
   * New feature: addons from [Matt Burke](https://github.com/spraints)
