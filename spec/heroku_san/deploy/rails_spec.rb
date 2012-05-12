@@ -8,7 +8,8 @@ module HerokuSan
       it "calls migrate" do
         subject = described_class.new(stage, {})
         stage.should_receive(:push) # "mock" super
-        stage.should_receive(:migrate).with()
+        stage.should_receive(:rake).with('db:migrate')
+        stage.should_receive(:restart)
         subject.deploy
       end
     end

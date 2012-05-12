@@ -22,11 +22,6 @@ describe HerokuSan::Project do
     end
   end
   
-  describe "#project_type" do
-    it "detects a Rails project"
-    it "detects a Sinatra project"
-  end    
-  
   describe "#apps constructs the deploy list" do
     it "appends known shorthands to apps" do
       heroku_san.apps.should == []
@@ -120,11 +115,7 @@ describe HerokuSan::Project do
         FileUtils.should_not_receive(:cp)
         heroku_san.create_config.should be_false
       end
-    end
-    
-    context "rails project" do
-      it "invokes a rails generator"
-    end
+    end    
   end    
 
 end
