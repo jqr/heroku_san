@@ -58,7 +58,6 @@ end
 When /^I run bundle install$/ do
   use_clean_gemset 'heroku_san_test'
   run_simple 'bundle install --quiet'
-  write_file '.rvmrc', "rvm use default@heroku_san_test\n"
 end
 
 Then /^rake reports that the heroku: tasks are available$/ do
