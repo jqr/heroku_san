@@ -52,7 +52,6 @@ When /^I add heroku_san to the Gemfile$/ do
       gem 'heroku_san', :path => '../../../.'
     end
 EOT
-
 end
 
 When /^I run bundle install$/ do
@@ -92,6 +91,7 @@ When /^I create my project on Heroku$/ do
     ---
     test_app:
       app: #{@app}
+
 EOT
 end
 
@@ -119,6 +119,7 @@ When /^I configure my project$/ do
       app: #{@app}
       config:
         DROIDS: marvin
+
 EOT
   cmd = 'bundle exec rake test_app heroku:config'
   run_simple cmd
@@ -187,6 +188,7 @@ When /^I install an addon$/ do
       app: #{@app}
       addons:
         - deployhooks:campfire
+
 END_CONFIG
 
   run_simple 'bundle exec rake test_app heroku:addons'
@@ -212,7 +214,7 @@ end
 def overwrite_simple_config_file
   overwrite_file 'config/heroku.yml', <<EOT.strip_heredoc
     ---
-    test_app:
+    test_app: 
+    
 EOT
-
 end
