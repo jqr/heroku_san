@@ -207,7 +207,7 @@ namespace :heroku do
     end
   end
 
-  desc "Pushes the given commit, migrates and restarts (default: HEAD)"
+  desc "Deploys the app (default: HEAD)"
   task :deploy, [:commit] => [:before_deploy] do |t, args|
     each_heroku_app do |stage|
       stage.deploy(args)
@@ -216,7 +216,7 @@ namespace :heroku do
   end
 
   namespace :deploy do
-    desc "Force-pushes the given commit, migrates and restarts (default: HEAD)"
+    desc "Deploys the app with push --force (default: HEAD)"
     task :force, [:commit] => [:before_deploy] do |t, args|
       each_heroku_app do |stage|
         stage.deploy(args.merge(:force => true))
