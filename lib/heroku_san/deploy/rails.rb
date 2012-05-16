@@ -2,11 +2,12 @@ require 'heroku_san/deploy/base'
 
 module HerokuSan
   module Deploy
-    class Rails < HerokuSan::Deploy::Base
+    class Rails < Base
       def deploy
-        $stderr.puts super
-        $stderr.puts @stage.rake('db:migrate')
-        $stderr.puts @stage.restart
+        # TODO: Add announce/logger
+        super
+        @stage.rake('db:migrate')
+        @stage.restart
       end
     end
   end

@@ -13,11 +13,13 @@ module HerokuSan
       @app_settings = {}
       config = parse(@config_file)
       config.each do |stage, settings|
+        # TODO: Push this eval later (j.i.t.)
         @app_settings[stage] = HerokuSan::Stage.new(stage, settings.merge(options.slice(:deploy)))
       end
     end
 
     def create_config
+      # TODO: Convert true/false returns to success/exception
       template = File.expand_path(File.join(File.dirname(__FILE__), '../templates', 'heroku.example.yml'))
       if File.exists?(@config_file)
         false
@@ -43,11 +45,10 @@ module HerokuSan
     end
   
     def apps
-      if !@apps.empty?
+      if @apps.present?
         @apps
       else
-        @apps = case all.size
-        when 1
+        @apps = if all.size == 1
           $stdout.puts "Defaulting to #{all.first.inspect} since only one app is defined"
           all
         else

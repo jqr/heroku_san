@@ -2,10 +2,10 @@ require 'heroku_san/deploy/base'
 
 module HerokuSan
   module Deploy
-    class Sinatra < Base
+    class Noop < Base
       def deploy
-        super
-      end
+        # do nothing
+      end        
     end
   end
 end
