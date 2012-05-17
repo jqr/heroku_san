@@ -1,5 +1,9 @@
 # Change log (curated)
 
+## v3.0.1
+
+  * Fix deploy:force bugs (#84 & #85)
+
 ## v3.0.0
 
   * New feature: support for Rack apps (e.g. Sinatra)
