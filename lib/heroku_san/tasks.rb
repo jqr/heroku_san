@@ -170,7 +170,7 @@ namespace :heroku do
   desc "Pushes the given commit (default: HEAD)"
   task :push, :commit do |t, args|
     each_heroku_app do |stage|
-      stage.push(args[:commit])
+      stage.push(args.commit)
     end
   end
 
@@ -178,7 +178,7 @@ namespace :heroku do
     desc "Force-pushes the given commit (default: HEAD)"
     task :force, :commit do |t, args|
       each_heroku_app do |stage|
-        stage.push(args[:commit], :force)
+        stage.push(args.commit, :force)
       end
     end
   end
@@ -210,7 +210,7 @@ namespace :heroku do
   desc "Deploys the app (default: HEAD)"
   task :deploy, [:commit] => [:before_deploy] do |t, args|
     each_heroku_app do |stage|
-      stage.deploy(args)
+      stage.deploy(args.commit)
     end
     Rake::Task[:after_deploy].execute
   end
@@ -219,7 +219,7 @@ namespace :heroku do
     desc "Deploys the app with push --force (default: HEAD)"
     task :force, [:commit] => [:before_deploy] do |t, args|
       each_heroku_app do |stage|
-        stage.deploy(args.merge(:force => true))
+        stage.deploy(args.commit, :force)
       end
       Rake::Task[:after_deploy].execute
     end

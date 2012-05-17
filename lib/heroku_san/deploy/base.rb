@@ -1,13 +1,14 @@
 module HerokuSan
   module Deploy
     class Base
-      def initialize(stage, args = {})
+      def initialize(stage, commit = nil, force = nil)
         @stage = stage
-        @args = args
+        @commit = commit
+        @force = force
       end
       
       def deploy
-        @stage.push(@args[:commit], @args[:force])
+        @stage.push(@commit, @force)
       end        
     end
   end

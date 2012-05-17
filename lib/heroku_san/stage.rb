@@ -65,8 +65,8 @@ module HerokuSan
       restart
     end
     
-    def deploy(args = {})
-      strategy = @options['deploy'].new(self, args)
+    def deploy(commit = nil, force = nil)
+      strategy = @options['deploy'].new(self, commit, force)
       strategy.deploy
     end
     
