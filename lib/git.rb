@@ -16,7 +16,7 @@ module Git
     commit ||= "HEAD"
     options ||= []
     begin
-      sh "git push #{repo} #{options.join(' ')}"
+      sh "git push #{repo} #{options.join(' ')} master"
     end
   end
   
