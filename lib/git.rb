@@ -16,10 +16,7 @@ module Git
     commit ||= "HEAD"
     options ||= []
     begin
-      sh "git update-ref refs/heroku_san/deploy #{commit}"
-      sh "git push #{repo} #{options.join(' ')} refs/heroku_san/deploy:refs/heads/master"
-    ensure
-      sh "git update-ref -d refs/heroku_san/deploy"
+      sh "git push #{repo} #{options.join(' ')} master"
     end
   end
   

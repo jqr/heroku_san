@@ -27,6 +27,7 @@ Gem::Specification.new do |s|
       s.add_runtime_dependency(%q<heroku-api>, ['>= 0.1.2'])
       s.add_runtime_dependency(%q<rake>)
       s.add_runtime_dependency('activesupport')
+      s.add_runtime_dependency('parallel')
       s.add_development_dependency(%q<aruba>)
       s.add_development_dependency(%q<cucumber>)
       s.add_development_dependency(%q<rake>)

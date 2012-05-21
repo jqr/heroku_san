@@ -6,6 +6,7 @@
 #   stack: <Heroku stack, optional>
 #   tag: <git tag pattern, optional>
 #   repo: <git repository, optional>
+#   account: <gem heroku_accounts user account, optional>
 #   config:
 #     - <Heroku config:var name>: <Heroku config:var value>
 #

@@ -17,6 +17,7 @@ module HerokuSan
       }
       @name = stage
       @options = default_options.merge(options.stringify_keys)
+      @account = @options['account'] || "com"
     end
     
     def heroku
@@ -28,7 +29,7 @@ module HerokuSan
     end
     
     def repo
-      @options['repo'] ||= "git@heroku.com:#{app}.git"
+      @options['repo'] ||= "git@heroku.#{@account}:#{app}.git"
     end
     
     def stack
@@ -93,6 +94,13 @@ module HerokuSan
       params = Hash[@options.select{|k,v| %w[app stack].include? k}].stringify_keys
       params['name'] = params.delete('app')
       response = heroku.post_app(params)
+      response.body['name']
+    end
+
+    def remove
+      params = Hash[@options.select{|k,v| %w[app].include? k}].stringify_keys
+      params['name'] = params.delete('app')
+      response = heroku.delete_app(params['name'])
       response.body['name']
     end
 
