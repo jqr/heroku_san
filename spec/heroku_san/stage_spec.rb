@@ -268,24 +268,24 @@ describe HerokuSan::Stage do
   describe "#installed_addons" do
     it "returns the list of installed addons" do
       with_app(subject, 'name' => subject.app) do |app_data|
-        subject.installed_addons.map{|a|a['name']}.should =~ %w[logging:basic shared-database:5mb]
+        subject.installed_addons.map{|a|a['name']}.should include *%w[shared-database:5mb]
       end
     end
   end
 
   describe '#install_addons' do
-    subject { HerokuSan::Stage.new('production', {"app" => "awesomeapp", "stack" => "bamboo-ree-1.8.7", "addons" => ["custom_domains:basic", "ssl:piggyback"]})}
+    subject { HerokuSan::Stage.new('production', {"app" => "awesomeapp", "stack" => "bamboo-ree-1.8.7", "addons" => %w[custom_domains:basic ssl:piggyback]})}
 
     it "installs the addons" do
       with_app(subject, 'name' => subject.app) do |app_data| 
-        subject.install_addons.map{|a| a['name']}.should =~ %w[logging:basic shared-database:5mb custom_domains:basic ssl:piggyback]
+        subject.install_addons.map{|a| a['name']}.should include *%w[custom_domains:basic ssl:piggyback]
         subject.installed_addons.map{|a|a['name']}.should =~ subject.install_addons.map{|a| a['name']}
       end
     end
     it "only installs missing addons" do
-      subject = HerokuSan::Stage.new('production', {"app" => "awesomeapp", "stack" => "bamboo-ree-1.8.7", "addons" => ["logging:basic","custom_domains:basic", "ssl:piggyback"]})
+      subject = HerokuSan::Stage.new('production', {"app" => "awesomeapp", "stack" => "bamboo-ree-1.8.7", "addons" => %w[shared-database:5mb custom_domains:basic ssl:piggyback]})
       with_app(subject, 'name' => subject.app) do |app_data| 
-        subject.install_addons.map{|a| a['name']}.should =~ %w[logging:basic shared-database:5mb custom_domains:basic ssl:piggyback]
+        subject.install_addons.map{|a| a['name']}.should include *%w[shared-database:5mb custom_domains:basic ssl:piggyback]
       end
     end
   end

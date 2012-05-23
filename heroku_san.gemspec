@@ -31,6 +31,7 @@ Gem::Specification.new do |s|
       s.add_development_dependency(%q<cucumber>)
       s.add_development_dependency(%q<rake>)
       s.add_development_dependency(%q<bundler>, ['~> 1.1  '])
+      s.add_development_dependency('git-smart')
     else
       s.add_dependency(%q<rails>, ['>= 2'])
       s.add_dependency(%q<heroku>, ['>= 2'])
