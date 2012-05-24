@@ -121,10 +121,12 @@ A full list of tasks provided:
   rake heroku:share                 # Adds a collaborator (asks for email)
   rake heroku:unshare               # Removes a collaborator (asks for email)
   rake heroku:stage:all             # Select all Heroku apps for later command
+  rake heroku:stage:parallel        # Select all Heroku apps for later command (multi process)
 
 Frequently used tasks are aliased into the global namespace:
 
   task :all           => 'heroku:stage:all'
+  task :parallel      => 'heroku:stage:parallel'
   task :deploy        => 'heroku:deploy'
   task 'deploy:force' => 'heroku:deploy:force'
   task :before_deploy => 'heroku:deploy:before'
@@ -158,6 +160,7 @@ Issue Tracker:: http://github.com/fastestforward/heroku_san/issues
 * Jonathan Hironaga (jonathan.hironaga@halogennetwork.com)
 * Ken Mayer (ken@bitwrangler.com)
 * Matt Burke (https://github.com/spraints)
+* Masahiro Saito (https://github.com/camelmasa)
 
 == License
 
