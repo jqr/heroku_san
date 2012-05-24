@@ -23,6 +23,12 @@ namespace :heroku do
     HerokuSan.project << HerokuSan.project.all
   end
 
+  desc 'Select all Heroku apps for later command (multi process)'
+  task 'stage:parallel' do
+    HerokuSan.project.parallel
+    HerokuSan.project << HerokuSan.project.all
+  end
+
   desc "Creates the Heroku app"
   task :create do
     each_heroku_app do |stage|
@@ -317,6 +323,7 @@ def alias_task(hash)
 end
 
 alias_task :all => 'heroku:stage:all'
+alias_task :parallel => 'heroku:stage:parallel'
 alias_task :deploy => 'heroku:deploy'
 alias_task 'deploy:force' => 'heroku:deploy:force'
 alias_task :before_deploy => 'heroku:deploy:before'

@@ -1,5 +1,6 @@
 require 'active_support/core_ext/string/inflections'
 require 'active_support/core_ext/hash/slice'
+require 'parallel'
 
 module HerokuSan
   class Project
@@ -62,11 +63,21 @@ module HerokuSan
   
     def each_app
       raise NoApps if apps.empty?
-      apps.each do |stage|
-        yield(self[stage])
+      if @parallel
+        Parallel.map(apps, :in_processes => apps.count){|stage|
+          yield(self[stage])
+        }
+      else
+        apps.each do |stage|
+          yield(self[stage])
+        end
       end
     end
-    
+
+    def parallel
+      @parallel = true
+    end
+
   private
     
     def parse_yaml(config_file)
