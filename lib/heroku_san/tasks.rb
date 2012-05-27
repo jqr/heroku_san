@@ -287,15 +287,7 @@ namespace :heroku do
     desc "Pull database from stage to local dev database"
     task :pull do
       each_heroku_app do |stage|
-        sh "heroku pgbackups:capture --expire --app #{stage.app}"
-        dump = `heroku pgbackups --app #{stage.app}`.split("\n").last.split(" ").first
-        sh "mkdir -p #{Rails.root}/db/dumps"
-        file = "#{Rails.root}/db/dumps/#{dump}.sql.gz"
-        url = `heroku pgbackups:url --app #{stage.app} #{dump}`.chomp
-        sh "wget", url, "-O", file
-        sh "rake db:drop db:create"
-        sh "gunzip -c #{file} | #{Rails.root}/script/dbconsole"
-        sh "rake jobs:clear"
+        sh "heroku db:pull --app #{stage.app} --confirm #{stage.app}"
       end
     end
   end
