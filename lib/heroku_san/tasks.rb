@@ -36,6 +36,13 @@ namespace :heroku do
     end
   end
 
+  desc "Removes the Heroku app"
+  task :remove do
+    each_heroku_app do |stage|
+      puts "#{stage.name}: Removed #{stage.remove}"
+    end
+  end
+
   #desc "Generate the Heroku gems manifest from gem dependencies"
   task :gems => 'gems:base' do
     raise HerokuSan::Deprecated
