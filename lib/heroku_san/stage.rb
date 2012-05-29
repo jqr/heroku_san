@@ -96,6 +96,13 @@ module HerokuSan
       response.body['name']
     end
 
+    def remove
+      params = Hash[@options.select{|k,v| %w[app stack].include? k}].stringify_keys
+      params['name'] = params.delete('app')
+      response = heroku.delete_app(params['name'])
+      response.body['name']
+    end
+
     def sharing_add(email) # DEPREC?
       sh_heroku "sharing:add #{email.chomp}"
     end
