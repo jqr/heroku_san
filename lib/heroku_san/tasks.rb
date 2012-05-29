@@ -101,7 +101,7 @@ namespace :heroku do
   desc 'Add config:vars to each application.'
   task :config do
     each_heroku_app do |stage|
-      puts y(stage.push_config)
+      puts stage.push_config
     end
   end
 
@@ -109,7 +109,7 @@ namespace :heroku do
   task :addons do
     each_heroku_app do |stage|
       addons = stage.install_addons
-      puts y("#{stage.name} addons" => addons.map { |addon| addon['configured'] ? addon['name'] : { addon['name'] => "Configure at https://api.heroku.com/myapps/#{stage.app}/addons/#{addon['name']}" } })
+      puts "#{stage.name} addons" => addons.map { |addon| addon['configured'] ? addon['name'] : { addon['name'] => "Configure at https://api.heroku.com/myapps/#{stage.app}/addons/#{addon['name']}" } }
     end
   end
 
@@ -158,7 +158,7 @@ namespace :heroku do
     task :list do
       each_heroku_app do |stage|
         puts "#{stage.name}:"
-        puts y(stage.long_config)
+        puts stage.long_config
       end
     end
 
@@ -167,7 +167,7 @@ namespace :heroku do
       task :local do
         each_heroku_app do |stage|
           puts "#{stage.name}:"
-          puts y(stage.config)
+          puts stage.config
         end
       end
     end
