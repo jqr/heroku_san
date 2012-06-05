@@ -1,5 +1,9 @@
 # Change log (curated)
 
+## v3.0.2
+
+  * Fix config:list bug (#90)
+
 ## v3.0.1
 
   * Fix deploy:force bugs (#84 & #85)
