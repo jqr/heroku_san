@@ -1,5 +1,9 @@
 # Change log (curated)
 
+## v3.0.3
+
+  * Use Heroku's db:pull instead of PGBackups
+  
 ## v3.0.2
 
   * Fix config:list bug (#90)
