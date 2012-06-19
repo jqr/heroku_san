@@ -22,6 +22,11 @@ staging:
   app: awesomeapp-staging
   config: &default
     BUNDLE_WITHOUT: "development:test"
+  addons:
+    - pgbackups:auto-week
+    - memcache:5mb
+    - logging:basic
+    - scheduler:standard
 
 demo: 
   app: awesomeapp-demo
