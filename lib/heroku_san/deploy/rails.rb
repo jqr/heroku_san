@@ -6,7 +6,7 @@ module HerokuSan
       def deploy
         # TODO: Add announce/logger
         super
-        if Gem.available?('mongoid')
+        if Gem::Specification::find_by_name('mongoid')
           @stage.restart
         else
           @stage.rake('db:migrate')
