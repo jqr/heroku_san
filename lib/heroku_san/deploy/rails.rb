@@ -6,8 +6,12 @@ module HerokuSan
       def deploy
         # TODO: Add announce/logger
         super
-        @stage.rake('db:migrate')
-        @stage.restart
+        if Gem.available?('mongoid')
+          @stage.restart
+        else
+          @stage.rake('db:migrate')
+          @stage.restart
+        end
       end
     end
   end
