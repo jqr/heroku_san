@@ -6,3 +6,5 @@ tmp
 .idea/**
 Gemfile.lock
 *.swp
+.rvmrc
+*.sublime*
