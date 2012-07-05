@@ -1,7 +1,7 @@
 # Heroku San
 Helpful rake tasks for Heroku.
 
-{<img src="https://secure.travis-ci.org/fastestforward/heroku_san.png?branch=master" alt="Build Status" />}[http://travis-ci.org/fastestforward/heroku_san]
+[![Build Status](https://secure.travis-ci.org/fastestforward/heroku_san.png)](http://travis-ci.org/fastestforward/heroku_san)
 
 ## Install
 
@@ -150,7 +150,7 @@ A full list of tasks provided:
 
 Frequently used tasks are aliased into the global namespace:
 
-```
+```ruby
   task :all           => 'heroku:stage:all'
   task :deploy        => 'heroku:deploy'
   task 'deploy:force' => 'heroku:deploy:force'
@@ -165,8 +165,9 @@ Frequently used tasks are aliased into the global namespace:
 
 ## Links
 
-Homepage:: http://github.com/fastestforward/heroku_san
-Issue Tracker:: http://github.com/fastestforward/heroku_san/issues
+Homepage: http://github.com/fastestforward/heroku_san
+
+Issue Tracker: http://github.com/fastestforward/heroku_san/issues
 
 ## Contributors
 
@@ -189,4 +190,4 @@ Issue Tracker:: http://github.com/fastestforward/heroku_san/issues
 
 ## License
 
-License:: Copyright (c) 2008-2012 Elijah Miller <mailto:elijah.miller@gmail.com>, released under the MIT license.
+Copyright (c) 2008-2012 Elijah Miller <mailto:elijah.miller@gmail.com>, released under the MIT license.
