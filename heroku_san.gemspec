@@ -6,7 +6,7 @@ Gem::Specification.new do |s|
   s.version = HerokuSan::VERSION
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
-  
+
   s.authors = ["Elijah Miller", "Glenn Roberts", "Ryan Ahearn", "Ken Mayer"]
   s.description = %q{Manage multiple Heroku instances/apps for a single Rails app using Rake}
   s.email = %q{elijah.miller@gmail.com}
@@ -14,7 +14,7 @@ Gem::Specification.new do |s|
   s.files = `git ls-files`.split("\n")
   s.test_files = `git ls-files -- {test,spec,features}/*`.split("\n")
   s.require_paths = ["lib"]
-  s.extra_rdoc_files = ["README.rdoc"]
+  s.extra_rdoc_files = ["README.md"]
   s.rubygems_version = %q{1.6.1}
   s.summary = %q{A bunch of useful Rake tasks for managing your Heroku apps}
 
