@@ -26,6 +26,7 @@ You can create your own strategies and then configure HerokuSan to use it instea
 
 Amend your `Rakefile`:
 
+```ruby
   require 'heroku_san'
   
   class MyStrategy < HerokuSan::Deploy::Base
@@ -36,11 +37,14 @@ Amend your `Rakefile`:
   end
   
   HerokuSan.project = HerokuSan::Project.new(Rails.root.join("config","heroku.yml"), :deploy => MyStrategy)
+```
+
 
 ## Sinatra (and other Rack based apps)
 
 Amend your `Rakefile`
 
+```ruby
   require 'heroku_san'
   
   class MyStrategy < HerokuSan::Deploy::Base
@@ -54,3 +58,4 @@ Amend your `Rakefile`
   HerokuSan.project = HerokuSan::Project.new(config_file, :deploy => MyStrategy)
   
   load "heroku_san/tasks.rb"
+```
