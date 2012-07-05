@@ -1,5 +1,9 @@
 # Change log (curated)
 
+## v3.0.4
+
+  * Documentation syntax highlighting and formatting.
+
 ## v3.0.3
 
   * Use Heroku's db:pull instead of PGBackups
