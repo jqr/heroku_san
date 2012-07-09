@@ -144,6 +144,7 @@ A full list of tasks provided:
   rake heroku:remotes               # Add git remotes for all apps in this project
   rake heroku:restart               # Restarts remote servers
   rake heroku:share                 # Adds a collaborator (asks for email)
+  rake heroku:shell                 # Opens a bash shell within app
   rake heroku:unshare               # Removes a collaborator (asks for email)
   rake heroku:stage:all             # Select all Heroku apps for later command
 ```
@@ -161,6 +162,7 @@ Frequently used tasks are aliased into the global namespace:
   task :migrate       => 'heroku:db:migrate'
   task :logs          => 'heroku:logs:default'
   task 'logs:tail'    => 'heroku:logs:tail'
+  task 'shell'        => 'heroku:shell'
 ```
 
 ## Links
