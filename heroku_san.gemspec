@@ -22,11 +22,12 @@ Gem::Specification.new do |s|
     s.specification_version = 3
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
-      s.add_development_dependency(%q<rails>, ['>= 2'])
       s.add_runtime_dependency(%q<heroku>, ['>= 2'])
       s.add_runtime_dependency(%q<heroku-api>, ['>= 0.1.2'])
       s.add_runtime_dependency(%q<rake>)
       s.add_runtime_dependency('activesupport')
+      s.add_development_dependency(%q<rails>, ['>= 2'])
+      s.add_development_dependency(%q<rspec>)
       s.add_development_dependency(%q<aruba>)
       s.add_development_dependency(%q<cucumber>)
       s.add_development_dependency(%q<rake>)
