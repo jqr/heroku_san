@@ -11,6 +11,7 @@ Gem::Specification.new do |s|
   s.description = %q{Manage multiple Heroku instances/apps for a single Rails app using Rake}
   s.email = %q{elijah.miller@gmail.com}
   s.homepage = %q{http://github.com/fastestforward/heroku_san}
+  s.license = "MIT"
   s.files = `git ls-files`.split("\n")
   s.test_files = `git ls-files -- {test,spec,features}/*`.split("\n")
   s.require_paths = ["lib"]
