@@ -71,7 +71,7 @@ module HerokuSan
     end
 
     def rake(*args)
-      raise HerokuSan::Deprecated
+      raise HerokuSan::Deprecated.new("use Stage#run instead")
     end
 
     def maintenance(action = nil)
