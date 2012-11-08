@@ -1,4 +1,4 @@
-@announce-cmd @slow_process
+@slow_process @announce-cmd
 Feature: heroku_san can control a project on Heroku
   WARNING: This WILL create apps on Heroku!
   You must login with the heroku cli before starting
@@ -9,8 +9,7 @@ Feature: heroku_san can control a project on Heroku
     Given I have a new Rails project
     When I am in the project directory
     And I add heroku_san to the Gemfile
-    And I run bundle install
-    Then rake reports that the heroku: tasks are available 
+    Then rake reports that the heroku: tasks are available
     
   Scenario: Manipulates a Rails app on Heroku
     Given I have a new Rails project
@@ -20,7 +19,6 @@ Feature: heroku_san can control a project on Heroku
     And I run bundle install
     And I generate a new config file
     And I create my project on Heroku
-    And I list the remote configuration
     And I curl the app home page
     And I configure my project
     And I turn maintenance on
@@ -41,7 +39,6 @@ Feature: heroku_san can control a project on Heroku
     And I run bundle install
     And I create a new config/heroku.yml file
     And I create my project on Heroku
-    And I list the remote configuration
     And I curl the app home page
     And I configure my project
     And I turn maintenance on

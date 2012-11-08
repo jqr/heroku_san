@@ -42,24 +42,12 @@ namespace :heroku do
     end
   end
 
-  desc 'Adds a collaborator (asks for email)'
   task :share do
-    print "Email address of collaborator to add: "
-    $stdout.flush
-    email = $stdin.gets
-    each_heroku_app do |stage|
-      stage.sharing_add email
-    end
+    raise HerokuSan::Deprecated
   end
 
-  desc 'Removes a collaborator (asks for email)'
   task :unshare do
-    print "Email address of collaborator to remove: "
-    $stdout.flush
-    email = $stdin.gets
-    each_heroku_app do |stage|
-      stage.sharing_remove email
-    end
+    raise HerokuSan::Deprecated
   end
 
   desc 'Lists configured apps'
@@ -119,7 +107,6 @@ namespace :heroku do
 
   desc 'Creates an example configuration file'
   task :create_config do
-    # FIXME: sh "rails generate heroku_san"
     filename = %Q{#{HerokuSan.project.config_file.to_s}}
     if HerokuSan.project.create_config
       puts "Copied example config to #{filename.inspect}"
@@ -172,7 +159,7 @@ namespace :heroku do
   desc 'Runs a rake task remotely'
   task :rake, [:task] do |t, args|
     each_heroku_app do |stage|
-      puts stage.rake args.task
+      puts stage.run "rake #{args.task}"
     end
   end
 

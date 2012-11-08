@@ -59,6 +59,7 @@ GEM
       json (>= 1.4.6)
     git-smart (0.1.9)
       colorize
+    godot (0.1.0)
     heroku-api (0.3.5)
       excon (~> 0.16.1)
     hike (1.2.1)
@@ -124,6 +125,7 @@ DEPENDENCIES
   bundler (~> 1.1)
   cucumber
   git-smart
+  godot
   heroku_san!
   rails (>= 2)
   rake

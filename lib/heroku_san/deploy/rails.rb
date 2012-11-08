@@ -6,7 +6,7 @@ module HerokuSan
       def deploy
         # TODO: Add announce/logger
         super
-        @stage.rake('db:migrate')
+        @stage.run('rake db:migrate')
         @stage.restart
       end
     end

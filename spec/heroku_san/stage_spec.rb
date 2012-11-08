@@ -1,13 +1,9 @@
 require 'spec_helper'
-require 'heroku/client'
 
 describe HerokuSan::Stage do
   include Git
-  subject { HerokuSan::Stage.new('production', {"app" => "awesomeapp", "stack" => "bamboo-ree-1.8.7"})}
+  subject { HerokuSan::Stage.new('production', {"app" => "awesomeapp", "stack" => "cedar"})}
   STOCK_CONFIG = {"BUNDLE_WITHOUT"=>"development:test", "LANG"=>"en_US.UTF-8", "RACK_ENV"=>"production"}
-  before do
-    Heroku::Auth.stub(:api_key) { 'API_KEY' }
-  end
 
   context "initializes" do
     subject { HerokuSan::Stage.new('production', 
@@ -73,13 +69,13 @@ describe HerokuSan::Stage do
 
   describe "#run" do
     it "runs commands using the pre-cedar format" do
-      subject.should_receive(:sh).with("heroku run:rake foo bar bleh --app awesomeapp")
-      subject.run 'rake', 'foo bar bleh'
+      subject = HerokuSan::Stage.new('production', {"app" => "awesomeapp", "stack" => "aspen"})
+      subject.should_receive(:system).with("heroku", "run:rake foo bar bleh", "--app", "awesomeapp") { true }
+      subject.run 'rake foo bar bleh'
     end
     it "runs commands using the new cedar format" do
-      subject = HerokuSan::Stage.new('production', {"app" => "awesomeapp", "stack" => "cedar"})
-      subject.should_receive(:sh).with("heroku run worker foo bar bleh --app awesomeapp")
-      subject.run 'worker', 'foo bar bleh'
+      subject.should_receive(:system).with("heroku", "run", "worker foo bar bleh", "--app", "awesomeapp") { true }
+      subject.run 'worker foo bar bleh'
     end
   end
 
@@ -108,7 +104,7 @@ describe HerokuSan::Stage do
   describe "#migrate" do
     it "runs rake db:migrate" do
       with_app(subject, 'name' => subject.app) do |app_data|
-        subject.should_receive(:rake).with('db:migrate').and_return 'output:'
+        subject.should_receive(:run).with('rake db:migrate').and_return 'output:'
         subject.migrate.should == "restarted"
       end
     end
@@ -192,24 +188,10 @@ describe HerokuSan::Stage do
     end    
     it "uses the stack from the config" do
       (@app = subject.create).should == 'awesomeapp'
-      subject.heroku.get_stack(@app).body.detect{|stack| stack['current']}['name'].should == 'bamboo-ree-1.8.7'
+      subject.heroku.get_stack(@app).body.detect{|stack| stack['current']}['name'].should == 'cedar'
     end
   end
   
-  describe "#sharing_add" do
-    it "add collaborators" do
-      subject.should_receive(:sh).with("heroku sharing:add email@example.com --app awesomeapp")
-      subject.sharing_add 'email@example.com'
-    end
-  end
-
-  describe "#sharing_remove" do
-    it "removes collaborators" do
-      subject.should_receive(:sh).with("heroku sharing:remove email@example.com --app awesomeapp")
-      subject.sharing_remove 'email@example.com'
-    end
-  end
-
   describe "#long_config" do
     it "returns the remote config" do
       with_app(subject, 'name' => subject.app) do |app_data|
@@ -228,11 +210,11 @@ describe HerokuSan::Stage do
   
   describe "#logs" do
     it "returns log files" do
-      subject.should_receive(:sh).with("heroku logs --app awesomeapp")
+      subject.should_receive(:system).with("heroku", "logs", "--app", "awesomeapp") { true }
       subject.logs
     end
     it "tails log files" do
-      subject.should_receive(:sh).with("heroku logs --tail --app awesomeapp")
+      subject.should_receive(:system).with("heroku", "logs --tail", "--app", "awesomeapp") { true }
       subject.logs(:tail)
     end
   end

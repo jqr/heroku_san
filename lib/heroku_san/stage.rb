@@ -1,8 +1,8 @@
-require 'heroku'
-require 'heroku/api'
+require 'heroku-api'
 require 'json'
 require 'active_support/core_ext/object/blank'
 require 'active_support/core_ext/hash/keys'
+require 'active_support/core_ext/hash/slice'
 
 MOCK = false unless defined?(MOCK)
 
@@ -20,7 +20,7 @@ module HerokuSan
     end
     
     def heroku
-      @heroku ||= Heroku::API.new(:api_key => ENV['HEROKU_API_KEY'] || Heroku::Auth.api_key, :mock => MOCK)
+      @heroku ||= Heroku::API.new(:api_key => auth_token, :mock => MOCK)
     end
 
     def app
@@ -48,10 +48,10 @@ module HerokuSan
     end
     
     def run(command, args = nil)
-      if stack =~ /cedar/
-        sh_heroku "run #{command} #{args}"
+      if stack !~ /aspen|bamboo/
+        sh_heroku "run", command, *args
       else
-        sh_heroku "run:#{command} #{args}"
+        sh_heroku "run:#{command}", *args
       end
     end
     
@@ -61,7 +61,7 @@ module HerokuSan
     end
     
     def migrate
-      rake('db:migrate')
+      run('rake db:migrate')
       restart
     end
     
@@ -69,10 +69,9 @@ module HerokuSan
       strategy = @options['deploy'].new(self, commit, force)
       strategy.deploy
     end
-    
+
     def rake(*args)
-      run 'rake', args.join(' ')
-      # heroku.rake app, args.join(' ')
+      raise HerokuSan::Deprecated
     end
 
     def maintenance(action = nil)
@@ -90,20 +89,20 @@ module HerokuSan
     end
     
     def create
-      params = Hash[@options.select{|k,v| %w[app stack].include? k}].stringify_keys
+      params = @options.slice('app', 'stack').stringify_keys
       params['name'] = params.delete('app')
       response = heroku.post_app(params)
       response.body['name']
     end
 
     def sharing_add(email) # DEPREC?
-      sh_heroku "sharing:add #{email.chomp}"
+      raise HerokuSan::Deprecated
     end
-  
+
     def sharing_remove(email) # DEPREC?
-      sh_heroku "sharing:remove #{email.chomp}"
+      raise HerokuSan::Deprecated
     end
-  
+
     def long_config
       heroku.get_config_vars(app).body
     end
@@ -138,9 +137,18 @@ module HerokuSan
     end
     
   private
-  
-    def sh_heroku(command)
-      sh "heroku #{command} --app #{app}"
+
+    def auth_token
+      @auth_token ||= (ENV['HEROKU_API_KEY'] || `heroku auth:token`.chomp unless MOCK)
+    end
+
+    def sh_heroku(*command)
+      cmd = (command + ['--app', app])
+      show_command = cmd.join(' ')
+      $stderr.puts show_command if @debug
+      ok = system "heroku", *cmd
+      status = $?
+      ok or fail "Command failed with status (#{status.exitstatus}): [heroku #{show_command}]"
     end
   end
 end

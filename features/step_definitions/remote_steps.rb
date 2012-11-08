@@ -1,49 +1,50 @@
 World(Aruba::Api)
 require 'active_support/core_ext/string/strip'
+require 'godot'
 
 Given /^I have a new Rails project$/ do
   cmd = "rails new test_app --quiet --force --database=postgresql --skip-bundle --skip-javascript --skip-test-unit --skip-sprockets"
-  run_simple unescape(cmd)
+  run_clean unescape(cmd)
 end
 
 Given /^I have a new Sinatra project$/ do
   create_dir 'test_app/config'
-  write_file 'test_app/app.rb', <<EOT.strip_heredoc
+  write_file 'test_app/app.rb', <<-EOT.strip_heredoc
     require 'sinatra'
 
     get '/' do
       'Hello, world.'
     end
-EOT
+  EOT
 
-  write_file 'test_app/config.ru', <<EOT.strip_heredoc
+  write_file 'test_app/config.ru', <<-EOT.strip_heredoc
     require './app'
     run Sinatra::Application
-EOT
+  EOT
 
-  write_file 'test_app/Gemfile', <<EOT.strip_heredoc
+  write_file 'test_app/Gemfile', <<-EOT.strip_heredoc
     source 'http://rubygems.org'
     gem 'sinatra'
-EOT
+  EOT
 
-  write_file 'test_app/Rakefile', <<EOT.strip_heredoc
+  write_file 'test_app/Rakefile', <<-EOT.strip_heredoc
     require "bundler/setup"
     require "heroku_san"
     config_file = File.join(File.expand_path(File.dirname(__FILE__)), 'config', 'heroku.yml')
     HerokuSan.project = HerokuSan::Project.new(config_file, :deploy => HerokuSan::Deploy::Sinatra)
     load "heroku_san/tasks.rb"
-EOT
+  EOT
 
 end
 
 When /^I am in the project directory$/ do
   cd '/test_app'
-  run_simple 'git init .'
+  run_clean 'git init .'
 end
 
-When /^I commit any changes with "(.*)"$/ do |message|
-  run_simple 'git add .'
-  run_simple "git commit -m '#{message}'"
+When /^I commit .* changes with "(.*)"$/ do |message|
+  run_clean 'git add .'
+  run_clean "git commit -m '#{message}'"
 end
 
 When /^I add heroku_san to the Gemfile$/ do
@@ -54,35 +55,41 @@ When /^I add heroku_san to the Gemfile$/ do
 EOT
 end
 
+def run_clean(cmd)
+  Bundler.with_clean_env do
+    ENV['NOEXEC'] = 'skip'
+    run_simple cmd
+  end
+end
+
 When /^I run bundle install$/ do
-  use_clean_gemset 'heroku_san_test'
-  run_simple 'bundle install --quiet'
+  run_clean "bundle install"
 end
 
 Then /^rake reports that the heroku: tasks are available$/ do
-  run_simple 'bundle exec rake -T heroku:'
-  output = stdout_from 'bundle exec rake -T heroku:'
+  run_clean 'rake -T heroku:'
+  output = stdout_from 'rake -T heroku:'
   assert_partial_output 'rake heroku:apps', output
 end
 
 When /^I generate a new config file$/ do
-  run_simple 'bundle exec rails generate heroku_san'
-  output = stdout_from 'bundle exec rails generate heroku_san'
+  run_clean 'rails generate heroku_san'
+  output = stdout_from 'rails generate heroku_san'
   assert_partial_output 'create  config/heroku.yml', output
   overwrite_simple_config_file
 end
 
 When /^I create a new config\/heroku\.yml file$/ do
-  run_simple 'bundle exec rake heroku:create_config'
-  output = stdout_from 'bundle exec rake heroku:create_config'
+  run_clean 'rake heroku:create_config'
+  output = stdout_from 'rake heroku:create_config'
   assert_matching_output %q{Copied example config to ".*.config.heroku.yml"}, output
   assert_matching_output %q{Please edit ".*.config.heroku.yml" with your application's settings.}, output
   overwrite_simple_config_file
 end
 
 When /^I create my project on Heroku$/ do
-  cmd = 'bundle exec rake test_app heroku:create'
-  run_simple unescape(cmd)
+  cmd = 'rake test_app heroku:create'
+  run_clean unescape(cmd)
   output = stdout_from cmd
   assert_matching_output %q{test_app: Created ([\w-]+)}, output
   
@@ -95,21 +102,8 @@ When /^I create my project on Heroku$/ do
 EOT
 end
 
-When /^I list the remote configuration$/ do
-  cmd = 'bundle exec rake test_app heroku:config:list'
-  run_simple unescape(cmd)
-  output = stdout_from cmd
-  assert_partial_output "APP_NAME: #{@app}", output
-  assert_partial_output "URL: #{@app}.heroku.com", output
-  
-  @url = output.match(/\bURL:\s+(.*.heroku.com)\b/)[1]
-  @curl = unescape("curl --silent http://#{@url}")
-end
-
 When /^I curl the app home page$/ do
-  run_simple @curl
-  output = stdout_from @curl
-  assert_partial_output '<h1><strong>Heroku | Welcome to your new app!</strong></h1>', output
+  Godot.match("#{@app}.herokuapp.com", 80, %r{<h1><strong>Heroku | Welcome to your new app!</strong></h1>}).should be, "Heroku didn't spin up a new app"
 end
 
 When /^I configure my project$/ do
@@ -121,38 +115,36 @@ When /^I configure my project$/ do
         DROIDS: marvin
 
 EOT
-  cmd = 'bundle exec rake test_app heroku:config'
-  run_simple cmd
+  cmd = 'rake test_app heroku:config'
+  run_clean cmd
   output = stdout_from cmd
   assert_partial_output 'DROIDS: marvin', output
 end
 
 When /^I turn maintenance on$/ do
-  run_simple 'bundle exec rake test_app heroku:maintenance_on'
-  output = stdout_from 'bundle exec rake test_app heroku:maintenance_on'
+  run_clean 'rake test_app heroku:maintenance_on'
+  output = stdout_from 'rake test_app heroku:maintenance_on'
   assert_partial_output 'test_app: Maintenance mode enabled.', output
-  
-  run_simple @curl
-  output = stdout_from @curl
-  assert_partial_output '<title>Offline for Maintenance</title>', output
+
+  Godot.match("#{@app}.herokuapp.com", 80, %r{<title>Offline for Maintenance</title>}).should be, "App is not offline"
 end
 
 When /^I turn maintenance off$/ do
-  run_simple 'bundle exec rake test_app heroku:maintenance_off'
-  output = stdout_from 'bundle exec rake test_app heroku:maintenance_off'
+  run_clean 'rake test_app heroku:maintenance_off'
+  output = stdout_from 'rake test_app heroku:maintenance_off'
   assert_partial_output 'test_app: Maintenance mode disabled.', output
   assert_app_is_running
 end
 
 When /^I restart my project$/ do
-  run_simple 'bundle exec rake test_app heroku:restart'
-  output = stdout_from 'bundle exec rake test_app heroku:restart'
+  run_clean 'rake test_app heroku:restart'
+  output = stdout_from 'rake test_app heroku:restart'
   assert_partial_output 'test_app: Restarted.', output
   assert_app_is_running
 end
 
 When /^I generate a scaffold$/ do
-  run_simple 'bundle exec rails generate scaffold droid'
+  run_clean 'rails generate scaffold droid'
   append_to_file 'app/views/droids/index.html.erb', %Q{\n<div><code><%= ENV['DROIDS'] -%></code></div>\n}
 end
 
@@ -166,16 +158,16 @@ EOT
 end
 
 When /^I deploy my project$/ do
-  run_simple 'bundle exec rake test_app deploy'
-  assert_partial_output "http://#{@app}.heroku.com deployed to Heroku", all_output
+  run_clean 'rake test_app deploy'
+  assert_partial_output "http://#{@app}.herokuapp.com deployed to Heroku", all_output
 end
 
 When /^I list all apps on Heroku$/ do
   sha = in_current_dir do
     `git rev-parse HEAD`.chomp
   end
-  run_simple 'bundle exec rake heroku:apps'
-  output = stdout_from 'bundle exec rake heroku:apps'
+  run_clean 'rake heroku:apps'
+  output = stdout_from 'rake heroku:apps'
   assert_partial_output "test_app is shorthand for the Heroku app #{@app} located at:", output
   assert_partial_output "git@heroku.com:#{@app}.git", output
   assert_partial_output "@ #{sha} master", output
@@ -191,24 +183,22 @@ When /^I install an addon$/ do
 
 END_CONFIG
 
-  run_simple 'bundle exec rake test_app heroku:addons'
-  output = stdout_from 'bundle exec rake test_app heroku:addons'
-  # The output should show the default addons...
-  assert_partial_output "shared-database:5mb", output
-  # ... and the new one ...
+  run_clean 'rake test_app heroku:addons'
+  output = stdout_from 'rake test_app heroku:addons'
+  # The output should show the new one ...
   assert_partial_output "deployhooks:campfire", output
   # ... with a note about needing to configure it.
   assert_partial_output "https://api.heroku.com/myapps/#{@app}/addons/deployhooks:campfire", output
 end
 
 Then /^heroku_san is green$/ do
-  run_simple "bundle exec heroku apps:destroy #{@app} --confirm #{@app}"
+  run_clean "heroku apps:destroy #{@app} --confirm #{@app}"
 end
 
 def assert_app_is_running
-  run_simple @curl + "/droids"
-  output = stdout_from @curl + "/droids"
-  assert_partial_output %Q{<code>marvin</code>}, output
+  vladimir = Godot.new("#{@app}.herokuapp.com", 80)
+  vladimir.timeout = 30
+  vladimir.match(%r{<code>marvin</code>}, 'droids').should be, "http://#{@app}.herokuapp.com/droids are not the droids I'm looking for"
 end
 
 def overwrite_simple_config_file
