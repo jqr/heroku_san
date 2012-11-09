@@ -1,6 +1,7 @@
 # Change log (curated)
 
 ## v4.0.0
+
   * Remove dependency on sunsetted 'heroku' gem. Add external dependency
     on Heroku Toolbelt, instead.
   * Deprecate Stage#rake, Stage#sharing_add and Stage#sharing_remove
