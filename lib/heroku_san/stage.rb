@@ -143,7 +143,7 @@ module HerokuSan
     end
 
     def sh_heroku(*command)
-      cmd = (command + ['--app', app])
+      cmd = (command + ['--app', app]).compact
       show_command = cmd.join(' ')
       $stderr.puts show_command if @debug
       ok = system "heroku", *cmd
