@@ -327,7 +327,7 @@ rescue HerokuSan::NoApps => e
     rake demo staging deploy"
 
   puts "\nYou can use also command all Heroku apps for this project:
-    rake all heroku:share"
+    rake all restart"
 
   exit(1)
 end

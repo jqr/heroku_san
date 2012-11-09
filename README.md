@@ -102,12 +102,8 @@ is additive, you can easily select which servers to run a command on.
 A special rake task 'all' is created that causes any further commands to
 execute on all Heroku apps.
 
-Manipulate collaborators on all this project's apps (prompts for email
-address):
-
 ```sh
-  rake all heroku:share
-  rake all heroku:unshare
+  rake all restart
 ```
 
 Need to add remotes for each app?
@@ -144,9 +140,7 @@ A full list of tasks provided:
   rake heroku:rake[task]            # Runs a rake task remotely
   rake heroku:remotes               # Add git remotes for all apps in this project
   rake heroku:restart               # Restarts remote servers
-  rake heroku:share                 # Adds a collaborator (asks for email)
   rake heroku:shell                 # Opens a bash shell within app
-  rake heroku:unshare               # Removes a collaborator (asks for email)
   rake heroku:stage:all             # Select all Heroku apps for later command
 ```
 
