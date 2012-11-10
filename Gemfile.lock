@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    heroku_san (4.0.0)
+    heroku_san (4.0.1)
       activesupport
       heroku-api (>= 0.1.2)
       rake
