@@ -139,12 +139,17 @@ module HerokuSan
     end
 
     def sh_heroku(*command)
+      preflight_check_for_cli
       cmd = (command + ['--app', app]).compact
       show_command = cmd.join(' ')
       $stderr.puts show_command if @debug
       ok = system "heroku", *cmd
       status = $?
       ok or fail "Command failed with status (#{status.exitstatus}): [heroku #{show_command}]"
+    end
+
+    def preflight_check_for_cli
+      raise "The Heroku Toolbelt is required for this action. http://toolbelt.heroku.com" if system('heroku version') == nil
     end
   end
 end

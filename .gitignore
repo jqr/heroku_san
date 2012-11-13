@@ -5,3 +5,4 @@ Thumbs.db
 tmp
 .idea/**
 *.swp
+.rspec
