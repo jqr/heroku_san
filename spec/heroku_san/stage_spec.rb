@@ -68,11 +68,6 @@ describe HerokuSan::Stage do
   end
 
   describe "#run" do
-    it "runs commands using the pre-cedar format" do
-      subject = HerokuSan::Stage.new('production', {"app" => "awesomeapp", "stack" => "aspen"})
-      subject.should_receive(:system).with("heroku", "run:rake foo bar bleh", "--app", "awesomeapp") { true }
-      subject.run 'rake foo bar bleh'
-    end
     it "runs commands using the new cedar format" do
       subject.should_receive(:system).with("heroku", "run", "worker foo bar bleh", "--app", "awesomeapp") { true }
       subject.run 'worker foo bar bleh'

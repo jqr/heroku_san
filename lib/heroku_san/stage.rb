@@ -48,11 +48,7 @@ module HerokuSan
     end
     
     def run(command, args = nil)
-      if stack !~ /aspen|bamboo/
-        sh_heroku "run", command, *args
-      else
-        sh_heroku "run:#{command}", *args
-      end
+      sh_heroku "run", command, *args
     end
     
     def push(sha = nil, force = false)
