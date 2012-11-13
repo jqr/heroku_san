@@ -1,5 +1,9 @@
 # Change log (curated)
 
+## v4.0.2
+
+  * Closes #110
+
 ## v4.0.0
 
   * Remove dependency on sunsetted 'heroku' gem. Add external dependency
@@ -9,6 +13,8 @@
   * Closes #107
   * Closes #108
   * Thanks to sworbel for the pull request (#104)
+
+* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 ## v3.0.4
 
