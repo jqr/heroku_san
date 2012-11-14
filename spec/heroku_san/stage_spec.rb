@@ -212,7 +212,7 @@ describe HerokuSan::Stage do
       subject.logs
     end
     it "tails log files" do
-      subject.should_receive(:system).with("heroku", "logs --tail", "--app", "awesomeapp") { true }
+      subject.should_receive(:system).with("heroku", "logs", "--tail", "--app", "awesomeapp") { true }
       subject.logs(:tail)
     end
   end

@@ -125,7 +125,7 @@ module HerokuSan
     end
   
     def logs(tail = false)
-      sh_heroku 'logs' + (tail ? ' --tail' : '')
+      sh_heroku 'logs', (tail ? '--tail' : nil)
     end
     
     def revision
