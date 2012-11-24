@@ -32,11 +32,13 @@ describe GitTest do
       subject.should_receive("`").with("git tag -l 'pattern*'") { "x\n\y\n\z\n" }
       subject.git_tag('pattern*').should == "z"
     end
-    it "returns nil if no tags match the pattern" do
+    it "raises exception if no tags match the pattern" do
       subject.should_receive("`").with("git tag -l 'pattern*'") { "\n" }
-      subject.git_tag('pattern*').should == nil
+      expect {
+        subject.git_tag('pattern*')
+      }.to raise_error(Git::NoTagFoundError)
     end
-    it "returns nil for a nil tag" do
+    it "returns nil for a nil glob" do
       subject.should_not_receive("`").with("git tag -l ''") { "\n" }
       subject.git_tag(nil).should == nil
     end
