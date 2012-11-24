@@ -79,7 +79,8 @@ describe HerokuSan::Stage do
 
   describe "#push" do
     it "deploys to heroku" do
-      subject.should_receive(:git_push).with(git_parsed_tag(subject.tag), subject.repo, [])
+      subject.should_receive(:git_parsed_tag).with(nil) {'tag'}
+      subject.should_receive(:git_push).with('tag', subject.repo, [])
       subject.push
     end
     
@@ -89,7 +90,8 @@ describe HerokuSan::Stage do
     end
     
     it "deploys with --force" do
-      subject.should_receive(:git_push).with(git_parsed_tag(subject.tag), subject.repo, %w[--force])
+      subject.should_receive(:git_parsed_tag).with(nil) {'tag'}
+      subject.should_receive(:git_push).with('tag', subject.repo, %w[--force])
       subject.push(nil, :force)
     end
     

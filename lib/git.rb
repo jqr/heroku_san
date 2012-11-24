@@ -2,6 +2,8 @@ require 'rake'
 require 'rake/dsl_definition'
 
 module Git
+  class NoTagFoundError < Exception; end
+
   include Rake::DSL
   
   def git_clone(repos, dir)
@@ -34,7 +36,7 @@ module Git
 
   def git_tag(glob)
     return nil if glob.nil?
-    %x{git tag -l '#{glob}'}.split("\n").last
+    %x{git tag -l '#{glob}'}.split("\n").last || (raise NoTagFoundError, "No tag found [#{glob}]")
   end
   
   def git_revision(repo)
