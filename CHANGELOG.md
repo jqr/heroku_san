@@ -1,5 +1,10 @@
 # Change log (curated)
 
+## v4.0.7
+
+  * Closes #114 & #111
+  * Closes #115
+
 ## v4.0.5
 
   * Remove ActiveSupport dependency
