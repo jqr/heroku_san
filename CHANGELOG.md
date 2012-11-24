@@ -1,5 +1,9 @@
 # Change log (curated)
 
+## v4.0.5
+
+  * Remove ActiveSupport dependency
+
 ## v4.0.2
 
   * Closes #110
