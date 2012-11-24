@@ -56,7 +56,7 @@ namespace :heroku do
       rev = stage.revision
       puts  "#{stage.name} is shorthand for the Heroku app #{stage.app} located at:"
       puts  "  #{stage.repo}"
-      puts  "  @ #{rev.blank? ? 'not deployed' : rev}"
+      puts  "  @ #{(rev == '') ? 'not deployed' : rev}"
       puts
     end
   end
