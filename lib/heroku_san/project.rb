@@ -1,6 +1,3 @@
-require 'active_support/core_ext/string'
-require 'active_support/core_ext/hash/slice'
-
 module HerokuSan
   class Project
     attr_reader :config_file
@@ -14,7 +11,7 @@ module HerokuSan
       config = parse(@config_file)
       config.each do |stage, settings|
         # TODO: Push this eval later (j.i.t.)
-        @app_settings[stage] = HerokuSan::Stage.new(stage, settings.merge(options.slice(:deploy)))
+        @app_settings[stage] = HerokuSan::Stage.new(stage, settings.merge('deploy' => (options[:deploy]||options['deploy'])))
       end
     end
 
@@ -45,7 +42,7 @@ module HerokuSan
     end
   
     def apps
-      if @apps.present?
+      if @apps && !@apps.empty?
         @apps
       else
         @apps = if all.size == 1

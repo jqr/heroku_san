@@ -1,8 +1,5 @@
 require 'heroku-api'
 require 'json'
-require 'active_support/core_ext/object/blank'
-require 'active_support/core_ext/hash/keys'
-require 'active_support/core_ext/hash/slice'
 
 MOCK = false unless defined?(MOCK)
 
@@ -16,7 +13,7 @@ module HerokuSan
         'deploy' => HerokuSan::Deploy::Rails
       }
       @name = stage
-      @options = default_options.merge(options.stringify_keys)
+      @options = default_options.merge(options)
     end
     
     def heroku
@@ -85,8 +82,10 @@ module HerokuSan
     end
     
     def create
-      params = @options.slice('app', 'stack').stringify_keys
-      params['name'] = params.delete('app')
+      params = {
+          'name' => @options['app'],
+          'stack' => @options['stack']
+      }
       response = heroku.post_app(params)
       response.body['name']
     end
@@ -104,7 +103,7 @@ module HerokuSan
     end
     
     def push_config(options = nil)
-      params = (options || config).stringify_keys
+      params = (options || config)
       heroku.put_config_vars(app, params).body
     end
 

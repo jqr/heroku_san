@@ -6,7 +6,14 @@ require 'heroku_san/deploy/rails'
 require 'heroku_san/deploy/sinatra'
 
 module HerokuSan
-  mattr_accessor :project
+  class << self
+    def project
+      @project
+    end
+    def project=(project)
+      @project = project
+    end
+  end
   class NoApps < StandardError; end
   class MissingApp < StandardError; end
   class Deprecated < StandardError; end

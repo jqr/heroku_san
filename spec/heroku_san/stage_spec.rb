@@ -219,15 +219,15 @@ describe HerokuSan::Stage do
 
   describe "#push_config" do
     it "updates the configuration settings on Heroku" do
-      subject = HerokuSan::Stage.new('test', {"app" => "awesomeapp", "config" => {:FOO => 'bar', :DOG => 'emu'}})
+      subject = HerokuSan::Stage.new('test', {"app" => "awesomeapp", "config" => {'FOO' => 'bar', 'DOG' => 'emu'}})
       with_app(subject, 'name' => subject.app) do |app_data|
         subject.push_config.should == STOCK_CONFIG.merge('FOO' => 'bar', 'DOG' => 'emu')
       end
     end
     it "pushes the options hash" do
-      subject = HerokuSan::Stage.new('test', {"app" => "awesomeapp", "config" => {:FOO => 'bar', :DOG => 'emu'}})
+      subject = HerokuSan::Stage.new('test', {"app" => "awesomeapp", "config" => {'FOO' => 'bar', 'DOG' => 'emu'}})
       with_app(subject, 'name' => subject.app) do |app_data|
-        subject.push_config(:RACK_ENV => 'magic').should == STOCK_CONFIG.merge('RACK_ENV' => 'magic')
+        subject.push_config('RACK_ENV' => 'magic').should == STOCK_CONFIG.merge('RACK_ENV' => 'magic')
       end
     end
   end
