@@ -21,7 +21,9 @@ module Git
       sh "git update-ref refs/heroku_san/deploy #{commit}"
       sh "git push #{repo} #{options.join(' ')} refs/heroku_san/deploy:refs/heads/master"
     ensure
+      exitstatus = $?.exitstatus # shell script failure code
       sh "git update-ref -d refs/heroku_san/deploy"
+      exit(exitstatus) 
     end
   end
   
