@@ -1,6 +1,6 @@
 #
 # Format:
-# 
+#
 # <stage name>:
 #   app: <Heroku app name>
 #   stack: <Heroku stack, optional>
@@ -9,7 +9,8 @@
 #   config:
 #     - <Heroku config:var name>: <Heroku config:var value>
 #
-production: 
+
+production:
   app: awesomeapp
   stack: bamboo-ree-1.8.7
   tag: production/*
@@ -28,6 +29,6 @@ staging:
     - logging:basic
     - scheduler:standard
 
-demo: 
+demo:
   app: awesomeapp-demo
   config: *default
