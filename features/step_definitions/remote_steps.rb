@@ -57,7 +57,7 @@ end
 
 def run_clean(cmd)
   Bundler.with_clean_env do
-    ENV['NOEXEC'] = 'skip'
+    ENV['NOEXEC_DISABLE'] = '1'
     run_simple cmd
   end
 end
