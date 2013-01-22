@@ -1,5 +1,9 @@
 # Change log (curated)
 
+## v4.0.8
+
+  * Closes #113 & #117
+
 ## v4.0.7
 
   * Closes #114 & #111
