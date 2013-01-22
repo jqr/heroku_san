@@ -47,6 +47,10 @@ When /^I commit .* changes with "(.*)"$/ do |message|
   run_clean "git commit -m '#{message}'"
 end
 
+When /^I tag the commit with "([^"]*)" annotated by "([^"]*)"$/ do |tag, annotation|
+  run_clean "git tag -a '#{tag}' -m '#{annotation}' HEAD"
+end
+
 When /^I add heroku_san to the Gemfile$/ do
   append_to_file 'Gemfile', <<EOT.strip_heredoc
     group :development, :test do
@@ -60,6 +64,7 @@ def run_clean(cmd)
     ENV['NOEXEC_DISABLE'] = '1'
     run_simple cmd
   end
+  stdout_from cmd
 end
 
 When /^I run bundle install$/ do
@@ -67,8 +72,7 @@ When /^I run bundle install$/ do
 end
 
 Then /^rake reports that the heroku: tasks are available$/ do
-  run_clean 'rake -T heroku:'
-  output = stdout_from 'rake -T heroku:'
+  output = run_clean 'rake -T heroku:'
   assert_partial_output 'rake heroku:apps', output
 end
 
@@ -80,8 +84,7 @@ When /^I generate a new config file$/ do
 end
 
 When /^I create a new config\/heroku\.yml file$/ do
-  run_clean 'rake heroku:create_config'
-  output = stdout_from 'rake heroku:create_config'
+  output = run_clean 'rake heroku:create_config'
   assert_matching_output %q{Copied example config to ".*.config.heroku.yml"}, output
   assert_matching_output %q{Please edit ".*.config.heroku.yml" with your application's settings.}, output
   overwrite_simple_config_file
@@ -89,8 +92,7 @@ end
 
 When /^I create my project on Heroku$/ do
   cmd = 'rake test_app heroku:create'
-  run_clean unescape(cmd)
-  output = stdout_from cmd
+  output = run_clean unescape(cmd)
   assert_matching_output %q{test_app: Created ([\w-]+)}, output
   
   @app = output.match(/test_app: Created ([\w-]+)/)[1]
@@ -103,7 +105,7 @@ EOT
 end
 
 When /^I curl the app home page$/ do
-  Godot.match("#{@app}.herokuapp.com", 80, %r{<h1><strong>Heroku | Welcome to your new app!</strong></h1>}).should be, "Heroku didn't spin up a new app"
+  vladimir.match(%r{<h1><strong>Heroku | Welcome to your new app!</strong></h1>}).should be, "Heroku didn't spin up a new app"
 end
 
 When /^I configure my project$/ do
@@ -116,29 +118,25 @@ When /^I configure my project$/ do
 
 EOT
   cmd = 'rake test_app heroku:config'
-  run_clean cmd
-  output = stdout_from cmd
+  output = run_clean cmd
   assert_partial_output 'DROIDS: marvin', output
 end
 
 When /^I turn maintenance on$/ do
-  run_clean 'rake test_app heroku:maintenance_on'
-  output = stdout_from 'rake test_app heroku:maintenance_on'
+  output = run_clean 'rake test_app heroku:maintenance_on'
   assert_partial_output 'test_app: Maintenance mode enabled.', output
 
-  Godot.match("#{@app}.herokuapp.com", 80, %r{<title>Offline for Maintenance</title>}).should be, "App is not offline"
+  vladimir.match(%r{<title>Offline for Maintenance</title>}).should be, "App is not offline"
 end
 
 When /^I turn maintenance off$/ do
-  run_clean 'rake test_app heroku:maintenance_off'
-  output = stdout_from 'rake test_app heroku:maintenance_off'
+  output = run_clean 'rake test_app heroku:maintenance_off'
   assert_partial_output 'test_app: Maintenance mode disabled.', output
   assert_app_is_running
 end
 
 When /^I restart my project$/ do
-  run_clean 'rake test_app heroku:restart'
-  output = stdout_from 'rake test_app heroku:restart'
+  output = run_clean 'rake test_app heroku:restart'
   assert_partial_output 'test_app: Restarted.', output
   assert_app_is_running
 end
@@ -162,12 +160,16 @@ When /^I deploy my project$/ do
   assert_partial_output "http://#{@app}.herokuapp.com deployed to Heroku", all_output
 end
 
+When /^I deploy to tag "([^"]*)"$/ do |tag|
+  run_clean "rake test_app deploy[#{tag}]"
+  assert_partial_output "http://#{@app}.herokuapp.com deployed to Heroku", all_output
+end
+
 When /^I list all apps on Heroku$/ do
   sha = in_current_dir do
     `git rev-parse HEAD`.chomp
   end
-  run_clean 'rake heroku:apps'
-  output = stdout_from 'rake heroku:apps'
+  output = run_clean 'rake heroku:apps'
   assert_partial_output "test_app is shorthand for the Heroku app #{@app} located at:", output
   assert_partial_output "git@heroku.com:#{@app}.git", output
   assert_partial_output "@ #{sha} master", output
@@ -183,22 +185,27 @@ When /^I install an addon$/ do
 
 END_CONFIG
 
-  run_clean 'rake test_app heroku:addons'
-  output = stdout_from 'rake test_app heroku:addons'
+  output = run_clean 'rake test_app heroku:addons'
   # The output should show the new one ...
   assert_partial_output "deployhooks:campfire", output
   # ... with a note about needing to configure it.
   assert_partial_output "https://api.heroku.com/myapps/#{@app}/addons/deployhooks:campfire", output
 end
 
-Then /^heroku_san is green$/ do
+Then /^(?:heroku_san|issue \d+) (?:is green|has been fixed)$/ do
   run_clean "heroku apps:destroy #{@app} --confirm #{@app}"
 end
 
 def assert_app_is_running
-  vladimir = Godot.new("#{@app}.herokuapp.com", 80)
-  vladimir.timeout = 30
   vladimir.match(%r{<code>marvin</code>}, 'droids').should be, "http://#{@app}.herokuapp.com/droids are not the droids I'm looking for"
+end
+
+def vladimir
+  @vladimir ||= begin
+    Godot.new("#{@app}.herokuapp.com", 80).tap do |vladimir|
+      vladimir.timeout = 60
+    end
+  end
 end
 
 def overwrite_simple_config_file
