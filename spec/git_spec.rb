@@ -25,6 +25,13 @@ describe GitTest do
       subject.should_receive(:sh).with("git update-ref -d refs/heroku_san/deploy")
       subject.git_push(nil, 'git@heroku.com:awesomeapp.git', %w[--force -v])
     end
+
+    it "propagates any errors, but still cleans up" do
+      subject.should_receive(:sh).with("git update-ref refs/heroku_san/deploy HEAD^{commit}")
+      subject.should_receive(:sh).with("git push git@heroku.com:awesomeapp.git  refs/heroku_san/deploy:refs/heads/master").and_raise
+      subject.should_receive(:sh).with("git update-ref -d refs/heroku_san/deploy")
+      expect { subject.git_push(nil, 'git@heroku.com:awesomeapp.git') }.to raise_error
+    end
   end
 
   describe "#git_tag" do
