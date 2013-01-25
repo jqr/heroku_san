@@ -2,23 +2,8 @@ module HerokuSan
   class Parser
     attr_reader :config_file
 
-    def initialize(config_file)
-      @config_file = config_file
-    end
-
-    def create_config
-      # TODO: Convert true/false returns to success/exception
-      template = File.expand_path(File.join(File.dirname(__FILE__), '../templates', 'heroku.example.yml'))
-      if File.exists?(config_file)
-        false
-      else
-        FileUtils.cp(template, config_file)
-        true
-      end
-    end
-
-    def parse
-      app_settings = parse_yaml(config_file)
+    def parse(parseable)
+      app_settings = parse_yaml(parseable.config_file)
 
       # support heroku_san format
       if app_settings.has_key? 'apps'
@@ -46,7 +31,7 @@ module HerokuSan
         app_settings[name]['config'].merge!(extra_config[name]) if extra_config[name]
       end
 
-      app_settings
+      parseable.configuration = app_settings
     end
 
     private

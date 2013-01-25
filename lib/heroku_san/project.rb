@@ -1,33 +1,45 @@
 module HerokuSan
   class Project
-    attr_reader :parser
+    attr_accessor :config_file
+    attr_reader :options
+    attr_accessor :configuration
 
     include Git
 
     # TODO: replace config_file with dependency injected Parser
     def initialize(config_file, options = {})
+      @config_file = config_file
+      @options = options
       @apps = []
-      @app_settings = {}
-      @parser = Parser.new(config_file)
-      @parser.parse.each do |stage, settings|
-        # TODO: Push this eval later (j.i.t.)
-        @app_settings[stage] = HerokuSan::Stage.new(stage, settings.merge('deploy' => (options[:deploy]||options['deploy'])))
+    end
+
+    def app_settings
+      @app_settings ||= begin
+        HerokuSan::Parser.new.parse(self)
+        configuration.inject({}) do |stages, (stage, settings)|
+          stages[stage] = HerokuSan::Stage.new(stage, settings.merge('deploy' => (options[:deploy]||options['deploy'])))
+          stages
+        end
       end
     end
 
     def create_config
-      parser.create_config
-    end
-    def config_file
-      parser.config_file
+      # TODO: Convert true/false returns to success/exception
+      template = File.expand_path(File.join(File.dirname(__FILE__), '../templates', 'heroku.example.yml'))
+      if File.exists?(config_file)
+        false
+      else
+        FileUtils.cp(template, config_file)
+        true
+      end
     end
 
     def all
-      @app_settings.keys
+      app_settings.keys
     end
   
     def [](stage)
-      @app_settings[stage]
+      app_settings[stage]
     end
   
     def <<(*app)
