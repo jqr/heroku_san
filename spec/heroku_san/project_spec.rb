@@ -101,7 +101,7 @@ describe HerokuSan::Project do
 
       it "creates a new file using the example file" do
         Dir.mktmpdir do |dir|
-          heroku_san.config_file = tmp_config_file = File.join dir, 'config.yml'
+          heroku_san.config_file = tmp_config_file = File.join(dir, 'config.yml')
           FileUtils.should_receive(:cp).with(File.expand_path(template_config_file), tmp_config_file)
           heroku_san.create_config.should be_true
         end
