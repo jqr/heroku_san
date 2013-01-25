@@ -1,31 +1,39 @@
 module HerokuSan
   class Project
+    include Git
     attr_accessor :config_file
     attr_reader :options
-    attr_accessor :configuration
 
-    include Git
-
-    # TODO: replace config_file with dependency injected Parser
-    def initialize(config_file, options = {})
+    def initialize(config_file = '', options = {})
       @config_file = config_file
       @options = options
       @apps = []
     end
 
-    def app_settings
-      @app_settings ||= begin
-        HerokuSan::Parser.new.parse(self)
-        configuration.inject({}) do |stages, (stage, settings)|
-          stages[stage] = HerokuSan::Stage.new(stage, settings.merge('deploy' => (options[:deploy]||options['deploy'])))
-          stages
-        end
+    # TODO: Extract the stage factory from this method
+    def configuration=(configuration)
+      @stages = configuration.inject({}) do |stages, (stage, settings)|
+        stages[stage] = HerokuSan::Stage.new(stage, settings.merge('deploy' => (options[:deploy]||options['deploy'])))
+        stages
       end
     end
 
+    # TODO: Extract the parser from this method
+    def stages
+      # Yeah, I know, weird. The parser collaborates with project to create the configuration
+      if !@stages
+        HerokuSan::Parser.new.parse(self)
+      end
+      @stages
+    end
+
+    def template
+      File.expand_path(File.join(File.dirname(__FILE__), '../templates', 'heroku.example.yml'))
+    end
+
+    # TODO: Extract this method
     def create_config
       # TODO: Convert true/false returns to success/exception
-      template = File.expand_path(File.join(File.dirname(__FILE__), '../templates', 'heroku.example.yml'))
       if File.exists?(config_file)
         false
       else
@@ -35,11 +43,11 @@ module HerokuSan
     end
 
     def all
-      app_settings.keys
+      stages.keys
     end
   
     def [](stage)
-      app_settings[stage]
+      stages[stage]
     end
   
     def <<(*app)
@@ -59,7 +67,7 @@ module HerokuSan
         else
           active_branch = self.git_active_branch
           all.select do |app| 
-            app == active_branch and ($stdout.puts("Defaulting to '#{app}' as it matches the current branch") || true)
+            app == active_branch and ($stdout.puts("Defaulting to '#{app}' as it matches the current branch"); true)
           end
         end
       end
@@ -68,7 +76,7 @@ module HerokuSan
     def each_app
       raise NoApps if apps.empty?
       apps.each do |stage|
-        yield(self[stage])
+        yield self[stage]
       end
     end
   end
