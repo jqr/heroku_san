@@ -1,40 +1,46 @@
 module HerokuSan
   class Parser
-    attr_reader :config_file
-
+    include Git
+    attr_accessor :settings
     def parse(parseable)
-      settings = parse_yaml(parseable.config_file)
+      @settings = parse_yaml(parseable.config_file)
+      convert_from_heroku_san_format
+      each_setting_has_a_config_section
+      merge_external_config
+      parseable.configuration = @settings
+    end
 
-      # support heroku_san format
-      if settings.has_key? 'apps'
-        settings = settings['apps']
-        settings.each_pair do |stage, app_name|
-          settings[stage] = {'app' => app_name}
-        end
+    def convert_from_heroku_san_format
+      (settings.delete('apps') || {}).each_pair do |stage, app_name|
+        settings[stage] = {'app' => app_name}
       end
+    end
 
-      # load external config
-      if (config_repo = settings.delete('config_repo'))
-        require 'tmpdir'
-        tmp_config_dir = Dir.mktmpdir
-        tmp_config_file = File.join tmp_config_dir, 'config.yml'
-        git_clone(config_repo, tmp_config_dir)
-        extra_config = parse_yaml(tmp_config_file)
-      else
-        extra_config = {}
-      end
-
-      # make sure each app has a 'config' section & merge w/extra
+    def each_setting_has_a_config_section
       settings.keys.each do |name|
         settings[name] ||= {}
         settings[name]['config'] ||= {}
-        settings[name]['config'].merge!(extra_config[name]) if extra_config[name]
       end
-
-      parseable.configuration = settings
     end
 
-    private
+    def merge_external_config
+      extra_config = parse_external_config(settings.delete('config_repo'))
+      return unless extra_config
+      settings.keys.each do |name|
+        settings[name]['config'].merge!(extra_config[name]) if extra_config[name]
+      end
+    end
+
+    def parse_external_config(config_repo)
+      return if config_repo.nil?
+      require 'tmpdir'
+      Dir.mktmpdir do |dir|
+        git_clone config_repo, dir
+        parse_yaml File.join(dir, 'config.yml')
+      end
+    end
+
+      private
 
     def parse_yaml(config_file)
       if File.exists?(config_file)

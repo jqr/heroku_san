@@ -3,5 +3,7 @@ production:
   app: awesomeapp
 staging:
   app: awesomeapp-staging
-demo: 
+  config:
+    EXTRA: 'bar'
+demo:
   app: awesomeapp-demo
