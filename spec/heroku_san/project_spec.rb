@@ -2,30 +2,15 @@ require 'spec_helper'
 require 'tmpdir'
 
 describe HerokuSan::Project do
-  let(:configuration) { {'production' => {}, 'staging' => {}, 'demo' => {}} }
   let(:heroku_san) { HerokuSan::Project.new("") }
   subject { heroku_san }
-  before(:each) do
-    heroku_san.configuration= configuration
+  before do
+    HerokuSan::Configuration.new(Configurable.new).tap do |config|
+      config.configuration = {'production' => {}, 'staging' => {}, 'demo' => {}}
+      heroku_san.configuration = config.stages
+    end
   end
 
-  describe ".new" do
-    its(:all) { should =~ %w[production staging demo] }
-    specify "with a missing config file has no stages" do
-      heroku_san.configuration= {}
-      heroku_san.all.should == []
-    end
-  
-    specify "with a deploy option configures each stage with the strategy" do
-      heroku_san.options[:deploy] = HerokuSan::Deploy::Base
-      heroku_san.configuration= configuration # necessary, for now, to rebuild stages with the new deploy strategy
-      heroku_san << heroku_san.all
-      heroku_san.each_app do |stage|
-        stage.instance_variable_get('@options')['deploy'].should == HerokuSan::Deploy::Base
-      end
-    end
-  end
-  
   describe "#apps constructs the deploy list" do
     it "appends known shorthands to apps" do
       heroku_san.apps.should == []
@@ -87,30 +72,6 @@ describe HerokuSan::Project do
     it "returns a config section" do
       heroku_san.all.each do |app|
         heroku_san[app].should be_a HerokuSan::Stage
-      end
-    end
-  end
-
-  # TODO: Extract this method
-  describe "#create_config" do
-    context "unknown project" do
-      let(:template_config_file) do
-        path = File.join(SPEC_ROOT, "..", "lib/templates", "heroku.example.yml")
-        (File.respond_to? :realpath) ? File.realpath(path) : path
-      end
-
-      it "creates a new file using the example file" do
-        Dir.mktmpdir do |dir|
-          heroku_san.config_file = tmp_config_file = File.join(dir, 'config.yml')
-          FileUtils.should_receive(:cp).with(File.expand_path(template_config_file), tmp_config_file)
-          heroku_san.create_config.should be_true
-        end
-      end
-
-      it "does not overwrite an existing file" do
-        FileUtils.should_not_receive(:cp)
-        heroku_san.config_file = File.join(SPEC_ROOT, "fixtures", "example.yml")
-        heroku_san.create_config.should be_false
       end
     end
   end

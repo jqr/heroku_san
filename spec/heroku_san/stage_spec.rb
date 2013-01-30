@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe HerokuSan::Stage do
   include Git
-  subject { HerokuSan::Stage.new('production', {"app" => "awesomeapp", "stack" => "cedar"})}
+  subject { HerokuSan::Stage.new('production', {"deploy" => HerokuSan::Deploy::Rails, "app" => "awesomeapp", "stack" => "cedar"})}
   STOCK_CONFIG = {"BUNDLE_WITHOUT"=>"development:test", "LANG"=>"en_US.UTF-8", "RACK_ENV"=>"production"}
   before do
     HerokuSan::Stage.any_instance.stub(:preflight_check_for_cli)
@@ -44,7 +44,7 @@ describe HerokuSan::Stage do
       end
     end
   
-    it "returns the stack name from the config if it is set there" do
+    it "returns the stack name from the config when it is set there" do
       subject = HerokuSan::Stage.new('production', {"app" => "awesomeapp", "stack" => "cedar"})
       subject.stack.should == 'cedar'
     end
@@ -174,18 +174,22 @@ describe HerokuSan::Stage do
     after do
       subject.heroku.delete_app(@app)
     end
+
     it "uses the provided name" do
       (@app = subject.create).should == 'awesomeapp'
     end
+
     it "creates an app on heroku" do
       subject = HerokuSan::Stage.new('production')
       (@app = subject.create).should =~ /generated-name-\d+/
     end
+
     it "uses the default stack if none is given" do
       subject = HerokuSan::Stage.new('production')
       (@app = subject.create).should =~ /generated-name-\d+/
       subject.heroku.get_stack(@app).body.detect{|stack| stack['current']}['name'].should == 'bamboo-mri-1.9.2'
-    end    
+    end
+
     it "uses the stack from the config" do
       (@app = subject.create).should == 'awesomeapp'
       subject.heroku.get_stack(@app).body.detect{|stack| stack['current']}['name'].should == 'cedar'
@@ -196,6 +200,22 @@ describe HerokuSan::Stage do
     it "returns the remote config" do
       with_app(subject, 'name' => subject.app) do |app_data|
         subject.long_config.should == STOCK_CONFIG
+      end
+    end
+  end
+
+  describe "#push_config" do
+    it "updates the configuration settings on Heroku" do
+      subject = HerokuSan::Stage.new('test', {"app" => "awesomeapp", "config" => {'FOO' => 'bar', 'DOG' => 'emu'}})
+      with_app(subject, 'name' => subject.app) do |app_data|
+        subject.push_config.should == STOCK_CONFIG.merge('FOO' => 'bar', 'DOG' => 'emu')
+      end
+    end
+
+    it "pushes the options hash" do
+      subject = HerokuSan::Stage.new('test', {"app" => "awesomeapp", "config" => {'FOO' => 'bar', 'DOG' => 'emu'}})
+      with_app(subject, 'name' => subject.app) do |app_data|
+        subject.push_config('RACK_ENV' => 'magic').should == STOCK_CONFIG.merge('RACK_ENV' => 'magic')
       end
     end
   end
@@ -213,24 +233,10 @@ describe HerokuSan::Stage do
       subject.should_receive(:system).with("heroku", "logs", "--app", "awesomeapp") { true }
       subject.logs
     end
+
     it "tails log files" do
       subject.should_receive(:system).with("heroku", "logs", "--tail", "--app", "awesomeapp") { true }
       subject.logs(:tail)
-    end
-  end
-
-  describe "#push_config" do
-    it "updates the configuration settings on Heroku" do
-      subject = HerokuSan::Stage.new('test', {"app" => "awesomeapp", "config" => {'FOO' => 'bar', 'DOG' => 'emu'}})
-      with_app(subject, 'name' => subject.app) do |app_data|
-        subject.push_config.should == STOCK_CONFIG.merge('FOO' => 'bar', 'DOG' => 'emu')
-      end
-    end
-    it "pushes the options hash" do
-      subject = HerokuSan::Stage.new('test', {"app" => "awesomeapp", "config" => {'FOO' => 'bar', 'DOG' => 'emu'}})
-      with_app(subject, 'name' => subject.app) do |app_data|
-        subject.push_config('RACK_ENV' => 'magic').should == STOCK_CONFIG.merge('RACK_ENV' => 'magic')
-      end
     end
   end
 
@@ -264,6 +270,7 @@ describe HerokuSan::Stage do
         subject.installed_addons.map{|a|a['name']}.should =~ subject.install_addons.map{|a| a['name']}
       end
     end
+
     it "only installs missing addons" do
       subject = HerokuSan::Stage.new('production', {"app" => "awesomeapp", "stack" => "bamboo-ree-1.8.7", "addons" => %w[shared-database:5mb custom_domains:basic ssl:piggyback]})
       with_app(subject, 'name' => subject.app) do |app_data| 

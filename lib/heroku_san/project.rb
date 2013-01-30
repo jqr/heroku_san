@@ -3,6 +3,7 @@ module HerokuSan
     include Git
     attr_accessor :config_file
     attr_reader :options
+    attr_writer :configuration
 
     def initialize(config_file = '', options = {})
       @config_file = config_file
@@ -10,44 +11,20 @@ module HerokuSan
       @apps = []
     end
 
-    # TODO: Extract the stage factory from this method
-    def configuration=(configuration)
-      @stages = configuration.inject({}) do |stages, (stage, settings)|
-        stages[stage] = HerokuSan::Stage.new(stage, settings.merge('deploy' => (options[:deploy]||options['deploy'])))
-        stages
-      end
+    def configuration
+      @configuration ||= HerokuSan::Configuration.new(self).stages
     end
 
-    # TODO: Extract the parser from this method
-    def stages
-      # Yeah, I know, weird. The parser collaborates with project to create the configuration
-      if !@stages
-        HerokuSan::Parser.new.parse(self)
-      end
-      @stages
-    end
-
-    def template
-      File.expand_path(File.join(File.dirname(__FILE__), '../templates', 'heroku.example.yml'))
-    end
-
-    # TODO: Extract this method
     def create_config
-      # TODO: Convert true/false returns to success/exception
-      if File.exists?(config_file)
-        false
-      else
-        FileUtils.cp(template, config_file)
-        true
-      end
+      HerokuSan::Configuration.new(self).generate_config
     end
 
     def all
-      stages.keys
+      configuration.keys
     end
   
     def [](stage)
-      stages[stage]
+      configuration[stage]
     end
   
     def <<(*app)
