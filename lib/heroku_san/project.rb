@@ -1,11 +1,11 @@
 module HerokuSan
   class Project
     include Git
-    attr_accessor :config_file
+    attr_reader :config_file
     attr_reader :options
     attr_writer :configuration
 
-    def initialize(config_file = '', options = {})
+    def initialize(config_file = nil, options = {})
       @config_file = config_file
       @options = options
       @apps = []

@@ -39,12 +39,14 @@ describe GitTest do
       subject.should_receive("`").with("git tag -l 'pattern*'") { "x\n\y\n\z\n" }
       subject.git_tag('pattern*').should == "z"
     end
+
     it "raises exception if no tags match the pattern" do
       subject.should_receive("`").with("git tag -l 'pattern*'") { "\n" }
       expect {
         subject.git_tag('pattern*')
       }.to raise_error(Git::NoTagFoundError)
     end
+
     it "returns nil for a nil glob" do
       subject.should_not_receive("`").with("git tag -l ''") { "\n" }
       subject.git_tag(nil).should == nil
@@ -56,6 +58,7 @@ describe GitTest do
       subject.should_receive("`").with("git rev-parse prod/1234567890") { "sha\n" }
       subject.git_rev_parse('prod/1234567890').should == "sha"
     end
+
     it "returns nil for a blank tag" do
       subject.should_not_receive("`").with("git rev-parse ") { "\n" }
       subject.git_rev_parse(nil).should == nil

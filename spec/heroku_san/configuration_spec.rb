@@ -33,7 +33,7 @@ describe HerokuSan::Configuration do
 
       it "does not overwrite an existing file" do
         FileUtils.should_not_receive(:cp)
-        configurable.config_file = File.join(SPEC_ROOT, "fixtures", "example.yml")
+        configurable.config_file = fixture("example.yml")
         configuration.generate_config.should be_false
       end
     end

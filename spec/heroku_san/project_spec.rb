@@ -2,7 +2,7 @@ require 'spec_helper'
 require 'tmpdir'
 
 describe HerokuSan::Project do
-  let(:heroku_san) { HerokuSan::Project.new("") }
+  let(:heroku_san) { HerokuSan::Project.new }
   subject { heroku_san }
   before do
     HerokuSan::Configuration.new(Configurable.new).tap do |config|

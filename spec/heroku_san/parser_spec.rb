@@ -5,7 +5,7 @@ describe HerokuSan::Parser do
 
   describe '#parse' do
     context 'using the new format' do
-      let(:parseable) { Parseable.new(File.join(SPEC_ROOT, "fixtures", "example.yml")) }
+      let(:parseable) { Parseable.new(fixture("example.yml")) }
 
       it "returns a list of apps" do
         parser.parse(parseable)
@@ -18,7 +18,7 @@ describe HerokuSan::Parser do
     end
 
     context "using the old heroku_san format" do
-      let(:parseable) { Parseable.new(File.join(SPEC_ROOT, "fixtures", "old_format.yml")) }
+      let(:parseable) { Parseable.new(fixture("old_format.yml")) }
 
       it "returns a list of apps" do
         parser.parse(parseable)

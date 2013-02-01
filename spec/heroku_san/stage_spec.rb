@@ -117,6 +117,7 @@ describe HerokuSan::Stage do
         subject.deploy
       end
     end
+
     context "using a custom strategy" do
       class TestDeployStrategy < HerokuSan::Deploy::Base
         def deploy; end
@@ -158,6 +159,7 @@ describe HerokuSan::Stage do
           subject.maintenance {reactor.scram(:now)} 
         end
       end
+
       it "ensures that maintenance mode is turned off" do
         with_app(subject, 'name' => subject.app) do |app_data|
           subject.heroku.should_receive(:post_app_maintenance).with(subject.app, '1').ordered
@@ -246,6 +248,7 @@ describe HerokuSan::Stage do
       subject.should_receive(:git_named_rev).with('sha') {"sha production/123456"}
       subject.revision.should == 'sha production/123456'
     end
+
     it "returns nil if the stage has never been deployed" do
       subject.should_receive(:git_revision).with(subject.repo) {nil}
       subject.should_receive(:git_named_rev).with(nil) {''}

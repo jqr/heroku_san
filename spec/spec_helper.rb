@@ -20,4 +20,8 @@ RSpec.configure do |config|
   config.mock_with :rspec
 end
 
+def fixture(filename)
+  File.join(SPEC_ROOT, "fixtures", filename)
+end
+
 require File.join(SPEC_ROOT, '/../lib/heroku_san')
