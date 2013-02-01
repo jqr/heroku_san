@@ -1,4 +1,8 @@
-# Change log (curated)
+# Change Log (curated)
+
+## v4.1.0
+
+  * Extracted `Parser` and `Configuration` classes from `Project`. This *should* be a feature-neutral version change. There are a few API additions, but they should not be needed by the general `heroku_san` population.
 
 ## v4.0.8
 
@@ -62,7 +66,7 @@
 
 ## v2.1.4
 
-  * Use heroku-api for client calls instead heroku gem
+  * Use heroku-api for client calls instead of heroku gem
 
 ## v2.1.3
 
