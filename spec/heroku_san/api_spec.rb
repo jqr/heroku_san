@@ -11,7 +11,7 @@ describe HerokuSan::API do
   it "reports Excon errors in a more human readable format" do
     error_message = 'Name is already taken'
     status_message = '000 Status'
-    response = mock("Response", body: %Q[{"error":"#{error_message}"}], headers: {'Status' => status_message})
+    response = mock("Response", :body => %Q[{"error":"#{error_message}"}], :headers => {'Status' => status_message})
     Heroku::API.any_instance.should_receive(:api_method).and_raise(Heroku::API::Errors::ErrorWithResponse.new("excon message", response))
 
     $stderr.should_receive(:puts).with("\nHeroku API ERROR: #{status_message} (#{error_message})\n\n")
