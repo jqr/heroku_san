@@ -1,5 +1,10 @@
 # Change Log (curated)
 
+## v4.2.0
+
+  * Wrap API calls so that errors are reported in a more human-fiendly way
+  * Closes #105
+
 ## v4.1.0
 
   * Extracted `Parser` and `Configuration` classes from `Project`. This *should* be a feature-neutral version change. There are a few API additions, but they should not be needed by the general `heroku_san` population.
