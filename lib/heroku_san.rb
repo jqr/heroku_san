@@ -1,5 +1,6 @@
 require File.join(File.dirname(__FILE__), 'railtie.rb') if defined?(Rails) && Rails::VERSION::MAJOR >= 3
 require 'git'
+require 'heroku_san/api'
 require 'heroku_san/stage'
 require 'heroku_san/parser'
 require 'heroku_san/project'

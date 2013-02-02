@@ -150,7 +150,7 @@ describe HerokuSan::Stage do
     end
     
     context "with a block" do
-      it "wraps it in a maitenance mode" do
+      it "wraps it in a maintenance mode" do
         with_app(subject, 'name' => subject.app) do |app_data|
           subject.heroku.should_receive(:post_app_maintenance).with(subject.app, '1').ordered
           reactor = mock("Reactor"); reactor.should_receive(:scram).with(:now).ordered

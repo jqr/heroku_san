@@ -19,7 +19,7 @@ module HerokuSan
     end
     
     def heroku
-      @heroku ||= Heroku::API.new(:api_key => auth_token, :mock => MOCK)
+      @heroku ||= HerokuSan::API.new(:api_key => auth_token, :mock => MOCK)
     end
 
     def app
