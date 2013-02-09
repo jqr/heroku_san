@@ -11,8 +11,12 @@ module HerokuSan
       @apps = []
     end
 
+    def stages
+      @stages ||= configuration.stages
+    end
+
     def configuration
-      @configuration ||= HerokuSan::Configuration.new(self).stages
+      @configuration ||= HerokuSan::Configuration.new(self)
     end
 
     def create_config
@@ -20,20 +24,20 @@ module HerokuSan
     end
 
     def all
-      configuration.keys
+      stages.keys
     end
-  
+
     def [](stage)
-      configuration[stage]
+      stages[stage]
     end
-  
+
     def <<(*app)
       app.flatten.each do |a|
         @apps << a if all.include?(a)
       end
       self
     end
-  
+
     def apps
       if @apps && !@apps.empty?
         @apps
@@ -43,15 +47,16 @@ module HerokuSan
           all
         else
           active_branch = self.git_active_branch
-          all.select do |app| 
+          all.select do |app|
             app == active_branch and ($stdout.puts("Defaulting to '#{app}' as it matches the current branch"); true)
           end
         end
       end
     end
-  
+
     def each_app
       raise NoApps if apps.empty?
+      HerokuSan::Parser.new.merge_external_config!(configuration, stages.values)
       apps.each do |stage|
         yield self[stage]
       end

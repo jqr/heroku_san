@@ -6,8 +6,9 @@ module HerokuSan
       @settings = parse_yaml(parseable.config_file)
       convert_from_heroku_san_format
       each_setting_has_a_config_section
-      merge_external_config
+      parseable.external_configuration = @settings.delete 'config_repo'
       parseable.configuration = @settings
+
     end
 
     def convert_from_heroku_san_format
@@ -23,15 +24,15 @@ module HerokuSan
       end
     end
 
-    def merge_external_config
-      extra_config = parse_external_config(settings.delete('config_repo'))
+    def merge_external_config!(parseable, stages)
+      extra_config = parse_external_config!(parseable.external_configuration)
       return unless extra_config
-      settings.keys.each do |name|
-        settings[name]['config'].merge!(extra_config[name]) if extra_config[name]
+      stages.each do |stage|
+        stage.config.merge!(extra_config[stage.name]) if extra_config[stage.name]
       end
     end
 
-    def parse_external_config(config_repo)
+    def parse_external_config!(config_repo)
       return if config_repo.nil?
       require 'tmpdir'
       Dir.mktmpdir do |dir|

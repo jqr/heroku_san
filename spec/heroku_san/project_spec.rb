@@ -7,7 +7,7 @@ describe HerokuSan::Project do
   before do
     HerokuSan::Configuration.new(Configurable.new).tap do |config|
       config.configuration = {'production' => {}, 'staging' => {}, 'demo' => {}}
-      heroku_san.configuration = config.stages
+      heroku_san.configuration = config
     end
   end
 
@@ -42,8 +42,14 @@ describe HerokuSan::Project do
       end
     
       context "with only a single configured app" do        
+        before do
+          HerokuSan::Configuration.new(Configurable.new).tap do |config|
+            config.configuration = {'production' => {}}
+            heroku_san.configuration = config
+          end
+        end
+
         it "returns the app" do
-          heroku_san.configuration= {'production' => {}}
           $stdout.should_receive(:puts).with('Defaulting to "production" since only one app is defined')
           expect {
             heroku_san.apps.should == %w[production]

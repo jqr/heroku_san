@@ -53,35 +53,35 @@ describe HerokuSan::Parser do
   end
 
   describe "#merge_external_config" do
+    let(:stages) { [stub(name: 'production', config: prod_config), stub(name: 'staging', config: staging_config)] }
+    let(:prod_config) { mock('Production Config') }
+    let(:staging_config) { {'EXTRA' => 'bar'} }
     let(:extras) { {'production' => {'EXTRA' => 'bar'}, 'staging' => {'EXTRA' => 'foo'}} }
 
     context "with no extras" do
-      it "doesn't change settings" do
-        parser.settings = {'production' => {'config' => {}}}
-        expect {
-          parser.merge_external_config
-        }.not_to change(parser, :settings)
+      let(:parseable) { stub external_configuration: nil }
+
+      it "doesn't change prod_config" do
+        prod_config.should_not_receive :merge!
+        parser.merge_external_config! parseable, stages
       end
     end
 
     context "with extra" do
+      let(:parseable) { stub external_configuration: 'config_repos' }
       before(:each) do
         parser.should_receive(:git_clone).with('config_repos', anything)
         parser.should_receive(:parse_yaml).and_return(extras)
       end
 
       it "merges extra configuration bits" do
-        parser.settings = {'config_repo' => 'config_repos', 'production' => {'config' => {}}}
-        expect {
-          parser.merge_external_config
-        }.to change(parser, :settings).to({"production" => {"config" => {"EXTRA" => "bar"}}})
+        prod_config.should_receive(:merge!).with extras['production']
+        parser.merge_external_config! parseable, [stages.first]
       end
 
       it "overrides the main configuration" do
-        parser.settings = {'config_repo' => 'config_repos', 'staging' => {'config' => {'EXTRA' => 'bar'}}}
-        expect {
-          parser.merge_external_config
-        }.to change(parser, :settings).to({"staging" => {"config" => {"EXTRA" => "foo"}}})
+        parser.merge_external_config! parseable, [stages.last]
+        staging_config.should == {"EXTRA" => "foo"}
       end
     end
   end

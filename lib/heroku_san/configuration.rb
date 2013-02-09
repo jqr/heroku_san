@@ -2,6 +2,7 @@ module HerokuSan
   class Configuration
     attr_reader :config_file
     attr_accessor :configuration
+    attr_accessor :external_configuration
     attr_reader :options
 
     def initialize(configurable)
