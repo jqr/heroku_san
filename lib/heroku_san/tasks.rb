@@ -1,6 +1,6 @@
 require 'heroku_san'
 require 'git'
-include Git
+include HerokuSan::Git
 
 if defined?(Rails)
   HerokuSan.project ||= HerokuSan::Project.new(
