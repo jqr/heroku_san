@@ -1,5 +1,5 @@
 require 'heroku_san'
-require 'git'
+require 'heroku_san/git'
 include HerokuSan::Git
 
 if defined?(Rails)
