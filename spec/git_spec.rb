@@ -1,7 +1,7 @@
 require 'spec_helper'
 require 'git'
 
-class GitTest; include Git; end
+class GitTest; include HerokuSan::Git; end
 
 describe GitTest do
   describe "#git_push" do    
@@ -44,7 +44,7 @@ describe GitTest do
       subject.should_receive("`").with("git tag -l 'pattern*'") { "\n" }
       expect {
         subject.git_tag('pattern*')
-      }.to raise_error(Git::NoTagFoundError)
+      }.to raise_error(HerokuSan::Git::NoTagFoundError)
     end
 
     it "returns nil for a nil glob" do
