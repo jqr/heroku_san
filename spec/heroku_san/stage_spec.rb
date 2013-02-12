@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe HerokuSan::Stage do
-  include Git
+  include HerokuSan::Git
   subject { HerokuSan::Stage.new('production', {"deploy" => HerokuSan::Deploy::Rails, "app" => "awesomeapp", "stack" => "cedar"})}
   STOCK_CONFIG = {"BUNDLE_WITHOUT"=>"development:test", "LANG"=>"en_US.UTF-8", "RACK_ENV"=>"production"}
   before do

@@ -1,6 +1,6 @@
 module HerokuSan
   class Parser
-    include Git
+    include HerokuSan::Git
     attr_accessor :settings
     def parse(parseable)
       @settings = parse_yaml(parseable.config_file)

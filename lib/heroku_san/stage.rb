@@ -5,7 +5,7 @@ MOCK = false unless defined?(MOCK)
 
 module HerokuSan
   class Stage
-    include Git
+    include HerokuSan::Git
     attr_reader :name
     attr_reader :options
 

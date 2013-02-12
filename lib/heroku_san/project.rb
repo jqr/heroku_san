@@ -1,6 +1,6 @@
 module HerokuSan
   class Project
-    include Git
+    include HerokuSan::Git
     attr_reader :config_file
     attr_reader :options
     attr_writer :configuration
