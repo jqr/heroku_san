@@ -33,7 +33,7 @@ end
 
 task :after_deploy do
   each_heroku_app do |stage|
-    create_and_push(stage.name, stage.revision)
+    create_and_push(stage.name, stage.revision.split.first)
   end
   Rake::Task['autotag:list'].invoke
 end
