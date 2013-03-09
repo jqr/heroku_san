@@ -5,8 +5,8 @@ module HerokuSan
     def parse(parseable)
       @settings = parse_yaml(parseable.config_file)
       convert_from_heroku_san_format
-      each_setting_has_a_config_section
       parseable.external_configuration = @settings.delete 'config_repo'
+      each_setting_has_a_config_section
       parseable.configuration = @settings
 
     end
