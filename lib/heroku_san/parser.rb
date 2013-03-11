@@ -1,3 +1,5 @@
+require 'yaml'
+
 module HerokuSan
   class Parser
     include HerokuSan::Git
