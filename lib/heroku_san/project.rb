@@ -1,19 +1,29 @@
 module HerokuSan
   class Project
-    attr_reader :parser
+    attr_accessor :config_file
+    attr_accessor :configuration
+    attr_reader :options
 
     include Git
 
     # TODO: replace config_file with dependency injected Parser
     def initialize(config_file, options = {})
+      @config_file = config_file
+      @options = options
       @apps = []
-      @app_settings = {}
-      @parser = Parser.new(config_file)
-      @parser.parse.each do |stage, settings|
-        # TODO: Push this eval later (j.i.t.)
-        @app_settings[stage] = HerokuSan::Stage.new(stage, settings.merge('deploy' => (options[:deploy]||options['deploy'])))
+    end
+
+    def app_settings
+      @app_settings ||= begin
+        HerokuSan::Parser.new.parse(self)
+        configuration.inject({}) do |stages, (stage, settings)|
+          # TODO: Push this eval later (j.i.t.)
+          stages[stage] = HerokuSan::Stage.new(stage, settings.merge('deploy' => (options[:deploy]||options['deploy'])))
+          stages
+        end
       end
     end
+
 
     def create_config
       # TODO: Convert true/false returns to success/exception
@@ -26,25 +36,21 @@ module HerokuSan
       end
     end
 
-    def config_file
-      parser.config_file
+    def all
+      app_settings.keys
     end
 
-    def all
-      @app_settings.keys
-    end
-  
     def [](stage)
-      @app_settings[stage]
+      app_settings[stage]
     end
-  
+
     def <<(*app)
       app.flatten.each do |a|
         @apps << a if all.include?(a)
       end
       self
     end
-  
+
     def apps
       if @apps && !@apps.empty?
         @apps
@@ -54,13 +60,13 @@ module HerokuSan
           all
         else
           active_branch = self.git_active_branch
-          all.select do |app| 
+          all.select do |app|
             app == active_branch and ($stdout.puts("Defaulting to '#{app}' as it matches the current branch") || true)
           end
         end
       end
     end
-  
+
     def each_app
       raise NoApps if apps.empty?
       apps.each do |stage|

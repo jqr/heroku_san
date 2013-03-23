@@ -4,3 +4,4 @@
 2. Change spec
 3. Refactor parser
 4. Wow. There are NO unit tests for the Parser... let's go make them now
+5. Refactor project
