@@ -1,0 +1,2 @@
+1. Rename app_settings to settings in Parser
+2. Rename app_settings to configuration in Project
