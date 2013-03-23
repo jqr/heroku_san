@@ -2,14 +2,8 @@ require 'yaml'
 
 module HerokuSan
   class Parser
-    attr_reader :config_file
-
-    def initialize(config_file)
-      @config_file = config_file
-    end
-
-    def parse
-      app_settings = parse_yaml(config_file)
+    def parse(parseable)
+      app_settings = parse_yaml(parseable.config_file)
 
       # support heroku_san format
       if app_settings.has_key? 'apps'
@@ -37,7 +31,7 @@ module HerokuSan
         app_settings[name]['config'].merge!(extra_config[name]) if extra_config[name]
       end
 
-      app_settings
+      parseable.configuration = app_settings
     end
 
     private
