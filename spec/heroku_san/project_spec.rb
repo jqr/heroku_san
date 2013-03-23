@@ -94,7 +94,7 @@ describe HerokuSan::Project do
       heroku_san.all.should =~ %w[production staging demo]
     end
   end
-        
+
   describe "#create_config" do
     context "unknown project" do
       let(:template_config_file) do
@@ -110,12 +110,12 @@ describe HerokuSan::Project do
           heroku_san.create_config.should be_true
         end
       end
-    
+
       it "does not overwrite an existing file" do
         FileUtils.should_not_receive(:cp)
         heroku_san.create_config.should be_false
       end
-    end    
-  end    
+    end
+  end
 
 end

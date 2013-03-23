@@ -2,6 +2,7 @@ require File.join(File.dirname(__FILE__), 'railtie.rb') if defined?(Rails) && Ra
 require 'git'
 require 'heroku_san/stage'
 require 'heroku_san/project'
+require 'heroku_san/parser'
 require 'heroku_san/deploy/rails'
 require 'heroku_san/deploy/sinatra'
 

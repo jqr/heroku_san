@@ -1,0 +1,9 @@
+# RF1 - Extract method into object
+
+1. Create parser_spec.rb, copy from project_spec: 89-120
+2. Run tests
+3. Create parser.rb
+4. Add parser to heroku_san.rb
+5. Apply p1
+6. Copy methods from project.rb into parser.rb
+7. Apply p2
