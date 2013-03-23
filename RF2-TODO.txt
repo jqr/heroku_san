@@ -1,0 +1,5 @@
+# RF2 - Use Dependency Injection to Create Collaborators
+
+1. oops! #create_config doesn't belong in Parser (any more than Project, but ...)
+
+
