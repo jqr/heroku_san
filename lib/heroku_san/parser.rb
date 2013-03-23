@@ -8,17 +8,6 @@ module HerokuSan
       @config_file = config_file
     end
 
-    def create_config
-      # TODO: Convert true/false returns to success/exception
-      template = File.expand_path(File.join(File.dirname(__FILE__), '../templates', 'heroku.example.yml'))
-      if File.exists?(config_file)
-        false
-      else
-        FileUtils.cp(template, config_file)
-        true
-      end
-    end
-
     def parse
       app_settings = parse_yaml(config_file)
 

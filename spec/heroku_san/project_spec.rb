@@ -86,4 +86,36 @@ describe HerokuSan::Project do
       end
     end
   end
+
+  describe "#create_config" do
+    context "using the heroku_san format" do
+      let(:project) { HerokuSan::Project.new(File.join(SPEC_ROOT, "fixtures", "old_format.yml")) }
+
+      it "returns a list of apps" do
+        project.all.should =~ %w[production staging demo]
+      end
+    end
+
+    context "unknown project" do
+      let(:template_config_file) do
+        path = File.join(SPEC_ROOT, "..", "lib/templates", "heroku.example.yml")
+        (File.respond_to? :realpath) ? File.realpath(path) : path
+      end
+
+      it "creates a new file using the example file" do
+        Dir.mktmpdir do |dir|
+          tmp_config_file = File.join dir, 'config.yml'
+          project = HerokuSan::Project.new(tmp_config_file)
+          FileUtils.should_receive(:cp).with(File.expand_path(template_config_file), tmp_config_file)
+          project.create_config.should be_true
+        end
+      end
+
+      it "does not overwrite an existing file" do
+        project = HerokuSan::Project.new(File.join(SPEC_ROOT, "fixtures", "example.yml"))
+        FileUtils.should_not_receive(:cp)
+        project.create_config.should be_false
+      end
+    end
+  end
 end
