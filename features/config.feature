@@ -1,7 +1,7 @@
 Feature: Command Line
 
   Background:
-    Given I run `rails new heroku_san_test --quiet --force --database=postgresql --skip-bundle --skip-javascript --skip-test-unit --skip-sprockets`
+    Given I run `rails new heroku_san_test --quiet --force --skip-active-record --skip-bundle --skip-javascript --skip-test-unit --skip-sprockets`
     And I cd to "heroku_san_test"
     And I overwrite "Gemfile" with:
       """
@@ -13,15 +13,15 @@ Feature: Command Line
   Scenario: Config file can be formatted like Rails' database.yml
     Given a file named "config/heroku.yml" with:
       """
-      production: 
+      production:
         app: awesomeapp
       staging:
         app: awesomeapp-staging
-      demo: 
+      demo:
         app: awesomeapp-demo
       development:
-        app: 
-      
+        app:
+
       """
 
     When I run `rake --trace heroku:apps:local`
@@ -68,7 +68,7 @@ Feature: Command Line
     Then a file named "config/heroku.yml" should exist
     And the output should match /Copied example config to ".*.config.heroku.yml"/
     And the output should match /Please edit ".*.config.heroku.yml" with your application's settings./
-  
+
   Scenario: heroku:create_config with an EDITOR set in the environment
     When I run `rake EDITOR=echo --trace heroku:create_config`
     And the output should match /Copied example config to ".*.config.heroku.yml"/

@@ -1,3 +1,5 @@
+require 'yaml'
+
 module HerokuSan
   class Project
     attr_reader :config_file

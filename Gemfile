@@ -4,12 +4,12 @@ source 'https://rubygems.org'
 gemspec
 
 group :development do
-  gem 'rails', '>= 2'
+  gem 'rails', '>= 3'
   gem 'rspec'
   gem 'aruba'
-  gem 'cucumber'
+  gem 'cucumber', '1.2.3'
   gem 'rake'
-  gem 'bundler', '~> 1.1'
+  gem 'bundler'
   gem 'git-smart'
   gem 'godot'
   gem 'guard'

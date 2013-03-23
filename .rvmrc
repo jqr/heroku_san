@@ -1,1 +1,1 @@
-rvm gemset use heroku_san --create
+rvm gemset use heroku_san-rf1 --create
