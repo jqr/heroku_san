@@ -13,8 +13,8 @@ module HerokuSan
       @apps = []
     end
 
-    def app_settings
-      @app_settings ||= begin
+    def configuration
+      @configuration ||= begin
         HerokuSan::Parser.new.parse(self)
         configuration.inject({}) do |stages, (stage, settings)|
           stages[stage] = HerokuSan::Stage.new(stage, settings.merge('deploy' => (options[:deploy]||options['deploy'])))
@@ -35,11 +35,11 @@ module HerokuSan
     end
 
     def all
-      app_settings.keys
+      configuration.keys
     end
   
     def [](stage)
-      app_settings[stage]
+      configuration[stage]
     end
   
     def <<(*app)

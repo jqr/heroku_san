@@ -5,18 +5,18 @@ module HerokuSan
     attr_reader :config_file
 
     def parse(parseable)
-      app_settings = parse_yaml(parseable.config_file)
+      settings = parse_yaml(parseable.config_file)
 
       # support heroku_san format
-      if app_settings.has_key? 'apps'
-        app_settings = app_settings['apps']
-        app_settings.each_pair do |stage, app_name|
-          app_settings[stage] = {'app' => app_name}
+      if settings.has_key? 'apps'
+        settings = settings['apps']
+        settings.each_pair do |stage, app_name|
+          settings[stage] = {'app' => app_name}
         end
       end
 
       # load external config
-      if (config_repo = app_settings.delete('config_repo'))
+      if (config_repo = settings.delete('config_repo'))
         require 'tmpdir'
         tmp_config_dir = Dir.mktmpdir
         tmp_config_file = File.join tmp_config_dir, 'config.yml'
@@ -27,13 +27,13 @@ module HerokuSan
       end
 
       # make sure each app has a 'config' section & merge w/extra
-      app_settings.keys.each do |name|
-        app_settings[name] ||= {}
-        app_settings[name]['config'] ||= {}
-        app_settings[name]['config'].merge!(extra_config[name]) if extra_config[name]
+      settings.keys.each do |name|
+        settings[name] ||= {}
+        settings[name]['config'] ||= {}
+        settings[name]['config'].merge!(extra_config[name]) if extra_config[name]
       end
 
-      parseable.configuration = app_settings
+      parseable.configuration = settings
     end
 
     private
