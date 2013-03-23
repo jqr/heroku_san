@@ -13,16 +13,20 @@ module HerokuSan
       @apps = []
     end
 
-    def configuration
-      @configuration ||= begin
+    def stages
+      if !@stages
         HerokuSan::Parser.new.parse(self)
-        configuration.inject({}) do |stages, (stage, settings)|
-          stages[stage] = HerokuSan::Stage.new(stage, settings.merge('deploy' => (options[:deploy]||options['deploy'])))
-          stages
-        end
       end
+      @stages
     end
 
+    def configuration=(configuration)
+      @stages = configuration.inject({}) do |stages, (stage, settings)|
+        stages[stage] = HerokuSan::Stage.new(stage, settings.merge('deploy' => (options[:deploy]||options['deploy'])))
+        stages
+      end
+    end
+    
     def create_config
       # TODO: Convert true/false returns to success/exception
       template = File.expand_path(File.join(File.dirname(__FILE__), '../templates', 'heroku.example.yml'))
@@ -35,11 +39,11 @@ module HerokuSan
     end
 
     def all
-      configuration.keys
+      stages.keys
     end
   
     def [](stage)
-      configuration[stage]
+      stages[stage]
     end
   
     def <<(*app)
