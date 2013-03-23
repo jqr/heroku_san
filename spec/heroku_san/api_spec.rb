@@ -1,6 +1,7 @@
 require 'spec_helper'
 
 # https://github.com/fastestforward/heroku_san/issues/105
+module HerokuSan
 describe HerokuSan::API do
   subject(:api) { HerokuSan::API.new(:api_key => 'key', :mock => true)}
   it "is a proxy to the Heroku::API" do
@@ -22,4 +23,5 @@ describe HerokuSan::API do
       error.backtrace.should == []
     }
   end
+end
 end

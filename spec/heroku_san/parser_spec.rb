@@ -1,5 +1,6 @@
 require 'spec_helper'
 
+module HerokuSan
 describe HerokuSan::Parser do
   let(:parser) { subject }
 
@@ -85,4 +86,5 @@ describe HerokuSan::Parser do
       end
     end
   end
+end
 end

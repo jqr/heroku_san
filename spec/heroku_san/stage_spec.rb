@@ -1,5 +1,6 @@
 require 'spec_helper'
 
+module HerokuSan
 describe HerokuSan::Stage do
   include HerokuSan::Git
   subject { HerokuSan::Stage.new('production', {"deploy" => HerokuSan::Deploy::Rails, "app" => "awesomeapp", "stack" => "cedar"})}
@@ -281,4 +282,5 @@ describe HerokuSan::Stage do
       end
     end
   end
+end
 end

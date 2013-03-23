@@ -1,6 +1,7 @@
 require 'spec_helper'
 require 'tmpdir'
 
+module HerokuSan
 describe HerokuSan::Project do
   let(:heroku_san) { HerokuSan::Project.new }
   subject { heroku_san }
@@ -81,4 +82,5 @@ describe HerokuSan::Project do
       end
     end
   end
+end
 end

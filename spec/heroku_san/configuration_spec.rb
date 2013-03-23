@@ -1,5 +1,6 @@
 require 'spec_helper'
 
+module HerokuSan
 describe HerokuSan::Configuration do
   let(:configurable) { Configurable.new }
   let(:configuration) { HerokuSan::Configuration.new(configurable) }
@@ -38,4 +39,5 @@ describe HerokuSan::Configuration do
       end
     end
   end
+end
 end
