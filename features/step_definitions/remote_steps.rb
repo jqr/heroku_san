@@ -3,7 +3,7 @@ require 'active_support/core_ext/string/strip'
 require 'godot'
 
 Given /^I have a new Rails project$/ do
-  cmd = "rails new test_app --quiet --force --database=postgresql --skip-bundle --skip-javascript --skip-test-unit --skip-sprockets"
+  cmd = "rails new test_app --quiet --force --database=postgresql --skip-javascript --skip-test-unit --skip-sprockets"
   run_clean unescape(cmd)
 end
 
@@ -204,6 +204,7 @@ def vladimir
   @vladimir ||= begin
     Godot.new("#{@app}.herokuapp.com", 80).tap do |vladimir|
       vladimir.timeout = 60
+      vladimir.interval = 5
     end
   end
 end
