@@ -23,10 +23,10 @@ module HerokuSan
     def external_config
       if (config_repo = settings.delete('config_repo'))
         require 'tmpdir'
-        tmp_config_dir = Dir.mktmpdir
-        tmp_config_file = File.join tmp_config_dir, 'config.yml'
-        git_clone(config_repo, tmp_config_dir)
-        parse_yaml(tmp_config_file)
+        Dir.mktmpdir do |dir|
+          git_clone(config_repo, dir)
+          parse_yaml(File.join(dir, 'config.yml'))
+        end
       else
         {}
       end
