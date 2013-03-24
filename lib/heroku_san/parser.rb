@@ -2,8 +2,6 @@ require 'yaml'
 
 module HerokuSan
   class Parser
-    attr_reader :config_file
-
     def parse(parseable)
       settings = parse_yaml(parseable.config_file)
 
