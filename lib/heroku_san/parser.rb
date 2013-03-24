@@ -8,17 +8,7 @@ module HerokuSan
       @settings = parse_yaml(parseable.config_file)
 
       convert_from_heroku_san_format
-
-      # load external config
-      if (config_repo = settings.delete('config_repo'))
-        require 'tmpdir'
-        tmp_config_dir = Dir.mktmpdir
-        tmp_config_file = File.join tmp_config_dir, 'config.yml'
-        git_clone(config_repo, tmp_config_dir)
-        extra_config = parse_yaml(tmp_config_file)
-      else
-        extra_config = {}
-      end
+      extra_config = load_external_config
 
       # make sure each app has a 'config' section & merge w/extra
       settings.keys.each do |name|
@@ -33,6 +23,18 @@ module HerokuSan
     def convert_from_heroku_san_format
       (settings.delete('apps') || {}).each_pair do |stage, app_name|
         settings[stage] = {'app' => app_name}
+      end
+    end
+
+    def load_external_config
+      if (config_repo = settings.delete('config_repo'))
+        require 'tmpdir'
+        tmp_config_dir = Dir.mktmpdir
+        tmp_config_file = File.join tmp_config_dir, 'config.yml'
+        git_clone(config_repo, tmp_config_dir)
+        parse_yaml(tmp_config_file)
+      else
+        {}
       end
     end
 
