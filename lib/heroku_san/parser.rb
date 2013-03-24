@@ -2,6 +2,7 @@ require 'yaml'
 
 module HerokuSan
   class Parser
+    include Git
     attr_accessor :settings
 
     def parse(parseable)
@@ -9,8 +10,7 @@ module HerokuSan
 
       convert_from_heroku_san_format
       each_setting_has_a_config_section
-      extra_config = load_external_config
-      merge_extra(extra_config)
+      merge_extra(external_config)
       parseable.configuration = settings
     end
 
@@ -20,7 +20,7 @@ module HerokuSan
       end
     end
 
-    def load_external_config
+    def external_config
       if (config_repo = settings.delete('config_repo'))
         require 'tmpdir'
         tmp_config_dir = Dir.mktmpdir
