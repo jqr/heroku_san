@@ -9,14 +9,7 @@ module HerokuSan
 
       convert_from_heroku_san_format
       extra_config = load_external_config
-
-      # make sure each app has a 'config' section & merge w/extra
-      settings.keys.each do |name|
-        settings[name] ||= {}
-        settings[name]['config'] ||= {}
-        settings[name]['config'].merge!(extra_config[name]) if extra_config[name]
-      end
-
+      each_setting_has_a_config_section_and_merge_extra(extra_config)
       parseable.configuration = settings
     end
 
@@ -35,6 +28,15 @@ module HerokuSan
         parse_yaml(tmp_config_file)
       else
         {}
+      end
+    end
+
+    def each_setting_has_a_config_section_and_merge_extra(extra_config)
+      # make sure each app has a 'config' section & merge w/extra
+      settings.keys.each do |name|
+        settings[name] ||= {}
+        settings[name]['config'] ||= {}
+        settings[name]['config'].merge!(extra_config[name]) if extra_config[name]
       end
     end
 
