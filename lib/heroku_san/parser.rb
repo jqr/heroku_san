@@ -8,8 +8,9 @@ module HerokuSan
       @settings = parse_yaml(parseable.config_file)
 
       convert_from_heroku_san_format
+      each_setting_has_a_config_section
       extra_config = load_external_config
-      each_setting_has_a_config_section_and_merge_extra(extra_config)
+      merge_extra(extra_config)
       parseable.configuration = settings
     end
 
@@ -31,11 +32,15 @@ module HerokuSan
       end
     end
 
-    def each_setting_has_a_config_section_and_merge_extra(extra_config)
-      # make sure each app has a 'config' section & merge w/extra
+    def each_setting_has_a_config_section
       settings.keys.each do |name|
         settings[name] ||= {}
         settings[name]['config'] ||= {}
+      end
+    end
+
+    def merge_extra(extra_config)
+      settings.keys.each do |name|
         settings[name]['config'].merge!(extra_config[name]) if extra_config[name]
       end
     end
