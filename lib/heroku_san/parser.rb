@@ -2,16 +2,12 @@ require 'yaml'
 
 module HerokuSan
   class Parser
-    def parse(parseable)
-      settings = parse_yaml(parseable.config_file)
+    attr_accessor :settings
 
-      # support heroku_san format
-      if settings.has_key? 'apps'
-        settings = settings['apps']
-        settings.each_pair do |stage, app_name|
-          settings[stage] = {'app' => app_name}
-        end
-      end
+    def parse(parseable)
+      @settings = parse_yaml(parseable.config_file)
+
+      convert_from_heroku_san_format
 
       # load external config
       if (config_repo = settings.delete('config_repo'))
@@ -32,6 +28,12 @@ module HerokuSan
       end
 
       parseable.configuration = settings
+    end
+
+    def convert_from_heroku_san_format
+      (settings.delete('apps') || {}).each_pair do |stage, app_name|
+        settings[stage] = {'app' => app_name}
+      end
     end
 
     private
