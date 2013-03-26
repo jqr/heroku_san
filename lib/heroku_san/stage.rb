@@ -5,15 +5,17 @@ MOCK = false unless defined?(MOCK)
 
 module HerokuSan
   class Stage
-    attr_reader :name
     include Git
+    attr_reader :name
+    attr_reader :options
     
     def initialize(stage, options = {})
-      default_options = {
-        'deploy' => HerokuSan::Deploy::Rails
-      }
       @name = stage
-      @options = default_options.merge(options)
+      @options = options
+    end
+    
+    def ==(other)
+      other.name == name && other.options == options
     end
     
     def heroku
