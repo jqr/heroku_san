@@ -2,15 +2,10 @@ require 'spec_helper'
 
 describe HerokuSan::Parser do
   let(:parser) { subject }
-  let(:old_format) { {'apps' => {'production' => 'awesomeapp', 'staging' => 'awesomeapp-staging', 'demo' => 'awesomeapp-demo'}} }
-  let(:new_format) { {'production' => {'app' => 'awesomeapp'}, 'staging' => {'app' => 'awesomeapp-staging'}, 'demo' => {'app' => 'awesomeapp-demo'}} }
-  let(:extras) { {'production' => {'EXTRA' => 'bar'}, 'staging' => {'EXTRA' => 'foo'}}}
-
-  Parseable = Struct.new(:config_file, :configuration)
 
   describe '#parse' do
     context 'using the new format' do
-      let(:parseable) { Parseable.new.tap do |parseable| parseable.config_file = File.join(SPEC_ROOT, "fixtures", "example.yml") end }
+      let(:parseable) { Parseable.new(File.join(SPEC_ROOT, "fixtures", "example.yml")) }
       it "returns a list of apps" do
         parser.parse(parseable)
 
@@ -22,7 +17,8 @@ describe HerokuSan::Parser do
     end
 
     context "using the old heroku_san format" do
-      let(:parseable) { Parseable.new.tap do |mock| mock.config_file = File.join(SPEC_ROOT, "fixtures", "old_format.yml") end }
+      let(:parseable) { Parseable.new(File.join(SPEC_ROOT, "fixtures", "old_format.yml")) }
+
       it "returns a list of apps" do
         parser.parse(parseable)
 
@@ -37,6 +33,9 @@ describe HerokuSan::Parser do
   end
 
   describe "#convert_from_heroku_san_format" do
+    let(:old_format) { {'apps' => {'production' => 'awesomeapp', 'staging' => 'awesomeapp-staging', 'demo' => 'awesomeapp-demo'}} }
+    let(:new_format) { {'production' => {'app' => 'awesomeapp'}, 'staging' => {'app' => 'awesomeapp-staging'}, 'demo' => {'app' => 'awesomeapp-demo'}} }
+
     it "converts to the new hash" do
       parser.settings = old_format
       expect {
@@ -53,6 +52,8 @@ describe HerokuSan::Parser do
   end
 
   describe "#merge_external_config" do
+    let(:extras) { {'production' => {'EXTRA' => 'bar'}, 'staging' => {'EXTRA' => 'foo'}} }
+
     context "with no extras" do
       it "doesn't change settings" do
         parser.settings = {'production' => {'config' => {}}}
