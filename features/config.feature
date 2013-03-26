@@ -1,7 +1,7 @@
 Feature: Command Line
 
   Background:
-    Given I run `rails new heroku_san_test --quiet --force --database=postgresql --skip-bundle --skip-javascript --skip-test-unit --skip-sprockets`
+    Given I run `rails new heroku_san_test --quiet --force --skip-active-record --skip-bundle --skip-javascript --skip-test-unit --skip-sprockets`
     And I cd to "heroku_san_test"
     And I overwrite "Gemfile" with:
       """
