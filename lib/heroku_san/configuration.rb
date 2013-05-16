@@ -20,7 +20,12 @@ module HerokuSan
     def stages
       configured? or parse
       configuration.inject({}) do |stages, (stage, settings)|
-        stages[stage] = HerokuSan::Stage.new(stage, settings.merge('deploy' => (options[:deploy]||options['deploy'])))
+        deploy_strategy = if settings.keys.include?('deploy')
+          eval(settings['deploy'])
+        else
+          options[:deploy]||options['deploy']
+        end
+        stages[stage] = HerokuSan::Stage.new(stage, settings.merge('deploy' => deploy_strategy))
         stages
       end
     end
