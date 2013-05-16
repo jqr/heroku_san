@@ -20,6 +20,14 @@ describe HerokuSan::Configuration do
           'production' => HerokuSan::Stage.new('production', 'deploy' => HerokuSan::Deploy::Base)
       }
     end
+
+    it "does NOT override custom settings" do
+      configurable.options = {'deploy' => HerokuSan::Deploy::Rails}
+      configuration.configuration = {'production' => { 'deploy' => 'HerokuSan::Deploy::Base' }}
+      configuration.stages.should == {
+          'production' => HerokuSan::Stage.new('production', 'deploy' => HerokuSan::Deploy::Base)
+      }
+    end
   end
 
   describe "#generate_config" do
