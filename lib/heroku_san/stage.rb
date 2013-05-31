@@ -136,7 +136,7 @@ module HerokuSan
   private
 
     def auth_token
-      @auth_token ||= (ENV['HEROKU_API_KEY'] || `heroku auth:token`.chomp unless MOCK)
+      @auth_token ||= (ENV['HEROKU_API_KEY'] || `env -i HOME=$HOME TERM=$TERM sh  -c 'heroku auth:token'`.chomp unless MOCK)
     end
 
     def sh_heroku(*command)
@@ -144,13 +144,13 @@ module HerokuSan
       cmd = (command + ['--app', app]).compact
       show_command = cmd.join(' ')
       $stderr.puts show_command if @debug
-      ok = system "heroku", *cmd
+      ok = system "env -i HOME=$HOME TERM=$TERM sh  -c 'heroku #{cmd.join(" ")}'"
       status = $?
       ok or fail "Command failed with status (#{status.exitstatus}): [heroku #{show_command}]"
     end
 
     def preflight_check_for_cli
-      raise "The Heroku Toolbelt is required for this action. http://toolbelt.heroku.com" if system('heroku version') == nil
+      raise "The Heroku Toolbelt is required for this action. http://toolbelt.heroku.com" if system("env -i HOME=$HOME TERM=$TERM sh -c 'heroku --version'") == nil
     end
   end
 end
