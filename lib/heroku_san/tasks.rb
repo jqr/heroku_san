@@ -318,7 +318,9 @@ alias_task 'heroku:rack_env' => 'heroku:config:rack_env'
 alias_task :shell => 'heroku:shell'
 
 def each_heroku_app(&block)
-  HerokuSan.project.each_app(&block)
+  Bundler.with_clean_env do
+    HerokuSan.project.each_app(&block)
+  end
   puts
 rescue HerokuSan::NoApps => e
   puts "You must first specify at least one Heroku app:
