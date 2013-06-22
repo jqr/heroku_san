@@ -5,7 +5,11 @@ module HerokuSan
     end
 
     def method_missing(name, *args)
-      @heroku_api.send(name, *args)
+      response = nil
+      Bundler.with_clean_env do
+        response = @heroku_api.send(name, *args)
+      end
+      response
     rescue Heroku::API::Errors::ErrorWithResponse => error
       status = error.response.headers["Status"]
       msg = JSON.parse(error.response.body)['error'] rescue '???'
