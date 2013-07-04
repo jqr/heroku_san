@@ -152,5 +152,9 @@ module HerokuSan
     def preflight_check_for_cli
       raise "The Heroku Toolbelt is required for this action. http://toolbelt.heroku.com" if system('heroku version') == nil
     end
+
+    def system(*args)
+      Bundler.clean_system *args
+    end
   end
 end
