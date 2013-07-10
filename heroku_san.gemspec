@@ -41,5 +41,9 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<aruba>)
     s.add_dependency(%q<cucumber>)
   end
+  
+  if RUBY_VERSION < '1.8'
+    s.add_runtime_dependency(%q<json>)
+  end
 end
 
