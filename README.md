@@ -134,6 +134,8 @@ A full list of tasks provided:
   rake heroku:deploy:after          # Callback after deploys
   rake heroku:deploy:before         # Callback before deploys
   rake heroku:deploy:force[commit]  # Force-pushes the given commit, migrates and restarts (default: HEAD)
+  rake heroku:features              # Install features (labs) for the application.
+  rake heroku:features:local        # List configured features (labs), without installing them
   rake heroku:logs                  # Shows the Heroku logs
   rake heroku:logs:tail             # Tail the Heroku logs (requires logging:expanded)
   rake heroku:maintenance           # Enable maintenance mode
