@@ -28,6 +28,8 @@ staging:
     - memcache:5mb
     - logging:basic
     - scheduler:standard
+  features:
+    - user-env-compile
 
 demo:
   app: awesomeapp-demo
