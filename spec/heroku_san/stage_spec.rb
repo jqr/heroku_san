@@ -10,23 +10,25 @@ describe HerokuSan::Stage do
   end
 
   context "initializes" do
-    subject { HerokuSan::Stage.new('production', 
-      {"stack" => "cedar", 
-       "app"   => "awesomeapp-demo", 
-       "tag"   => "demo/*", 
-       "config"=> {"BUNDLE_WITHOUT"=>"development:test"},
-       "addons"=> ['one:addon', 'two:addons'],
+    subject { HerokuSan::Stage.new('production',
+      {"stack"    => "cedar",
+       "app"      => "awesomeapp-demo",
+       "tag"      => "demo/*",
+       "config"   => {"BUNDLE_WITHOUT"=>"development:test"},
+       "addons"   => ['one:addon', 'two:addons'],
+       "features" => ['sigterm-all', 'user_env_compile']
       })}
 
-    its(:name)   { should == 'production' }
-    its(:app)    { should == 'awesomeapp-demo' }
-    its(:stack)  { should == 'cedar' }
-    its(:tag)    { should == "demo/*" }
-    its(:config) { should == {"BUNDLE_WITHOUT"=>"development:test"} }
-    its(:repo)   { should == 'git@heroku.com:awesomeapp-demo.git' }
-    its(:addons) { should == ['one:addon', 'two:addons'] }
+    its(:name)     { should == 'production' }
+    its(:app)      { should == 'awesomeapp-demo' }
+    its(:stack)    { should == 'cedar' }
+    its(:tag)      { should == "demo/*" }
+    its(:config)   { should == {"BUNDLE_WITHOUT"=>"development:test"} }
+    its(:repo)     { should == 'git@heroku.com:awesomeapp-demo.git' }
+    its(:addons)   { should == ['one:addon', 'two:addons'] }
+    its(:features) { should == ['sigterm-all', 'user_env_compile'] }
   end
-  
+
   describe "#app" do
     its(:app) { should == 'awesomeapp'}
     context "blank app" do
@@ -36,7 +38,7 @@ describe HerokuSan::Stage do
       end
     end
   end
-  
+
   describe "#stack" do
     it "returns the name of the stack from Heroku" do
       subject = HerokuSan::Stage.new('production', {"app" => "awesomeapp"})
@@ -44,7 +46,7 @@ describe HerokuSan::Stage do
         subject.stack.should == 'bamboo-mri-1.9.2'
       end
     end
-  
+
     it "returns the stack name from the config when it is set there" do
       subject = HerokuSan::Stage.new('production', {"app" => "awesomeapp", "stack" => "cedar"})
       subject.stack.should == 'cedar'
@@ -71,6 +73,26 @@ describe HerokuSan::Stage do
     end
   end
 
+  describe '#features' do
+    subject { HerokuSan::Stage.new('production', {'features' => features}) }
+    context 'default' do
+      let(:features) { nil }
+      its(:features) { should == [] }
+    end
+    context 'nested' do
+      # This is for when you do:
+      # default_features: &default_features
+      #   - a
+      #   - b
+      # env:
+      #   features:
+      #   - *default_features
+      #   - other
+      let(:features) { [ ['a', 'b'], 'other' ] }
+      its(:features) { should == [ 'a', 'b', 'other' ] }
+    end
+  end
+
   describe "#run" do
     it "runs commands using the new cedar format" do
       subject.should_receive(:system).with("heroku", "run", "worker foo bar bleh", "--app", "awesomeapp") { true }
@@ -84,18 +106,18 @@ describe HerokuSan::Stage do
       subject.should_receive(:git_push).with('tag', subject.repo, [])
       subject.push
     end
-    
+
     it "deploys with a custom sha" do
       subject.should_receive(:git_push).with('deadbeef', subject.repo, [])
       subject.push('deadbeef')
     end
-    
+
     it "deploys with --force" do
       subject.should_receive(:git_parsed_tag).with(nil) {'tag'}
       subject.should_receive(:git_push).with('tag', subject.repo, %w[--force])
       subject.push(nil, :force)
     end
-    
+
     it "deploys with a custom sha & --force" do
       subject.should_receive(:git_push).with('deadbeef', subject.repo, %w[--force])
       subject.push('deadbeef', :force)
@@ -110,7 +132,7 @@ describe HerokuSan::Stage do
       end
     end
   end
-  
+
   describe "#deploy" do
     context "using the default strategy" do
       it "(rails) pushes & migrates" do
@@ -130,7 +152,7 @@ describe HerokuSan::Stage do
       end
     end
   end
-  
+
   describe "#maintenance" do
     it ":on" do
       with_app(subject, 'name' => subject.app )do |app_data|
@@ -143,21 +165,21 @@ describe HerokuSan::Stage do
         subject.maintenance(:off).status.should.should == 200
       end
     end
-    
+
     it "otherwise raises an ArgumentError" do
       expect do
         subject.maintenance :busy
-      end.to raise_error ArgumentError, "Action #{:busy.inspect} must be one of (:on, :off)"      
+      end.to raise_error ArgumentError, "Action #{:busy.inspect} must be one of (:on, :off)"
     end
-    
+
     context "with a block" do
       it "wraps it in a maintenance mode" do
         with_app(subject, 'name' => subject.app) do |app_data|
           subject.heroku.should_receive(:post_app_maintenance).with(subject.app, '1').ordered
           reactor = mock("Reactor"); reactor.should_receive(:scram).with(:now).ordered
           subject.heroku.should_receive(:post_app_maintenance).with(subject.app, '0').ordered
-          
-          subject.maintenance {reactor.scram(:now)} 
+
+          subject.maintenance {reactor.scram(:now)}
         end
       end
 
@@ -166,7 +188,7 @@ describe HerokuSan::Stage do
           subject.heroku.should_receive(:post_app_maintenance).with(subject.app, '1').ordered
           reactor = mock("Reactor"); reactor.should_receive(:scram).and_raise(RuntimeError)
           subject.heroku.should_receive(:post_app_maintenance).with(subject.app, '0').ordered
-          
+
           expect do subject.maintenance {reactor.scram(:now)} end.to raise_error
         end
       end
@@ -198,7 +220,7 @@ describe HerokuSan::Stage do
       subject.heroku.get_stack(@app).body.detect{|stack| stack['current']}['name'].should == 'cedar'
     end
   end
-  
+
   describe "#long_config" do
     it "returns the remote config" do
       with_app(subject, 'name' => subject.app) do |app_data|
@@ -230,7 +252,7 @@ describe HerokuSan::Stage do
       end
     end
   end
-  
+
   describe "#logs" do
     it "returns log files" do
       subject.should_receive(:system).with("heroku", "logs", "--app", "awesomeapp") { true }
@@ -256,7 +278,7 @@ describe HerokuSan::Stage do
       subject.revision.should == ''
     end
   end
-  
+
   describe "#installed_addons" do
     it "returns the list of installed addons" do
       with_app(subject, 'name' => subject.app) do |app_data|
@@ -269,7 +291,7 @@ describe HerokuSan::Stage do
     subject { HerokuSan::Stage.new('production', {"app" => "awesomeapp", "stack" => "bamboo-ree-1.8.7", "addons" => %w[custom_domains:basic ssl:piggyback]})}
 
     it "installs the addons" do
-      with_app(subject, 'name' => subject.app) do |app_data| 
+      with_app(subject, 'name' => subject.app) do |app_data|
         subject.install_addons.map{|a| a['name']}.should include *%w[custom_domains:basic ssl:piggyback]
         subject.installed_addons.map{|a|a['name']}.should =~ subject.install_addons.map{|a| a['name']}
       end
@@ -277,8 +299,34 @@ describe HerokuSan::Stage do
 
     it "only installs missing addons" do
       subject = HerokuSan::Stage.new('production', {"app" => "awesomeapp", "stack" => "bamboo-ree-1.8.7", "addons" => %w[shared-database:5mb custom_domains:basic ssl:piggyback]})
-      with_app(subject, 'name' => subject.app) do |app_data| 
+      with_app(subject, 'name' => subject.app) do |app_data|
         subject.install_addons.map{|a| a['name']}.should include *%w[shared-database:5mb custom_domains:basic ssl:piggyback]
+      end
+    end
+  end
+
+  describe "#installed_features" do
+    it "returns the list of installed features" do
+      with_app(subject, 'name' => subject.app) do |app_data|
+        subject.installed_features.map{|a|a['name']}.should include *%w[sigterm-all]
+      end
+    end
+  end
+
+  describe '#install_features' do
+    subject { HerokuSan::Stage.new('production', {"app" => "awesomeapp", "stack" => "bamboo-ree-1.8.7", "features" => %w[sigterm-all user_env_compile]})}
+
+    it "installs the features" do
+      with_app(subject, 'name' => subject.app) do |app_data|
+        subject.install_features.map{|a| a['name']}.should include *%w[sigterm-all user_env_compile]
+        subject.installed_features.map{|a|a['name']}.should =~ subject.install_features.map{|a| a['name']}
+      end
+    end
+
+    it "only installs missing features" do
+      subject { HerokuSan::Stage.new('production', {"app" => "awesomeapp", "stack" => "bamboo-ree-1.8.7", "features" => %w[sigterm-all user_env_compile]})}
+      with_app(subject, 'name' => subject.app) do |app_data|
+        subject.install_features.map{|a| a['name']}.should include *%w[sigterm-all user_env_compile]
       end
     end
   end
