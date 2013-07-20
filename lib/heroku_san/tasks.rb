@@ -87,7 +87,7 @@ namespace :heroku do
     each_heroku_app do |stage|
       addons = stage.install_addons
       puts "#{stage.name} addons"
-      addons.each do |addon| 
+      addons.each do |addon|
         puts "  - " + addon['name'] + (addon['configured'] ? "" : " # Configure at https://api.heroku.com/myapps/#{stage.app}/addons/#{addon['name']}")
       end
     end
@@ -100,6 +100,29 @@ namespace :heroku do
         puts "Configured addons for #{stage.name}:"
         stage.addons.each do |addon|
           puts "  - #{addon}"
+        end
+      end
+    end
+  end
+
+  desc 'Install features (labs) for the application.'
+  task :features do
+    each_heroku_app do |stage|
+      features = stage.install_features
+      puts "#{stage.name} features (labs)"
+      features.each do |feature|
+        puts "  - " + feature['name']
+      end
+    end
+  end
+
+  namespace :features do
+    desc 'List configured features (labs), without installing them'
+    task :local do
+      each_heroku_app do |stage|
+        puts "Configured features (labs) for #{stage.name}:"
+        stage.features.each do |feature|
+          puts "  - #{feature}"
         end
       end
     end

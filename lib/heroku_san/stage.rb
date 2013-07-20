@@ -17,7 +17,7 @@ module HerokuSan
     def ==(other)
       other.name == name && other.options == options
     end
-    
+
     def heroku
       @heroku ||= HerokuSan::API.new(:api_key => auth_token, :mock => MOCK)
     end
@@ -25,19 +25,19 @@ module HerokuSan
     def app
       @options['app'] or raise MissingApp, "#{name}: is missing the app: configuration value. I don't know what to access on Heroku."
     end
-    
+
     def repo
       @options['repo'] ||= "git@heroku.com:#{app}.git"
     end
-    
+
     def stack
       @options['stack'] ||= heroku.get_stack(app).body.detect{|stack| stack['current']}['name']
     end
-    
+
     def tag
       @options['tag']
     end
-    
+
     def config
       @options['config'] ||= {}
     end
@@ -45,21 +45,25 @@ module HerokuSan
     def addons
       (@options['addons'] ||= []).flatten
     end
-    
+
+    def features
+      (@options['features'] ||= []).flatten
+    end
+
     def run(command, args = nil)
       sh_heroku "run", command, *args
     end
-    
+
     def push(sha = nil, force = false)
       sha ||= git_parsed_tag(tag)
       git_push(sha, repo, force ? %w[--force] : [])
     end
-    
+
     def migrate
       run('rake db:migrate')
       restart
     end
-    
+
     def deploy(commit = nil, force = nil)
       strategy = @options['deploy'].new(self, commit, force)
       strategy.deploy
@@ -82,7 +86,7 @@ module HerokuSan
         heroku.post_app_maintenance(app, {:on => '1', :off => '0'}[action])
       end
     end
-    
+
     def create
       params = {
           'name' => @options['app'],
@@ -103,7 +107,7 @@ module HerokuSan
     def long_config
       heroku.get_config_vars(app).body
     end
-    
+
     def push_config(options = nil)
       params = (options || config)
       heroku.put_config_vars(app, params).body
@@ -121,18 +125,30 @@ module HerokuSan
       installed_addons
     end
 
+    def installed_features
+      heroku.get_features(app).body.select { |feature| feature['enabled'] }
+    end
+
+    def install_features
+      features_to_install = features - installed_features.map { |l| l['name'] }
+      features_to_install.each do |feature|
+        heroku.post_feature(feature, app)
+      end
+      installed_features
+    end
+
     def restart
       "restarted" if heroku.post_ps_restart(app).body == 'ok'
     end
-  
+
     def logs(tail = false)
       sh_heroku 'logs', (tail ? '--tail' : nil)
     end
-    
+
     def revision
       git_named_rev(git_revision(repo))
     end
-    
+
   private
 
     def auth_token
