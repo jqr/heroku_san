@@ -129,5 +129,28 @@ module HerokuSan
     def revision
       git_named_rev(git_revision(repo))
     end
+
+    # Will return true if not using Rails or the remote DB isn't postgresql.
+    # Otherwise returns true if the remote DB has pending migrations and false if not.
+    def has_pending_migrations
+      return @has_pending_migrations if @has_pending_migrations != nil
+      return true unless defined?(::Rails)
+      database_url = long_config['DATABASE_URL']
+      return true unless database_url =~ /\Apostgres:\/\//
+      remote_migrations = get_remote_migrations(database_url)
+      Rake::Task[:environment].invoke
+      ActiveRecord::Base.establish_connection
+      local_migrations = ActiveRecord::Migrator.new(:up, ActiveRecord::Migrator.migrations_paths).migrations
+      pending_migrations = local_migrations.reject { |m| remote_migrations.include?(m.version.to_s) }
+      @has_pending_migrations = pending_migrations.present?
+    end
+
+  private
+
+    # returns an array of the schema_migrations run on the server
+    def get_remote_migrations(database_url)
+      `psql #{database_url} -Atc "SELECT * FROM schema_migrations;"`.split
+    end
+
   end
 end
