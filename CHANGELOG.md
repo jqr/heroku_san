@@ -1,5 +1,10 @@
 # Change Log (curated)
 
+## v4.3.0
+
+  * Add #ensure_{all|one}_worker(s)_running -- which will restart your web workers until they stay up
+  * Closes #137
+
 ## v4.2.0
 
   * Wrap API calls so that errors are reported in a more human-fiendly way
