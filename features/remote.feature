@@ -8,7 +8,7 @@ Feature: heroku_san can control a project on Heroku
   Scenario: Installs a project
     Given I have a new Rails project
     When I am in the project directory
-    And I add heroku_san to the Gemfile
+    And I add heroku_san to the rails Gemfile
     Then rake reports that the heroku: tasks are available
     
   Scenario: Manipulates a Rails app on Heroku
