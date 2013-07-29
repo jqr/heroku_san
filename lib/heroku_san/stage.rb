@@ -1,5 +1,6 @@
 require 'heroku-api'
 require 'json'
+require_relative 'application'
 
 MOCK = false unless defined?(MOCK)
 
@@ -8,6 +9,7 @@ module HerokuSan
     include HerokuSan::Git
     attr_reader :name
     attr_reader :options
+    include HerokuSan::Application
 
     def initialize(stage, options = {})
       @name = stage

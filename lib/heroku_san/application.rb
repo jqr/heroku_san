@@ -1,50 +1,36 @@
 require 'heroku-api'
 
-MOCK = false unless defined?(MOCK)
-
 module HerokuSan
-  class Application
-    def initialize app_name
-      @app_name = app_name
-      @api = HerokuSan::API.new(:api_key => auth_token, :mock => MOCK)
-    end
-
-    def ensure_one_worker_running
-      one_up = false
-      until one_up do
-        processes = @api.get_ps(@app_name).body
-        web_processes = processes.select { |p| p["process"] =~ /web\./ }
-
-        web_processes.each do |process|
-          case process["state"]
-          when "up"
-            one_up = true
-          when "crashed"
-            @api.post_ps_restart(@app_name, ps: process["process"])
-          end
-        end
-      end
+  module Application
+    def ensure_one_worker_running(at_least = 1)
+      begin
+        web_processes = heroku.get_ps(app).body.select { |p| p["process"] =~ /web\./ }
+      end until restart_processes(web_processes) >= at_least
     end
 
     def ensure_all_workers_running
       while true do
-        processes = @api.get_ps(@app_name).body
+        processes = heroku.get_ps(app).body
 
-        return if processes.all? {|p| p["state"] == "up"}
+        return if processes.all? { |p| p["state"] == "up" }
 
-        processes.each do |process|
-          case process["state"]
-          when "crashed"
-            @api.post_ps_restart(@app_name, ps: process["process"])
-          end
-        end
+        restart_processes(processes)
       end
     end
 
     private
 
-    def auth_token
-      @auth_token ||= (ENV['HEROKU_API_KEY'] || `heroku auth:token`.chomp unless MOCK)
+    def restart_processes(web_processes)
+      up = 0
+      web_processes.each do |process|
+        case process["state"]
+          when "up"
+            up += 1
+          when "crashed"
+            heroku.post_ps_restart(app, ps: process["process"])
+        end
+      end
+      up
     end
   end
 end

@@ -1,3 +1,5 @@
+require 'time'
+
 module HerokuSan
   class API
     def initialize(options = {})
