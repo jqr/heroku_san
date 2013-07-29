@@ -15,7 +15,7 @@ Feature: heroku_san can control a project on Heroku
     Given I have a new Rails project
     When I am in the project directory
     And I commit any changes with "Initial commit"
-    And I add heroku_san to the Gemfile
+    And I add heroku_san to the rails Gemfile
     And I run bundle install
     And I generate a new config file
     And I create my project on Heroku
@@ -35,7 +35,7 @@ Feature: heroku_san can control a project on Heroku
     Given I have a new Sinatra project
     When I am in the project directory
     And I commit any changes with "Initial commit"
-    And I add heroku_san to the Gemfile
+    And I add heroku_san to the sinatra Gemfile
     And I run bundle install
     And I create a new config/heroku.yml file
     And I create my project on Heroku

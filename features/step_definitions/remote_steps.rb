@@ -3,7 +3,7 @@ require 'active_support/core_ext/string/strip'
 require 'godot'
 
 Given /^I have a new Rails project$/ do
-  cmd = "rails new test_app --quiet --force --skip-active-record --skip-bundle --skip-javascript --skip-test-unit --skip-sprockets"
+  cmd = "rails new test_app --quiet --force --skip-bundle --skip-javascript --skip-test-unit --skip-sprockets"
   run_clean unescape(cmd)
 end
 
@@ -51,8 +51,24 @@ When /^I tag the commit with "([^"]*)" annotated by "([^"]*)"$/ do |tag, annotat
   run_clean "git tag -a '#{tag}' -m '#{annotation}' HEAD"
 end
 
-When /^I add heroku_san to the Gemfile$/ do
-  append_to_file 'Gemfile', <<EOT.strip_heredoc
+When /^I add heroku_san to the rails Gemfile$/ do
+  overwrite_file 'Gemfile', <<EOT.strip_heredoc
+    source 'https://rubygems.org'
+    ruby '1.9.3'
+    gem 'rails', '3.2.7'
+    gem 'pg'
+    group :development, :test do
+      gem 'heroku_san', :path => '../../../.'
+      gem 'sqlite3'
+    end
+EOT
+end
+
+When /^I add heroku_san to the sinatra Gemfile$/ do
+  overwrite_file 'Gemfile', <<EOT.strip_heredoc
+    source 'https://rubygems.org'
+    ruby '1.9.3'
+    gem 'sinatra'
     group :development, :test do
       gem 'heroku_san', :path => '../../../.'
     end
@@ -142,7 +158,7 @@ When /^I restart my project$/ do
 end
 
 When /^I generate a scaffold$/ do
-  run_clean 'rails generate scaffold droid'
+  run_clean 'rails generate resource droid'
   append_to_file 'app/views/droids/index.html.erb', %Q{\n<div><code><%= ENV['DROIDS'] -%></code></div>\n}
 end
 
@@ -181,15 +197,13 @@ When /^I install an addon$/ do
     test_app:
       app: #{@app}
       addons:
-        - deployhooks:campfire
+        - scheduler:standard
 
 END_CONFIG
 
   output = run_clean 'rake test_app heroku:addons'
   # The output should show the new one ...
-  assert_partial_output "deployhooks:campfire", output
-  # ... with a note about needing to configure it.
-  assert_partial_output "https://api.heroku.com/myapps/#{@app}/addons/deployhooks:campfire", output
+  assert_partial_output "scheduler:standard", output
 end
 
 Then /^(?:heroku_san|issue \d+) (?:is green|has been fixed)$/ do
