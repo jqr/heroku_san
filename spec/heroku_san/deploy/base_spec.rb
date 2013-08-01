@@ -3,7 +3,7 @@ require 'spec_helper'
 module HerokuSan
   module Deploy
     describe Base do
-      let(:stage) { HerokuSan::Stage.new('test', {"app" => "awesomeapp", "deploy" => 'HerokuSan::Deploy::Base'}) }
+      let(:stage) { Factory::Stage.build('test', {"app" => "awesomeapp", "deploy" => 'HerokuSan::Deploy::Base'}) }
       
       it "calls push" do
         subject = described_class.new(stage)

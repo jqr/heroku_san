@@ -6,7 +6,7 @@ describe HerokuSan::Project do
   let(:heroku_san) { HerokuSan::Project.new }
   subject { heroku_san }
   before do
-    HerokuSan::Configuration.new(Configurable.new).tap do |config|
+    HerokuSan::Configuration.new(Configurable.new, Factory::Stage).tap do |config|
       config.configuration = {'production' => {}, 'staging' => {}, 'demo' => {}}
       heroku_san.configuration = config
     end

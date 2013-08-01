@@ -2,28 +2,23 @@ require 'heroku-api'
 require 'json'
 require_relative 'application'
 
-MOCK = false unless defined?(MOCK)
-
 module HerokuSan
   class Stage
     include HerokuSan::Git
-    attr_reader :name
-    attr_reader :options
     include HerokuSan::Application
+
+    attr_reader :name, :options, :heroku
 
     def initialize(stage, options = {})
       @name = stage
       @options = options
+      @heroku = options.delete(:api) || HerokuSan::API.new(:api_key => auth_token)
     end
 
     def ==(other)
       other.name == name && other.options == options
     end
     
-    def heroku
-      @heroku ||= HerokuSan::API.new(:api_key => auth_token, :mock => MOCK)
-    end
-
     def app
       @options['app'] or raise MissingApp, "#{name}: is missing the app: configuration value. I don't know what to access on Heroku."
     end
@@ -138,7 +133,7 @@ module HerokuSan
   private
 
     def auth_token
-      @auth_token ||= (ENV['HEROKU_API_KEY'] || `heroku auth:token`.chomp unless MOCK)
+      @auth_token ||= (ENV['HEROKU_API_KEY'] || `heroku auth:token`.chomp)
     end
 
     def sh_heroku(*command)

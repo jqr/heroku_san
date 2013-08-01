@@ -2,7 +2,7 @@ require 'spec_helper'
 
 module HerokuSan
   describe HerokuSan::Application do
-    let(:stage) { HerokuSan::Stage.new('production', {"deploy" => HerokuSan::Deploy::Rails, "app" => "awesomeapp", "stack" => "cedar"}) }
+    let(:stage) { Factory::Stage.build('production', {"deploy" => HerokuSan::Deploy::Rails, "app" => "awesomeapp", "stack" => "cedar"}) }
     let(:response) { stub }
 
     before do

@@ -3,13 +3,13 @@ require 'spec_helper'
 module HerokuSan
 describe HerokuSan::Configuration do
   let(:configurable) { Configurable.new }
-  let(:configuration) { HerokuSan::Configuration.new(configurable) }
+  let(:configuration) { HerokuSan::Configuration.new(configurable, Factory::Stage) }
 
   describe "#stages" do
     it "creates a configuration hash" do
       configuration.configuration = {'production' => {}}
       configuration.stages.should == {
-          'production' => HerokuSan::Stage.new('production', 'deploy' => HerokuSan::Deploy::Rails)
+          'production' => Factory::Stage.build('production', 'deploy' => HerokuSan::Deploy::Rails)
       }
     end
 
@@ -17,7 +17,7 @@ describe HerokuSan::Configuration do
       configurable.options = {'deploy' => HerokuSan::Deploy::Base}
       configuration.configuration = {'production' => {}}
       configuration.stages.should == {
-          'production' => HerokuSan::Stage.new('production', 'deploy' => HerokuSan::Deploy::Base)
+          'production' => Factory::Stage.build('production', 'deploy' => HerokuSan::Deploy::Base)
       }
     end
   end

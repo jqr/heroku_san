@@ -1,21 +1,22 @@
 require 'spec_helper'
 
 module HerokuSan
+  STOCK_CONFIG = {"BUNDLE_WITHOUT"=>"development:test", "LANG"=>"en_US.UTF-8", "RACK_ENV"=>"production"}
+
 describe HerokuSan::Stage do
   include HerokuSan::Git
-  subject { HerokuSan::Stage.new('production', {"deploy" => HerokuSan::Deploy::Rails, "app" => "awesomeapp", "stack" => "cedar"})}
-  STOCK_CONFIG = {"BUNDLE_WITHOUT"=>"development:test", "LANG"=>"en_US.UTF-8", "RACK_ENV"=>"production"}
+  subject { Factory::Stage.build('production', {"deploy" => HerokuSan::Deploy::Rails, "app" => "awesomeapp", "stack" => "cedar"})}
   before do
     HerokuSan::Stage.any_instance.stub(:preflight_check_for_cli)
   end
 
   context "initializes" do
-    subject { HerokuSan::Stage.new('production', 
+    subject { Factory::Stage.build('production',
       {"stack" => "cedar", 
        "app"   => "awesomeapp-demo", 
        "tag"   => "demo/*", 
        "config"=> {"BUNDLE_WITHOUT"=>"development:test"},
-       "addons"=> ['one:addon', 'two:addons'],
+       "addons"=> ['one:addon', 'two:addons']
       })}
 
     its(:name)   { should == 'production' }
@@ -30,7 +31,7 @@ describe HerokuSan::Stage do
   describe "#app" do
     its(:app) { should == 'awesomeapp'}
     context "blank app" do
-      subject { HerokuSan::Stage.new('production') }
+      subject { Factory::Stage.build('production') }
       it "should raise an error" do
         expect { subject.app }.to raise_error(HerokuSan::MissingApp, /production: is missing the app: configuration value\./)
       end
@@ -39,20 +40,20 @@ describe HerokuSan::Stage do
   
   describe "#stack" do
     it "returns the name of the stack from Heroku" do
-      subject = HerokuSan::Stage.new('production', {"app" => "awesomeapp"})
+      subject = Factory::Stage.build('production', {"app" => "awesomeapp"})
       with_app(subject, 'name' => subject.app) do |app_data|
         subject.stack.should == 'bamboo-mri-1.9.2'
       end
     end
   
     it "returns the stack name from the config when it is set there" do
-      subject = HerokuSan::Stage.new('production', {"app" => "awesomeapp", "stack" => "cedar"})
+      subject = Factory::Stage.build('production', {"app" => "awesomeapp", "stack" => "cedar"})
       subject.stack.should == 'cedar'
     end
   end
 
   describe '#addons' do
-    subject { HerokuSan::Stage.new('production', {'addons' => addons}) }
+    subject { Factory::Stage.build('production', {'addons' => addons}) }
     context 'default' do
       let(:addons) { nil }
       its(:addons) { should == [] }
@@ -123,7 +124,7 @@ describe HerokuSan::Stage do
       class TestDeployStrategy < HerokuSan::Deploy::Base
         def deploy; end
       end
-      subject = HerokuSan::Stage.new('test', {"app" => "awesomeapp", "deploy" => TestDeployStrategy})
+      subject = Factory::Stage.build('test', {"app" => "awesomeapp", "deploy" => TestDeployStrategy})
       it "(custom) calls deploy" do
         TestDeployStrategy.any_instance.should_receive(:deploy)
         subject.deploy
@@ -183,12 +184,12 @@ describe HerokuSan::Stage do
     end
 
     it "creates an app on heroku" do
-      subject = HerokuSan::Stage.new('production')
+      subject = Factory::Stage.build('production')
       (@app = subject.create).should =~ /generated-name-\d+/
     end
 
     it "uses the default stack if none is given" do
-      subject = HerokuSan::Stage.new('production')
+      subject = Factory::Stage.build('production')
       (@app = subject.create).should =~ /generated-name-\d+/
       subject.heroku.get_stack(@app).body.detect{|stack| stack['current']}['name'].should == 'bamboo-mri-1.9.2'
     end
@@ -209,14 +210,14 @@ describe HerokuSan::Stage do
 
   describe "#push_config" do
     it "updates the configuration settings on Heroku" do
-      subject = HerokuSan::Stage.new('test', {"app" => "awesomeapp", "config" => {'FOO' => 'bar', 'DOG' => 'emu'}})
+      subject = Factory::Stage.build('test', {"app" => "awesomeapp", "config" => {'FOO' => 'bar', 'DOG' => 'emu'}})
       with_app(subject, 'name' => subject.app) do |app_data|
         subject.push_config.should == STOCK_CONFIG.merge('FOO' => 'bar', 'DOG' => 'emu')
       end
     end
 
     it "pushes the options hash" do
-      subject = HerokuSan::Stage.new('test', {"app" => "awesomeapp", "config" => {'FOO' => 'bar', 'DOG' => 'emu'}})
+      subject = Factory::Stage.build('test', {"app" => "awesomeapp", "config" => {'FOO' => 'bar', 'DOG' => 'emu'}})
       with_app(subject, 'name' => subject.app) do |app_data|
         subject.push_config('RACK_ENV' => 'magic').should == STOCK_CONFIG.merge('RACK_ENV' => 'magic')
       end
@@ -266,7 +267,7 @@ describe HerokuSan::Stage do
   end
 
   describe '#install_addons' do
-    subject { HerokuSan::Stage.new('production', {"app" => "awesomeapp", "stack" => "bamboo-ree-1.8.7", "addons" => %w[custom_domains:basic ssl:piggyback]})}
+    subject { Factory::Stage.build('production', {"app" => "awesomeapp", "stack" => "bamboo-ree-1.8.7", "addons" => %w[custom_domains:basic ssl:piggyback]})}
 
     it "installs the addons" do
       with_app(subject, 'name' => subject.app) do |app_data| 
@@ -276,7 +277,7 @@ describe HerokuSan::Stage do
     end
 
     it "only installs missing addons" do
-      subject = HerokuSan::Stage.new('production', {"app" => "awesomeapp", "stack" => "bamboo-ree-1.8.7", "addons" => %w[shared-database:5mb custom_domains:basic ssl:piggyback]})
+      subject = Factory::Stage.build('production', {"app" => "awesomeapp", "stack" => "bamboo-ree-1.8.7", "addons" => %w[shared-database:5mb custom_domains:basic ssl:piggyback]})
       with_app(subject, 'name' => subject.app) do |app_data| 
         subject.install_addons.map{|a| a['name']}.should include *%w[shared-database:5mb custom_domains:basic ssl:piggyback]
       end

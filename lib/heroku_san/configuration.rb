@@ -4,13 +4,15 @@ module HerokuSan
     attr_accessor :configuration
     attr_accessor :external_configuration
     attr_reader :options
+    attr_reader :stage_factory
 
-    def initialize(configurable)
+    def initialize(configurable, stage_factory = HerokuSan::Stage)
       @config_file = configurable.config_file
       default_options = {
           'deploy' => HerokuSan::Deploy::Rails
       }
       @options = default_options.merge(configurable.options || {})
+      @stage_factory = stage_factory
     end
 
     def parse
@@ -20,7 +22,7 @@ module HerokuSan
     def stages
       configured? or parse
       configuration.inject({}) do |stages, (stage, settings)|
-        stages[stage] = HerokuSan::Stage.new(stage, settings.merge('deploy' => (options[:deploy]||options['deploy'])))
+        stages[stage] = stage_factory.new(stage, settings.merge('deploy' => (options[:deploy]||options['deploy'])))
         stages
       end
     end
