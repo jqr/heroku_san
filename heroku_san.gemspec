@@ -26,5 +26,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency("heroku-api", [">= 0.1.2"])
   s.add_runtime_dependency("json")
   s.add_runtime_dependency("rake")
+
+  s.add_runtime_dependency("json") if RUBY_VERSION < '1.9'
 end
 
