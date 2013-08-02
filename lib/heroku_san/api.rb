@@ -4,7 +4,7 @@ module HerokuSan
   class API
     def initialize(options = {})
       @options = options
-      @options[:api_key] || auth_token
+      @options[:api_key] ||= auth_token
       @heroku_api = Heroku::API.new(@options)
     end
 
