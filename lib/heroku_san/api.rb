@@ -36,6 +36,8 @@ module HerokuSan
 
     def auth_token
       ENV['HEROKU_API_KEY'] || `heroku auth:token`.chomp
+    rescue Errno::ENOENT
+      nil
     end
 
     def preflight_check_for_cli
