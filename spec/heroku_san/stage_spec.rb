@@ -7,7 +7,7 @@ describe HerokuSan::Stage do
   include HerokuSan::Git
   subject { Factory::Stage.build('production', {"deploy" => HerokuSan::Deploy::Rails, "app" => "awesomeapp", "stack" => "cedar"})}
   before do
-    HerokuSan::Stage.any_instance.stub(:preflight_check_for_cli)
+    HerokuSan::API.any_instance.stub(:preflight_check_for_cli)
   end
 
   context "initializes" do
@@ -74,7 +74,7 @@ describe HerokuSan::Stage do
 
   describe "#run" do
     it "runs commands using the new cedar format" do
-      subject.should_receive(:system).with("heroku", "run", "worker foo bar bleh", "--app", "awesomeapp") { true }
+      subject.heroku.should_receive(:system).with("heroku", "run", "worker foo bar bleh", "--app", "awesomeapp") { true }
       subject.run 'worker foo bar bleh'
     end
   end
@@ -234,12 +234,12 @@ describe HerokuSan::Stage do
   
   describe "#logs" do
     it "returns log files" do
-      subject.should_receive(:system).with("heroku", "logs", "--app", "awesomeapp") { true }
+      subject.heroku.should_receive(:system).with("heroku", "logs", "--app", "awesomeapp") { true }
       subject.logs
     end
 
     it "tails log files" do
-      subject.should_receive(:system).with("heroku", "logs", "--tail", "--app", "awesomeapp") { true }
+      subject.heroku.should_receive(:system).with("heroku", "logs", "--tail", "--app", "awesomeapp") { true }
       subject.logs(:tail)
     end
   end

@@ -12,7 +12,7 @@ module HerokuSan
     def initialize(stage, options = {})
       @name = stage
       @options = options
-      @heroku = options.delete(:api) || HerokuSan::API.new(:api_key => auth_token)
+      @heroku = options.delete(:api) || HerokuSan::API.new
     end
 
     def ==(other)
@@ -44,7 +44,7 @@ module HerokuSan
     end
     
     def run(command, args = nil)
-      sh_heroku "run", command, *args
+      heroku.sh app, "run", command, *args
     end
     
     def push(sha = nil, force = false)
@@ -123,31 +123,11 @@ module HerokuSan
     end
   
     def logs(tail = false)
-      sh_heroku 'logs', (tail ? '--tail' : nil)
+      heroku.sh app, 'logs', (tail ? '--tail' : nil)
     end
     
     def revision
       git_named_rev(git_revision(repo))
-    end
-    
-  private
-
-    def auth_token
-      @auth_token ||= (ENV['HEROKU_API_KEY'] || `heroku auth:token`.chomp)
-    end
-
-    def sh_heroku(*command)
-      preflight_check_for_cli
-      cmd = (command + ['--app', app]).compact
-      show_command = cmd.join(' ')
-      $stderr.puts show_command if @debug
-      ok = system "heroku", *cmd
-      status = $?
-      ok or fail "Command failed with status (#{status.exitstatus}): [heroku #{show_command}]"
-    end
-
-    def preflight_check_for_cli
-      raise "The Heroku Toolbelt is required for this action. http://toolbelt.heroku.com" if system('heroku version') == nil
     end
   end
 end
