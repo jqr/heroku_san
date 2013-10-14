@@ -16,7 +16,7 @@ module HerokuSan
       show_command = cmd.join(' ')
       $stderr.puts show_command if @debug
 
-      ok = system "heroku", *cmd
+      ok = Bundler.with_clean_env { system "heroku", *cmd }
 
       status = $?
       ok or fail "Command failed with status (#{status.exitstatus}): [heroku #{show_command}]"
@@ -35,13 +35,13 @@ module HerokuSan
     private
 
     def auth_token
-      ENV['HEROKU_API_KEY'] || `heroku auth:token`.chomp
+      ENV['HEROKU_API_KEY'] || Bundler.with_clean_env { `heroku auth:token`.chomp }
     rescue Errno::ENOENT
       nil
     end
 
     def preflight_check_for_cli
-      raise "The Heroku Toolbelt is required for this action. http://toolbelt.heroku.com" if system('heroku version') == nil
+      raise "The Heroku Toolbelt is required for this action. http://toolbelt.heroku.com" if Bundler.with_clean_env { system('heroku version') == nil }
     end
   end
 end
