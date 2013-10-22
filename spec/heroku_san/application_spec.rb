@@ -3,7 +3,7 @@ require 'spec_helper'
 module HerokuSan
   describe HerokuSan::Application do
     let(:stage) { Factory::Stage.build('production', {"deploy" => HerokuSan::Deploy::Rails, "app" => "awesomeapp", "stack" => "cedar"}) }
-    let(:response) { stub }
+    let(:response) { double }
 
     before do
       stage.heroku.stub(:get_ps).with(stage.app) { response }

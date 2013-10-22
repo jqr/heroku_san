@@ -155,7 +155,7 @@ describe HerokuSan::Stage do
       it "wraps it in a maintenance mode" do
         with_app(subject, 'name' => subject.app) do |app_data|
           subject.heroku.should_receive(:post_app_maintenance).with(subject.app, '1').ordered
-          reactor = mock("Reactor"); reactor.should_receive(:scram).with(:now).ordered
+          reactor = double("Reactor"); reactor.should_receive(:scram).with(:now).ordered
           subject.heroku.should_receive(:post_app_maintenance).with(subject.app, '0').ordered
           
           subject.maintenance {reactor.scram(:now)} 
@@ -165,7 +165,7 @@ describe HerokuSan::Stage do
       it "ensures that maintenance mode is turned off" do
         with_app(subject, 'name' => subject.app) do |app_data|
           subject.heroku.should_receive(:post_app_maintenance).with(subject.app, '1').ordered
-          reactor = mock("Reactor"); reactor.should_receive(:scram).and_raise(RuntimeError)
+          reactor = double("Reactor"); reactor.should_receive(:scram).and_raise(RuntimeError)
           subject.heroku.should_receive(:post_app_maintenance).with(subject.app, '0').ordered
           
           expect do subject.maintenance {reactor.scram(:now)} end.to raise_error

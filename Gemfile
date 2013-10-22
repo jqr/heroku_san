@@ -10,7 +10,7 @@ group :test do
   gem 'godot'
   gem 'rails', '>= 3'
   gem 'rake'
-  gem 'rspec'
+  gem 'rspec', '~> 2.14'
   gem 'sqlite3'
 end
 

@@ -54,13 +54,13 @@ describe HerokuSan::Parser do
   end
 
   describe "#merge_external_config" do
-    let(:stages) { [stub(:name => 'production', :config => prod_config), stub(:name => 'staging', :config => staging_config)] }
-    let(:prod_config) { mock('Production Config') }
+    let(:stages) { [double(:name => 'production', :config => prod_config), double(:name => 'staging', :config => staging_config)] }
+    let(:prod_config) { double('Production Config') }
     let(:staging_config) { {'EXTRA' => 'bar'} }
     let(:extras) { {'production' => {'EXTRA' => 'bar'}, 'staging' => {'EXTRA' => 'foo'}} }
 
     context "with no extras" do
-      let(:parseable) { stub :external_configuration => nil }
+      let(:parseable) { double :external_configuration => nil }
 
       it "doesn't change prod_config" do
         prod_config.should_not_receive :merge!
@@ -69,7 +69,7 @@ describe HerokuSan::Parser do
     end
 
     context "with extra" do
-      let(:parseable) { stub :external_configuration => 'config_repos' }
+      let(:parseable) { double :external_configuration => 'config_repos' }
       before(:each) do
         parser.should_receive(:git_clone).with('config_repos', anything)
         parser.should_receive(:parse_yaml).and_return(extras)
