@@ -14,5 +14,5 @@ before_script:
   - git config --global user.name "Travis CI"
   - git config --global user.email "travis@example.com"
   - echo -e "Host heroku.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
-  - ssh-keygen -f ~/.ssh/id_rsa -C travis@example.com < /dev/null
+  - ssh-keygen -f ~/.ssh/id_rsa -C travis@example.com -N '' < /dev/null
   - heroku keys:add ~/.ssh/id_rsa.pub < /dev/null
