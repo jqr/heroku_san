@@ -8,7 +8,7 @@ rvm:
 env:
   global:
     - secure: dAxfEdg/7Cb/G9vkrn/ifdvycbXWtK2ey60JMepOxx9v3QyaqoSY3w5G0QB+4+uyOYmHwtif8tnK3Sa8jbBgqhAlXaxqxOT8WmQKYlhSgwWX4lQe4lUM5jkOkfNHRMRaQvCAn27gNAjdIRU7sb2cU/pm64eAFbU01TejJOM7Aow=
-install:
+before_install:
   - wget -qO- https://toolbelt.heroku.com/install-ubuntu.sh | sh
 before_script:
   - git config --global user.name "Travis CI"
