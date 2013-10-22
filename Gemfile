@@ -8,10 +8,11 @@ group :test do
   gem 'bundler', '~> 1.1'
   gem 'cucumber'
   gem 'godot'
-  gem 'rails', '~> 3.2'
+  gem 'rails', '3.2.7'
   gem 'rake'
   gem 'rspec', '~> 2.14'
   gem 'sqlite3'
+  gem 'pg'
 end
 
 group :development do

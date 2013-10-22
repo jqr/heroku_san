@@ -11,3 +11,6 @@ env:
 before_install:
   - git config --global user.name "Travis CI"
   - git config --global user.email "travis@example.com"
+  - echo -e "Host heroku.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
+  - cat ~/.ssh/config
+  - printenv
