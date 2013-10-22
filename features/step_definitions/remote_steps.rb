@@ -54,7 +54,7 @@ end
 When /^I add heroku_san to the rails Gemfile$/ do
   overwrite_file 'Gemfile', <<EOT.strip_heredoc
     source 'https://rubygems.org'
-    ruby '1.9.3'
+    ruby '#{ruby_version}'
     gem 'rails', '3.2.7'
     gem 'pg'
     group :development, :test do
@@ -67,7 +67,7 @@ end
 When /^I add heroku_san to the sinatra Gemfile$/ do
   overwrite_file 'Gemfile', <<EOT.strip_heredoc
     source 'https://rubygems.org'
-    ruby '1.9.3'
+    ruby '#{ruby_version}'
     gem 'sinatra'
     group :development, :test do
       gem 'heroku_san', :path => '../../../.'
@@ -234,4 +234,8 @@ def overwrite_simple_config_file
     test_app: 
     
 EOT
+end
+
+def ruby_version
+  ENV['TRAVIS_RUBY_VERSION'] || '1.9.3'
 end
