@@ -87,6 +87,10 @@ When /^I run bundle install$/ do
   run_clean "bundle install"
 end
 
+When /^I cleanly run `([^`]*)`$/ do |cmd|
+  run_clean(cmd)
+end
+
 Then /^rake reports that the heroku: tasks are available$/ do
   output = run_clean 'rake -T heroku:'
   assert_partial_output 'rake heroku:apps', output
