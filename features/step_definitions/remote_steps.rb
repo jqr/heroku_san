@@ -201,13 +201,14 @@ When /^I install an addon$/ do
     test_app:
       app: #{@app}
       addons:
-        - scheduler:standard
+        - heroku-postgresql:dev
+        - pgbackups:plus
 
 END_CONFIG
 
   output = run_clean 'rake test_app heroku:addons'
   # The output should show the new one ...
-  assert_partial_output "scheduler:standard", output
+  assert_partial_output "heroku-postgresql:dev", output
 end
 
 Then /^(?:heroku_san|issue \d+) (?:is green|has been fixed)$/ do
