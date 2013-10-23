@@ -1,6 +1,6 @@
 language: ruby
 bundler_args: --without development
-script: "rake travis"
+script: "bundle exec rake travis"
 rvm:
   - 1.9.2
   - 1.9.3
@@ -14,5 +14,7 @@ before_script:
   - git config --global user.name "Travis CI"
   - git config --global user.email "travis@example.com"
   - echo -e "Host heroku.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
-  - ssh-keygen -f ~/.ssh/id_rsa -C travis@example.com -N '' < /dev/null
+  - ./spec/support/travis-ssh-keygen.sh < /dev/null
   - heroku keys:add ~/.ssh/id_rsa.pub < /dev/null
+after_script:
+  - ./spec/support/travis-key-cleanup.sh
