@@ -25,7 +25,7 @@ Feature: heroku_san can shell out to heroku without errors
 
       api = HerokuSan::API.new
 
-      api.sh('cool_app', 'version')
+      api.sh('any_app_name', 'auth:whoami')
     """
     And I write to "run_in_ruby_2.sh" with:
     """
