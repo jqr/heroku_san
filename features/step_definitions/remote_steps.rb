@@ -202,7 +202,6 @@ When /^I install an addon$/ do
       app: #{@app}
       addons:
         - heroku-postgresql:dev
-        - pgbackups:plus
 
 END_CONFIG
 
