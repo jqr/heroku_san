@@ -4,8 +4,6 @@ module HerokuSan
   class API
     def initialize(options = {})
       @options = options
-      @options[:api_key] ||= auth_token
-      @heroku_api = Heroku::API.new(@options)
     end
 
     def sh(app, *command)
@@ -23,7 +21,7 @@ module HerokuSan
     end
 
     def method_missing(name, *args)
-      @heroku_api.send(name, *args)
+      heroku_api.send(name, *args)
     rescue Heroku::API::Errors::ErrorWithResponse => error
       status = error.response.headers["Status"]
       msg = JSON.parse(error.response.body)['error'] rescue '???'
@@ -33,6 +31,13 @@ module HerokuSan
     end
 
     private
+
+    def heroku_api
+      @heroku_api ||= begin
+        @options[:api_key] ||= auth_token
+        Heroku::API.new(@options)
+      end
+    end
 
     def auth_token
       ENV['HEROKU_API_KEY'] || Bundler.with_clean_env { `heroku auth:token`.chomp }
