@@ -1,5 +1,10 @@
 # Change Log (curated)
 
+# The Future
+
+  * [https://github.com/fastestforward/heroku_san/releases](https://github.com/fastestforward/heroku_san/releases)
+  * GitHub releases pages will replace the ChangeLog
+
 ## v4.3.0
 
   * Add #ensure_{all|one}_worker(s)_running -- which will restart your web workers until they stay up
