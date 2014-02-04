@@ -7,7 +7,7 @@ Helpful rake tasks for Heroku.
 
 ## Install
 
-### Rails 3
+### Rails 3+
 
 Add this to your `Gemfile`:
 
@@ -63,7 +63,7 @@ Update your `Rakefile`:
 
 In `config/heroku.yml` you will need to add the Heroku apps that you would like to attach to this project. You can generate this file by running:
 
-### Rails 3
+### Rails 3+
 
 ```sh
   rails generate heroku_san
