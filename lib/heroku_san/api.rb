@@ -9,7 +9,7 @@ module HerokuSan
     def sh(app, *command)
       preflight_check_for_cli
 
-      cmd = (command + ['--app', app]).compact
+      cmd = (command + ['--app', app, "--exit-code"]).compact
 
       show_command = cmd.join(' ')
       $stderr.puts show_command if @debug
