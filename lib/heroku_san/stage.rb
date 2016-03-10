@@ -129,5 +129,45 @@ module HerokuSan
     def revision
       git_named_rev(git_revision(repo))
     end
+
+    # Will return true if not using Rails or the remote DB isn't postgresql.
+    # Otherwise returns true if the remote DB has pending migrations and false if not.
+    def has_pending_migrations
+      return @has_pending_migrations if @has_pending_migrations != nil
+      return true unless defined?(::Rails)
+      database_url = long_config['DATABASE_URL']
+      return true unless database_url =~ /\Apostgres:\/\//
+      @has_pending_migrations = (local_migrations - remote_migrations(database_url)).present?
+    end
+
+  private
+
+    # returns an array of the schema_migrations run on the server
+    def remote_migrations(database_url)
+      database_uri = URI.parse(database_url)
+      begin
+        ENV['PGPASSWORD'] = database_uri.password
+        ENV['PGSSLMODE']  = 'require'
+        psql_cmd = "psql -U #{database_uri.user} -h #{database_uri.host} -p #{database_uri.port || 5432} #{database_uri.path[1..-1]}"
+        psql_output = `#{psql_cmd} -Atc "SELECT * FROM schema_migrations;" 2>&1`
+        if psql_output =~ /ERROR:  relation "schema_migrations" does not exist/
+          puts "'schema_migrations' table doesn't exist remotely, assuming no remote migrations"
+          return []
+        end
+        raise 'Error getting remote migrations' unless $?.success?
+        psql_output.split.map(&:to_i)
+      ensure
+        ENV.delete('PGPASSWORD')
+        ENV.delete('PGSSLMODE')
+      end
+    end
+
+    # returns an array of schema migration versions in the local source directory
+    def local_migrations
+      Rake::Task[:environment].invoke
+      ActiveRecord::Base.establish_connection
+      ActiveRecord::Migrator.migrations(ActiveRecord::Migrator.migrations_paths).map(&:version)
+    end
+
   end
 end
