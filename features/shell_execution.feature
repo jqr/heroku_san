@@ -1,13 +1,13 @@
 @slow_process @announce-cmd
 Feature: heroku_san can shell out to heroku without errors
 
-  Scenario: Bundling a ruby 2.0 project
+  Scenario: Bundling a ruby 2.2.4 project
     Given I run `mkdir -p ruby2test`
     And I cd to "ruby2test"
     And I write to "Gemfile" with:
     """
       source "https://rubygems.org"
-      ruby '2.0.0'
+      ruby '2.2.4'
       gem 'heroku_san', :path => '../../../.'
     """
 
@@ -31,9 +31,7 @@ Feature: heroku_san can shell out to heroku without errors
     """
     #!/usr/bin/env bash
 
-    [[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
-
-    rvm use 2.0.0
+    rbenv local 2.2.4
     bundle install
 
     ruby get_heroku_version.rb

@@ -55,7 +55,7 @@ When /^I add heroku_san to the rails Gemfile$/ do
   overwrite_file 'Gemfile', <<EOT.strip_heredoc
     source 'https://rubygems.org'
     ruby '#{ruby_version}'
-    gem 'rails', '3.2.7'
+    gem 'rails', '4.2.6'
     gem 'pg'
     group :development, :test do
       gem 'heroku_san', :path => '../../../.'
@@ -177,12 +177,12 @@ end
 
 When /^I deploy my project$/ do
   run_clean 'rake test_app deploy'
-  assert_partial_output "http://#{@app}.herokuapp.com deployed to Heroku", all_output
+  assert_partial_output "https://#{@app}.herokuapp.com/ deployed to Heroku", all_output
 end
 
 When /^I deploy to tag "([^"]*)"$/ do |tag|
   run_clean "rake test_app deploy[#{tag}]"
-  assert_partial_output "http://#{@app}.herokuapp.com deployed to Heroku", all_output
+  assert_partial_output "https://#{@app}.herokuapp.com/ deployed to Heroku", all_output
 end
 
 When /^I list all apps on Heroku$/ do
@@ -196,18 +196,17 @@ When /^I list all apps on Heroku$/ do
 end
 
 When /^I install an addon$/ do
-  # Install the campfire addon.
   overwrite_file 'config/heroku.yml', <<END_CONFIG.strip_heredoc
     test_app:
       app: #{@app}
       addons:
-        - heroku-postgresql:dev
+        - heroku-postgresql:hobby-dev
 
 END_CONFIG
 
   output = run_clean 'rake test_app heroku:addons'
   # The output should show the new one ...
-  assert_partial_output "heroku-postgresql:dev", output
+  assert_partial_output "heroku-postgresql:hobby-dev", output
 end
 
 Then /^(?:heroku_san|issue \d+) (?:is green|has been fixed)$/ do
@@ -236,5 +235,5 @@ EOT
 end
 
 def ruby_version
-  ENV['TRAVIS_RUBY_VERSION'] || '1.9.3'
+  ENV['TRAVIS_RUBY_VERSION'] || '2.2.4'
 end
