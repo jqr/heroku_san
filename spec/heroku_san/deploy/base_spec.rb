@@ -7,25 +7,25 @@ module HerokuSan
       
       it "calls push" do
         subject = described_class.new(stage)
-        stage.should_receive(:push).with(nil, nil)
+        expect(stage).to receive(:push).with(nil, nil)
         subject.deploy
       end
       
       it "calls push(sha)" do
         subject = described_class.new(stage, 'sha')
-        stage.should_receive(:push).with('sha', nil)
+        expect(stage).to receive(:push).with('sha', nil)
         subject.deploy
       end
       
       it "calls push(nil, :force)" do
         subject = described_class.new(stage, nil, :force)
-        stage.should_receive(:push).with(nil, :force)
+        expect(stage).to receive(:push).with(nil, :force)
         subject.deploy
       end
 
       it "calls push(sha, :force)" do
         subject = described_class.new(stage, 'sha', :force)
-        stage.should_receive(:push).with('sha', :force)
+        expect(stage).to receive(:push).with('sha', :force)
         subject.deploy
       end
     end

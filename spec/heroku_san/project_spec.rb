@@ -14,32 +14,32 @@ describe HerokuSan::Project do
 
   describe "#apps constructs the deploy list" do
     it "appends known shorthands to apps" do
-      heroku_san.apps.should == []
+      expect(heroku_san.apps).to eq []
       heroku_san << 'production'
-      heroku_san.apps.should == %w[production]
+      expect(heroku_san.apps).to eq %w[production]
       heroku_san << 'staging'
-      heroku_san.apps.should == %w[production staging]
+      expect(heroku_san.apps).to eq %w[production staging]
       heroku_san << 'unknown'
-      heroku_san.apps.should == %w[production staging]
+      expect(heroku_san.apps).to eq %w[production staging]
     end
   
     it "appends .all (or any array)" do
       heroku_san << heroku_san.all
-      heroku_san.apps.should == heroku_san.all
+      expect(heroku_san.apps).to eq heroku_san.all
     end
   
     describe "extra (default) behaviors" do
       specify "on a git branch that matches an app name" do
-        heroku_san.should_receive(:git_active_branch) { "staging" }
-        $stdout.should_receive(:puts).with("Defaulting to 'staging' as it matches the current branch")
+        expect(heroku_san).to receive(:git_active_branch) { "staging" }
+        expect($stdout).to receive(:puts).with("Defaulting to 'staging' as it matches the current branch")
         expect {
-          heroku_san.apps.should == %w[staging]
+          expect(heroku_san.apps).to eq %w[staging]
         }.to change{heroku_san.instance_variable_get('@apps')}.from([]).to(%w[staging])
       end
-    
+
       specify "on a git branch that doesn't matches an app name" do
-        heroku_san.should_receive(:git_active_branch) { "master" }
-        heroku_san.apps.should == %w[]
+        expect(heroku_san).to receive(:git_active_branch) { "master" }
+        expect(heroku_san.apps).to eq %w[]
       end
     
       context "with only a single configured app" do        
@@ -51,9 +51,9 @@ describe HerokuSan::Project do
         end
 
         it "returns the app" do
-          $stdout.should_receive(:puts).with('Defaulting to "production" since only one app is defined')
+          expect($stdout).to receive(:puts).with('Defaulting to "production" since only one app is defined')
           expect {
-            heroku_san.apps.should == %w[production]
+            expect(heroku_san.apps).to eq %w[production]
           }.to change{heroku_san.instance_variable_get('@apps')}.from([]).to(%w[production])
         end
       end
@@ -68,7 +68,7 @@ describe HerokuSan::Project do
     it "yields to a block with args" do
       heroku_san << 'production'
       block = double('block')
-      block.should_receive(:action).with(heroku_san['production'])
+      expect(block).to receive(:action).with(heroku_san['production'])
       heroku_san.each_app do |stage|
         block.action(stage)
       end
@@ -78,7 +78,7 @@ describe HerokuSan::Project do
   describe "#[]" do
     it "returns a config section" do
       heroku_san.all.each do |app|
-        heroku_san[app].should be_a HerokuSan::Stage
+        expect(heroku_san[app]).to be_a HerokuSan::Stage
       end
     end
   end

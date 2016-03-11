@@ -11,10 +11,10 @@ describe HerokuSan::Parser do
       it "returns a list of apps" do
         parser.parse(parseable)
 
-        parseable.configuration.keys.should =~ %w[production staging demo]
-        parseable.configuration['production'].should == {'app' => 'awesomeapp', 'tag' => 'production/*', 'config' => {'BUNDLE_WITHOUT' => 'development:test', 'GOOGLE_ANALYTICS' => 'UA-12345678-1'}}
-        parseable.configuration['staging'].should == {'app' => 'awesomeapp-staging', 'stack' => 'bamboo-ree-1.8.7', 'config' => {'BUNDLE_WITHOUT' => 'development:test'}}
-        parseable.configuration['demo'].should == {'app' => 'awesomeapp-demo', 'stack' => 'cedar', 'config' => {'BUNDLE_WITHOUT' => 'development:test'}}
+        expect(parseable.configuration.keys).to match %w[production staging demo]
+        expect(parseable.configuration['production']).to eq({'app' => 'awesomeapp', 'tag' => 'production/*', 'config' => {'BUNDLE_WITHOUT' => 'development:test', 'GOOGLE_ANALYTICS' => 'UA-12345678-1'}})
+        expect(parseable.configuration['staging']).to eq({'app' => 'awesomeapp-staging', 'stack' => 'bamboo-ree-1.8.7', 'config' => {'BUNDLE_WITHOUT' => 'development:test'}})
+        expect(parseable.configuration['demo']).to eq({'app' => 'awesomeapp-demo', 'stack' => 'cedar', 'config' => {'BUNDLE_WITHOUT' => 'development:test'}})
       end
     end
 
@@ -24,12 +24,12 @@ describe HerokuSan::Parser do
       it "returns a list of apps" do
         parser.parse(parseable)
 
-        parseable.configuration.keys.should =~ %w[production staging demo]
-        parseable.configuration.should == {
+        expect(parseable.configuration.keys).to match %w[production staging demo]
+        expect(parseable.configuration).to eq({
             'production' => {'app' => 'awesomeapp', 'config' => {}},
             'staging' => {'app' => 'awesomeapp-staging', 'config' => {}},
             'demo' => {'app' => 'awesomeapp-demo', 'config' => {}}
-        }
+        })
       end
     end
   end
@@ -63,7 +63,7 @@ describe HerokuSan::Parser do
       let(:parseable) { double :external_configuration => nil }
 
       it "doesn't change prod_config" do
-        prod_config.should_not_receive :merge!
+        expect(prod_config).not_to receive :merge!
         parser.merge_external_config! parseable, stages
       end
     end
@@ -71,18 +71,18 @@ describe HerokuSan::Parser do
     context "with extra" do
       let(:parseable) { double :external_configuration => 'config_repos' }
       before(:each) do
-        parser.should_receive(:git_clone).with('config_repos', anything)
-        parser.should_receive(:parse_yaml).and_return(extras)
+        expect(parser).to receive(:git_clone).with('config_repos', anything)
+        expect(parser).to receive(:parse_yaml).and_return(extras)
       end
 
       it "merges extra configuration bits" do
-        prod_config.should_receive(:merge!).with extras['production']
+        expect(prod_config).to receive(:merge!).with extras['production']
         parser.merge_external_config! parseable, [stages.first]
       end
 
       it "overrides the main configuration" do
         parser.merge_external_config! parseable, [stages.last]
-        staging_config.should == {"EXTRA" => "foo"}
+        expect(staging_config).to eq("EXTRA" => "foo")
       end
     end
   end

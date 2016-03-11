@@ -6,7 +6,7 @@ module HerokuSan
     let(:response) { double }
 
     before do
-      stage.heroku.stub(:get_ps).with(stage.app) { response }
+      allow(stage.heroku).to receive(:get_ps).with(stage.app) { response }
     end
 
     describe "#ensure_one_worker_running" do
@@ -29,8 +29,8 @@ module HerokuSan
       it "should block until at least one worker is running, and restart any crashed workers it sees" do
 
         with_app(stage, 'name' => stage.app) do |app_data|
-          response.should_receive(:body).twice.and_return(none_running, one_running_with_crash)
-          stage.heroku.should_receive(:post_ps_restart).with(stage.app, ps: 'web.1')
+          expect(response).to receive(:body).twice.and_return(none_running, one_running_with_crash)
+          expect(stage.heroku).to receive(:post_ps_restart).with(stage.app, ps: 'web.1')
 
           stage.ensure_one_worker_running
         end
@@ -69,9 +69,9 @@ module HerokuSan
 
       it "should block until all workers are running, and restart any crashed workers it sees" do
         with_app(stage, 'name' => stage.app) do |app_data|
-          response.should_receive(:body).exactly(4).times.and_return(some_crashes, some_restarting, one_crash, all_up)
-          stage.heroku.should_receive(:post_ps_restart).with(stage.app, ps: 'worker.1').twice
-          stage.heroku.should_receive(:post_ps_restart).with(stage.app, ps: 'web.1').once
+          expect(response).to receive(:body).exactly(4).times.and_return(some_crashes, some_restarting, one_crash, all_up)
+          expect(stage.heroku).to receive(:post_ps_restart).with(stage.app, ps: 'worker.1').twice
+          expect(stage.heroku).to receive(:post_ps_restart).with(stage.app, ps: 'web.1').once
 
           stage.ensure_all_workers_running
         end

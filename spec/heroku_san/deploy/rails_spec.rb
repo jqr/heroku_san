@@ -7,9 +7,9 @@ module HerokuSan
 
       it "calls push, rake db:migrate & restart" do
         subject = described_class.new(stage, {})
-        stage.should_receive(:push) { "pushed" } # "mock" super
-        stage.should_receive(:run).with('rake db:migrate') { "migrated" }
-        stage.should_receive(:restart) { "restarted" }
+        expect(stage).to receive(:push) { "pushed" } # "mock" super
+        expect(stage).to receive(:run).with('rake db:migrate') { "migrated" }
+        expect(stage).to receive(:restart) { "restarted" }
         subject.deploy
       end
     end

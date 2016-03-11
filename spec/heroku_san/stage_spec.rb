@@ -7,7 +7,7 @@ describe HerokuSan::Stage do
   include HerokuSan::Git
   subject { Factory::Stage.build('production', {"deploy" => HerokuSan::Deploy::Rails, "app" => "awesomeapp", "stack" => "cedar"})}
   before do
-    HerokuSan::API.any_instance.stub(:preflight_check_for_cli)
+    allow_any_instance_of(HerokuSan::API).to receive(:preflight_check_for_cli)
   end
 
   context "initializes" do
@@ -19,17 +19,17 @@ describe HerokuSan::Stage do
        "addons"=> ['one:addon', 'two:addons']
       })}
 
-    its(:name)   { should == 'production' }
-    its(:app)    { should == 'awesomeapp-demo' }
-    its(:stack)  { should == 'cedar' }
-    its(:tag)    { should == "demo/*" }
-    its(:config) { should == {"BUNDLE_WITHOUT"=>"development:test"} }
-    its(:repo)   { should == 'git@heroku.com:awesomeapp-demo.git' }
-    its(:addons) { should == ['one:addon', 'two:addons'] }
+    it { expect(subject.name).to eq 'production' }
+    it { expect(subject.app).to eq 'awesomeapp-demo' }
+    it { expect(subject.stack).to eq 'cedar' }
+    it { expect(subject.tag).to eq "demo/*" }
+    it { expect(subject.config).to eq("BUNDLE_WITHOUT"=>"development:test") }
+    it { expect(subject.repo).to eq 'git@heroku.com:awesomeapp-demo.git' }
+    it { expect(subject.addons).to eq ['one:addon', 'two:addons'] }
   end
   
   describe "#app" do
-    its(:app) { should == 'awesomeapp'}
+    it { expect(subject.app).to eq 'awesomeapp'}
     context "blank app" do
       subject { Factory::Stage.build('production') }
       it "should raise an error" do
@@ -42,13 +42,13 @@ describe HerokuSan::Stage do
     it "returns the name of the stack from Heroku" do
       subject = Factory::Stage.build('production', {"app" => "awesomeapp"})
       with_app(subject, 'name' => subject.app) do |app_data|
-        subject.stack.should == 'bamboo-mri-1.9.2'
+        expect(subject.stack).to eq 'bamboo-mri-1.9.2'
       end
     end
   
     it "returns the stack name from the config when it is set there" do
       subject = Factory::Stage.build('production', {"app" => "awesomeapp", "stack" => "cedar"})
-      subject.stack.should == 'cedar'
+      expect(subject.stack).to eq 'cedar'
     end
   end
 
@@ -56,7 +56,7 @@ describe HerokuSan::Stage do
     subject { Factory::Stage.build('production', {'addons' => addons}) }
     context 'default' do
       let(:addons) { nil }
-      its(:addons) { should == [] }
+      it { expect(subject.addons).to eq [] }
     end
     context 'nested' do
       # This is for when you do:
@@ -68,37 +68,37 @@ describe HerokuSan::Stage do
       #   - *default_addons
       #   - other
       let(:addons) { [ ['a', 'b'], 'other' ] }
-      its(:addons) { should == [ 'a', 'b', 'other' ] }
+      it { expect(subject.addons).to eq [ 'a', 'b', 'other' ] }
     end
   end
 
   describe "#run" do
     it "runs commands using the new cedar format" do
-      subject.heroku.should_receive(:system).with("heroku", "run", "worker foo bar bleh", "--app", "awesomeapp") { true }
+      expect(subject.heroku).to receive(:system).with("heroku", "run", "worker foo bar bleh", "--app", "awesomeapp", "--exit-code") { true }
       subject.run 'worker foo bar bleh'
     end
   end
 
   describe "#push" do
     it "deploys to heroku" do
-      subject.should_receive(:git_parsed_tag).with(nil) {'tag'}
-      subject.should_receive(:git_push).with('tag', subject.repo, [])
+      expect(subject).to receive(:git_parsed_tag).with(nil) {'tag'}
+      expect(subject).to receive(:git_push).with('tag', subject.repo, [])
       subject.push
     end
     
     it "deploys with a custom sha" do
-      subject.should_receive(:git_push).with('deadbeef', subject.repo, [])
+      expect(subject).to receive(:git_push).with('deadbeef', subject.repo, [])
       subject.push('deadbeef')
     end
     
     it "deploys with --force" do
-      subject.should_receive(:git_parsed_tag).with(nil) {'tag'}
-      subject.should_receive(:git_push).with('tag', subject.repo, %w[--force])
+      expect(subject).to receive(:git_parsed_tag).with(nil) {'tag'}
+      expect(subject).to receive(:git_push).with('tag', subject.repo, %w[--force])
       subject.push(nil, :force)
     end
     
     it "deploys with a custom sha & --force" do
-      subject.should_receive(:git_push).with('deadbeef', subject.repo, %w[--force])
+      expect(subject).to receive(:git_push).with('deadbeef', subject.repo, %w[--force])
       subject.push('deadbeef', :force)
     end
   end
@@ -106,8 +106,8 @@ describe HerokuSan::Stage do
   describe "#migrate" do
     it "runs rake db:migrate" do
       with_app(subject, 'name' => subject.app) do |app_data|
-        subject.should_receive(:run).with('rake db:migrate').and_return 'output:'
-        subject.migrate.should == "restarted"
+        expect(subject).to receive(:run).with('rake db:migrate').and_return 'output:'
+        expect(subject.migrate).to eq "restarted"
       end
     end
   end
@@ -115,7 +115,7 @@ describe HerokuSan::Stage do
   describe "#deploy" do
     context "using the default strategy" do
       it "(rails) pushes & migrates" do
-        HerokuSan::Deploy::Rails.any_instance.should_receive(:deploy)
+        allow_any_instance_of(HerokuSan::Deploy::Rails).to receive(:deploy)
         subject.deploy
       end
     end
@@ -126,7 +126,7 @@ describe HerokuSan::Stage do
       end
       subject = Factory::Stage.build('test', {"app" => "awesomeapp", "deploy" => TestDeployStrategy})
       it "(custom) calls deploy" do
-        TestDeployStrategy.any_instance.should_receive(:deploy)
+        expect_any_instance_of(TestDeployStrategy).to receive(:deploy)
         subject.deploy
       end
     end
@@ -135,13 +135,13 @@ describe HerokuSan::Stage do
   describe "#maintenance" do
     it ":on" do
       with_app(subject, 'name' => subject.app )do |app_data|
-        subject.maintenance(:on).status.should == 200
+        expect(subject.maintenance(:on).status).to eq 200
       end
     end
 
     it ":off" do
       with_app(subject, 'name' => subject.app) do |app_data|
-        subject.maintenance(:off).status.should.should == 200
+        expect(subject.maintenance(:off).status).to eq 200
       end
     end
     
@@ -154,9 +154,9 @@ describe HerokuSan::Stage do
     context "with a block" do
       it "wraps it in a maintenance mode" do
         with_app(subject, 'name' => subject.app) do |app_data|
-          subject.heroku.should_receive(:post_app_maintenance).with(subject.app, '1').ordered
-          reactor = double("Reactor"); reactor.should_receive(:scram).with(:now).ordered
-          subject.heroku.should_receive(:post_app_maintenance).with(subject.app, '0').ordered
+          expect(subject.heroku).to receive(:post_app_maintenance).with(subject.app, '1').ordered
+          reactor = double("Reactor"); expect(reactor).to receive(:scram).with(:now).ordered
+          expect(subject.heroku).to receive(:post_app_maintenance).with(subject.app, '0').ordered
           
           subject.maintenance {reactor.scram(:now)} 
         end
@@ -164,11 +164,11 @@ describe HerokuSan::Stage do
 
       it "ensures that maintenance mode is turned off" do
         with_app(subject, 'name' => subject.app) do |app_data|
-          subject.heroku.should_receive(:post_app_maintenance).with(subject.app, '1').ordered
-          reactor = double("Reactor"); reactor.should_receive(:scram).and_raise(RuntimeError)
-          subject.heroku.should_receive(:post_app_maintenance).with(subject.app, '0').ordered
+          expect(subject.heroku).to receive(:post_app_maintenance).with(subject.app, '1').ordered
+          reactor = double("Reactor"); expect(reactor).to receive(:scram).and_raise(RuntimeError)
+          expect(subject.heroku).to receive(:post_app_maintenance).with(subject.app, '0').ordered
           
-          expect do subject.maintenance {reactor.scram(:now)} end.to raise_error
+          expect do subject.maintenance {reactor.scram(:now)} end.to raise_error StandardError
         end
       end
     end
@@ -180,30 +180,30 @@ describe HerokuSan::Stage do
     end
 
     it "uses the provided name" do
-      (@app = subject.create).should == 'awesomeapp'
+      expect((@app = subject.create)).to eq 'awesomeapp'
     end
 
     it "creates an app on heroku" do
       subject = Factory::Stage.build('production')
-      (@app = subject.create).should =~ /generated-name-\d+/
+      expect(@app = subject.create).to match /generated-name-\d+/
     end
 
     it "uses the default stack if none is given" do
       subject = Factory::Stage.build('production')
-      (@app = subject.create).should =~ /generated-name-\d+/
-      subject.heroku.get_stack(@app).body.detect{|stack| stack['current']}['name'].should == 'bamboo-mri-1.9.2'
+      expect(@app = subject.create).to match /generated-name-\d+/
+      expect(subject.heroku.get_stack(@app).body.detect{|stack| stack['current']}['name']).to eq 'bamboo-mri-1.9.2'
     end
 
     it "uses the stack from the config" do
-      (@app = subject.create).should == 'awesomeapp'
-      subject.heroku.get_stack(@app).body.detect{|stack| stack['current']}['name'].should == 'cedar'
+      expect(@app = subject.create).to eq 'awesomeapp'
+      expect(subject.heroku.get_stack(@app).body.detect{|stack| stack['current']}['name']).to eq 'cedar'
     end
   end
   
   describe "#long_config" do
     it "returns the remote config" do
       with_app(subject, 'name' => subject.app) do |app_data|
-        subject.long_config.should == STOCK_CONFIG
+        expect(subject.long_config).to eq STOCK_CONFIG
       end
     end
   end
@@ -212,14 +212,14 @@ describe HerokuSan::Stage do
     it "updates the configuration settings on Heroku" do
       subject = Factory::Stage.build('test', {"app" => "awesomeapp", "config" => {'FOO' => 'bar', 'DOG' => 'emu'}})
       with_app(subject, 'name' => subject.app) do |app_data|
-        subject.push_config.should == STOCK_CONFIG.merge('FOO' => 'bar', 'DOG' => 'emu')
+        expect(subject.push_config).to eq STOCK_CONFIG.merge('FOO' => 'bar', 'DOG' => 'emu')
       end
     end
 
     it "pushes the options hash" do
       subject = Factory::Stage.build('test', {"app" => "awesomeapp", "config" => {'FOO' => 'bar', 'DOG' => 'emu'}})
       with_app(subject, 'name' => subject.app) do |app_data|
-        subject.push_config('RACK_ENV' => 'magic').should == STOCK_CONFIG.merge('RACK_ENV' => 'magic')
+        expect(subject.push_config('RACK_ENV' => 'magic')).to eq STOCK_CONFIG.merge('RACK_ENV' => 'magic')
       end
     end
   end
@@ -227,41 +227,41 @@ describe HerokuSan::Stage do
   describe "#restart" do
     it "restarts an app" do
       with_app(subject, 'name' => subject.app) do |app_data|
-        subject.restart.should == 'restarted'
+        expect(subject.restart).to eq 'restarted'
       end
     end
   end
   
   describe "#logs" do
     it "returns log files" do
-      subject.heroku.should_receive(:system).with("heroku", "logs", "--app", "awesomeapp") { true }
+      expect(subject.heroku).to receive(:system).with("heroku", "logs", "--app", "awesomeapp", "--exit-code") { true }
       subject.logs
     end
 
     it "tails log files" do
-      subject.heroku.should_receive(:system).with("heroku", "logs", "--tail", "--app", "awesomeapp") { true }
+      expect(subject.heroku).to receive(:system).with("heroku", "logs", "--tail", "--app", "awesomeapp", "--exit-code") { true }
       subject.logs(:tail)
     end
   end
 
   describe "#revision" do
     it "returns the named remote revision for the stage" do
-      subject.should_receive(:git_revision).with(subject.repo) {"sha"}
-      subject.should_receive(:git_named_rev).with('sha') {"sha production/123456"}
-      subject.revision.should == 'sha production/123456'
+      expect(subject).to receive(:git_revision).with(subject.repo) {"sha"}
+      expect(subject).to receive(:git_named_rev).with('sha') {"sha production/123456"}
+      expect(subject.revision).to eq 'sha production/123456'
     end
 
     it "returns nil if the stage has never been deployed" do
-      subject.should_receive(:git_revision).with(subject.repo) {nil}
-      subject.should_receive(:git_named_rev).with(nil) {''}
-      subject.revision.should == ''
+      expect(subject).to receive(:git_revision).with(subject.repo) {nil}
+      expect(subject).to receive(:git_named_rev).with(nil) {''}
+      expect(subject.revision).to eq ''
     end
   end
   
   describe "#installed_addons" do
     it "returns the list of installed addons" do
       with_app(subject, 'name' => subject.app) do |app_data|
-        subject.installed_addons.map{|a|a['name']}.should include *%w[shared-database:5mb]
+        expect(subject.installed_addons.map{|a|a['name']}).to include *%w[shared-database:5mb]
       end
     end
   end
@@ -271,15 +271,15 @@ describe HerokuSan::Stage do
 
     it "installs the addons" do
       with_app(subject, 'name' => subject.app) do |app_data| 
-        subject.install_addons.map{|a| a['name']}.should include *%w[custom_domains:basic ssl:piggyback]
-        subject.installed_addons.map{|a|a['name']}.should =~ subject.install_addons.map{|a| a['name']}
+        expect(subject.install_addons.map{|a| a['name']}).to include *%w[custom_domains:basic ssl:piggyback]
+        expect(subject.installed_addons.map{|a|a['name']}).to match subject.install_addons.map{|a| a['name']}
       end
     end
 
     it "only installs missing addons" do
       subject = Factory::Stage.build('production', {"app" => "awesomeapp", "stack" => "bamboo-ree-1.8.7", "addons" => %w[shared-database:5mb custom_domains:basic ssl:piggyback]})
       with_app(subject, 'name' => subject.app) do |app_data| 
-        subject.install_addons.map{|a| a['name']}.should include *%w[shared-database:5mb custom_domains:basic ssl:piggyback]
+        expect(subject.install_addons.map{|a| a['name']}).to include *%w[shared-database:5mb custom_domains:basic ssl:piggyback]
       end
     end
   end
