@@ -261,25 +261,25 @@ describe HerokuSan::Stage do
   describe "#installed_addons" do
     it "returns the list of installed addons" do
       with_app(subject, 'name' => subject.app) do |app_data|
-        expect(subject.installed_addons.map{|a|a['name']}).to include *%w[shared-database:5mb]
+        expect(subject.installed_addons.map{|a|a['name']}).to include *%w[heroku-postgresql:hobby-dev]
       end
     end
   end
 
   describe '#install_addons' do
-    subject { Factory::Stage.build('production', {"app" => "awesomeapp", "stack" => "bamboo-ree-1.8.7", "addons" => %w[custom_domains:basic ssl:piggyback]})}
+    subject { Factory::Stage.build('production', {"app" => "awesomeapp", "addons" => %w[deployhooks:email]})}
 
     it "installs the addons" do
       with_app(subject, 'name' => subject.app) do |app_data| 
-        expect(subject.install_addons.map{|a| a['name']}).to include *%w[custom_domains:basic ssl:piggyback]
+        expect(subject.install_addons.map{|a| a['name']}).to include *%w[deployhooks:email]
         expect(subject.installed_addons.map{|a|a['name']}).to match subject.install_addons.map{|a| a['name']}
       end
     end
 
     it "only installs missing addons" do
-      subject = Factory::Stage.build('production', {"app" => "awesomeapp", "stack" => "bamboo-ree-1.8.7", "addons" => %w[shared-database:5mb custom_domains:basic ssl:piggyback]})
+      subject = Factory::Stage.build('production', {"app" => "awesomeapp", "stack" => "bamboo-ree-1.8.7", "addons" => %w[deployhooks:email]})
       with_app(subject, 'name' => subject.app) do |app_data| 
-        expect(subject.install_addons.map{|a| a['name']}).to include *%w[shared-database:5mb custom_domains:basic ssl:piggyback]
+        expect(subject.install_addons.map{|a| a['name']}).to include *%w[deployhooks:email]
       end
     end
   end
