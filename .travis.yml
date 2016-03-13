@@ -1,22 +1,13 @@
 language: ruby
-bundler_args: --without development
 script: "bundle exec rake travis"
 rvm:
-  - 2.0
-  - 2.1
-  - 2.2
-  - 2.3
+  - 2.0.0-p648
+  - 2.1.8
+  - 2.2.4
+  - 2.3.0
+  - 2.4.0-dev
 env:
   global:
     - secure: dAxfEdg/7Cb/G9vkrn/ifdvycbXWtK2ey60JMepOxx9v3QyaqoSY3w5G0QB+4+uyOYmHwtif8tnK3Sa8jbBgqhAlXaxqxOT8WmQKYlhSgwWX4lQe4lUM5jkOkfNHRMRaQvCAn27gNAjdIRU7sb2cU/pm64eAFbU01TejJOM7Aow=
 before_install:
-  - sudo apt-get install openssl
   - wget -qO- https://toolbelt.heroku.com/install-ubuntu.sh | sh
-before_script:
-  - git config --global user.name "Travis CI"
-  - git config --global user.email "travis@example.com"
-  - echo -e "Host heroku.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
-  - ./spec/support/travis-ssh-keygen.sh < /dev/null
-  - heroku keys:add ~/.ssh/id_rsa.pub < /dev/null
-after_script:
-  - ./spec/support/travis-key-cleanup.sh
