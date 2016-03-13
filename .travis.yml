@@ -9,4 +9,4 @@ before_install:
   - git config --global user.email "heroku_san@example.com"
   - git config --global user.name "Test User"
   - wget -qO- https://toolbelt.heroku.com/install-ubuntu.sh | sh
-  - spec/support_heroku_login.sh
+  - spec/support/heroku_login.sh
