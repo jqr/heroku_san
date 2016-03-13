@@ -7,9 +7,9 @@ describe GitTest do
   describe "#git_push" do    
     it "pushes to heroku" do
       expect(subject).to receive(:sh).with("git update-ref refs/heroku_san/deploy HEAD^{commit}")
-      expect(subject).to receive(:sh).with("git push git@heroku.com:awesomeapp.git  refs/heroku_san/deploy:refs/heads/master")
+      expect(subject).to receive(:sh).with("git push https://git.heroku.com/awesomeapp.git  refs/heroku_san/deploy:refs/heads/master")
       expect(subject).to receive(:sh).with("git update-ref -d refs/heroku_san/deploy")
-      subject.git_push(nil, 'git@heroku.com:awesomeapp.git')
+      subject.git_push(nil, 'https://git.heroku.com/awesomeapp.git')
     end
     
     it "pushes a specific commit to heroku" do

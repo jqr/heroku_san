@@ -1,4 +1,5 @@
 require 'time'
+require 'bundler'
 
 module HerokuSan
   class API
@@ -9,12 +10,14 @@ module HerokuSan
     def sh(app, *command)
       preflight_check_for_cli
 
-      cmd = (command + ['--app', app, "--exit-code"]).compact
+      cmd = command
+      cmd << ['--app', app] if app
+      cmd << '--exit-code' if command.first == 'run'
 
       show_command = cmd.join(' ')
       $stderr.puts show_command if @debug
 
-      ok = Bundler.with_clean_env { system "heroku", *cmd }
+      ok = ::Bundler.with_clean_env { system "heroku", *cmd.compact.flatten }
 
       status = $?
       ok or fail "Command failed with status (#{status.exitstatus}): [heroku #{show_command}]"

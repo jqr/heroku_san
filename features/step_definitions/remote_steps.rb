@@ -1,6 +1,7 @@
 World(Aruba::Api)
 require 'active_support/core_ext/string/strip'
 require 'godot'
+require 'bundler'
 
 Given /^I have a new Rails project$/ do
   cmd = "rails new test_app --quiet --force --skip-bundle --skip-javascript --skip-test-unit --skip-sprockets"
@@ -191,7 +192,7 @@ When /^I list all apps on Heroku$/ do
   end
   output = run_clean 'rake heroku:apps'
   assert_partial_output "test_app is shorthand for the Heroku app #{@app} located at:", output
-  assert_partial_output "git@heroku.com:#{@app}.git", output
+  assert_partial_output "https://git.heroku.com/#{@app}.git", output
   assert_partial_output "@ #{sha} master", output
 end
 
@@ -200,13 +201,13 @@ When /^I install an addon$/ do
     test_app:
       app: #{@app}
       addons:
-        - heroku-postgresql:hobby-dev
+        - deployhooks:email
 
 END_CONFIG
 
   output = run_clean 'rake test_app heroku:addons'
   # The output should show the new one ...
-  assert_partial_output "heroku-postgresql:hobby-dev", output
+  assert_partial_output "deployhooks:email", output
 end
 
 Then /^(?:heroku_san|issue \d+) (?:is green|has been fixed)$/ do

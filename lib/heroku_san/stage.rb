@@ -24,7 +24,7 @@ module HerokuSan
     end
     
     def repo
-      @options['repo'] ||= "git@heroku.com:#{app}.git"
+      @options['repo'] ||= "https://git.heroku.com/#{app}.git"
     end
     
     def stack
