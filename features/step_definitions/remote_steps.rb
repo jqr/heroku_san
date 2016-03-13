@@ -107,6 +107,7 @@ When /^I create my project on Heroku$/ do
 
   output = last_command_started.output
   @app = output.match(/test_app: Created ([\w-]+)/)[1]
+  at_exit { system "heroku apps:destroy #{@app} --confirm #{@app}" }
   overwrite_file 'config/heroku.yml', <<-EOT.strip_heredoc
     ---
     test_app:
