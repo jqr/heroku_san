@@ -5,10 +5,6 @@ rvm:
   - 2.1.8
   - 2.2.4
   - 2.3.0
-  - 2.4.0-dev
-env:
-  global:
-    - secure: dAxfEdg/7Cb/G9vkrn/ifdvycbXWtK2ey60JMepOxx9v3QyaqoSY3w5G0QB+4+uyOYmHwtif8tnK3Sa8jbBgqhAlXaxqxOT8WmQKYlhSgwWX4lQe4lUM5jkOkfNHRMRaQvCAn27gNAjdIRU7sb2cU/pm64eAFbU01TejJOM7Aow=
 before_install:
   - git config --global user.email "heroku_san@example.com"
   - git config --global user.name "Test User"
