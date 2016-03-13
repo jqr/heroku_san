@@ -1,4 +1,4 @@
-@slow_process @announce-command @announce-output
+@slow_process @announce-command @announce-output @announce-directory
 Feature: heroku_san can control a project on Heroku
   WARNING: This WILL create apps on Heroku!
   You must login with the heroku cli before starting

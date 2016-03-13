@@ -49,6 +49,7 @@ Given /^I have a new Sinatra project$/ do
   EOT
 
   run_simple 'bundle install'
+  run_simple 'git add Gemfile.lock'
 end
 
 When /^I commit .* changes with "(.*)"$/ do |message|
@@ -70,6 +71,8 @@ When /^I add heroku_san to the rails Gemfile$/ do
     end
   EOT
   run_simple "bundle install"
+  run_simple "git add Gemfile Gemfile.lock"
+  run_simple "git commit -m 'Add heroku_san gem'"
 end
 
 When /^I add heroku_san to the sinatra Gemfile$/ do
