@@ -12,7 +12,7 @@ Gem::Specification.new do |s|
   s.email = %q{elijah.miller@gmail.com}
   s.homepage = %q{http://github.com/fastestforward/heroku_san}
   s.license = "MIT"
-  s.files = `git ls-files`.split("\n")
+  s.files = `git ls-files`.split("\n") - ['Gemfile.lock']
   s.test_files = `git ls-files -- {test,spec,features}/*`.split("\n")
   s.require_paths = ["lib"]
   s.extra_rdoc_files = ["README.md"]
@@ -26,5 +26,6 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency("heroku-api", [">= 0.1.2"])
   s.add_runtime_dependency("json")
   s.add_runtime_dependency("rake")
+  s.add_runtime_dependency("bundler")
 end
 

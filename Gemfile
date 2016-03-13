@@ -4,15 +4,13 @@ source 'https://rubygems.org'
 gemspec
 
 group :test do
-  gem 'aruba'
+  gem 'aruba', '~> 0.14.0'
   gem 'bundler'
   gem 'cucumber'
   gem 'godot'
   gem 'rails'
   gem 'rake'
   gem 'rspec'
-  gem 'sqlite3'
-  gem 'pg'
 end
 
 group :development do

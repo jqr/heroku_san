@@ -1,4 +1,4 @@
-@slow_process @announce-cmd @issue
+@slow_process @announce-command @issue
 Feature: github issues
   Given there are bugs
   And everyone wants defect-free software
