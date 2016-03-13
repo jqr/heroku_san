@@ -1,6 +1,7 @@
-#!/bin/sh -x
+#!/bin/sh
 
 heroku login <<EOT
-apikey
+heroku_san
 $HEROKU_SAN_API_KEY
 EOT
+heroku auth:whoami

@@ -1,4 +1,4 @@
-@slow_process @announce-command
+@slow_process @announce
 Feature: heroku_san can control a project on Heroku
   WARNING: This WILL create apps on Heroku!
   You must login with the heroku cli before starting
