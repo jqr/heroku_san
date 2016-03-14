@@ -48,8 +48,9 @@ Given /^I have a new Sinatra project$/ do
     load "heroku_san/tasks.rb"
   EOT
 
-  run_simple 'bundle install'
-  run_simple 'git add Gemfile.lock'
+  Bundler.with_clean_env do
+    run_simple 'bundle install'
+  end
 end
 
 When /^I commit .* changes with "(.*)"$/ do |message|
@@ -70,8 +71,9 @@ When /^I add heroku_san to the rails Gemfile$/ do
       gem 'heroku_san', :path => '../../../.'
     end
   EOT
-  run_simple "bundle install"
-  run_simple "git add Gemfile Gemfile.lock"
+  Bundler.with_clean_env do
+    run_simple 'bundle install'
+  end
   run_simple "git commit -m 'Add heroku_san gem'"
 end
 
@@ -79,7 +81,9 @@ When /^I add heroku_san to the sinatra Gemfile$/ do
 end
 
 When /^I run bundle install$/ do
-  run_simple "bundle install", exit_timeout: 60
+  Bundler.with_clean_env do
+    run_simple 'bundle install', exit_timeout: 60
+  end
   expect(%w[Gemfile.lock]).to Aruba::Matchers.all be_an_existing_file
 end
 
