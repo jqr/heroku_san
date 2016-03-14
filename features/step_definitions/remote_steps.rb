@@ -54,8 +54,7 @@ Given /^I have a new Sinatra project$/ do
 end
 
 When /^I commit .* changes with "(.*)"$/ do |message|
-  run_simple 'git add .'
-  run_simple "git commit -m '#{message}'"
+  run_simple "git commit --all --message '#{message}'"
 end
 
 When /^I tag the commit with "([^"]*)" annotated by "([^"]*)"$/ do |tag, annotation|
@@ -74,7 +73,7 @@ When /^I add heroku_san to the rails Gemfile$/ do
   Bundler.with_clean_env do
     run_simple 'bundle install'
   end
-  run_simple "git commit -m 'Add heroku_san gem'"
+  run_simple "git commit --all --message 'Add heroku_san gem'"
 end
 
 When /^I add heroku_san to the sinatra Gemfile$/ do
