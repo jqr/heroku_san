@@ -1,9 +1,9 @@
 # Heroku San
 Helpful rake tasks for Heroku.
 
-[![Build Status](https://secure.travis-ci.org/fastestforward/heroku_san.png)](http://travis-ci.org/fastestforward/heroku_san)
-[![Code Climate](https://codeclimate.com/github/fastestforward/heroku_san.png)](https://codeclimate.com/github/fastestforward/heroku_san)
-[![Gemnasium](https://gemnasium.com/fastestforward/heroku_san.png)](https://gemnasium.com/fastestforward/heroku_san)
+[![Build Status](https://secure.travis-ci.org/jqr/heroku_san.png)](http://travis-ci.org/jqr/heroku_san)
+[![Code Climate](https://codeclimate.com/github/jqr/heroku_san.png)](https://codeclimate.com/github/jqr/heroku_san)
+[![Gemnasium](https://gemnasium.com/jqr/heroku_san.png)](https://gemnasium.com/jqr/heroku_san)
 
 ## Install
 
