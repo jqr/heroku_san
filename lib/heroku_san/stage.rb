@@ -40,7 +40,7 @@ module HerokuSan
     end
 
     def addons
-      (@options['addons'] ||= []).flatten
+      (@options['addons'] ||= []).map{|addon, level| "#{addon}:#{level}"}
     end
     
     def run(command, args = nil)
