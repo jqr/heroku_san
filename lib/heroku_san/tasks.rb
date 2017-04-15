@@ -207,8 +207,9 @@ namespace :heroku do
   task :deploy, [:commit] => [:before_deploy] do |t, args|
     each_heroku_app do |stage|
       stage.deploy(args.commit)
+      Rake::Task["heroku:deploy:after"].invoke(stage)
+      Rake::Task["heroku:deploy:after"].reenable
     end
-    Rake::Task[:after_deploy].execute
   end
 
   namespace :deploy do
@@ -216,8 +217,9 @@ namespace :heroku do
     task :force, [:commit] => [:before_deploy] do |t, args|
       each_heroku_app do |stage|
         stage.deploy(args.commit, :force)
+        Rake::Task["heroku:deploy:after"].invoke(stage)
+        Rake::Task["heroku:deploy:after"].reenable
       end
-      Rake::Task[:after_deploy].execute
     end
 
     desc "Callback before deploys"
@@ -226,7 +228,7 @@ namespace :heroku do
 
     desc "Callback after deploys"
     task :after do
-  end
+    end
 
   end
 
