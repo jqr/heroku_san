@@ -48,6 +48,7 @@ module HerokuSan
     end
     
     def push(sha = nil, force = false)
+      (sha = sha + "^{commit}") if sha
       sha ||= git_parsed_tag(tag)
       git_push(sha, repo, force ? %w[--force] : [])
     end
