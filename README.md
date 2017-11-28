@@ -165,6 +165,26 @@ Frequently used tasks are aliased into the global namespace:
   task 'shell'        => 'heroku:shell'
 ```
 
+## Tests
+
+To run the cucumber acceptance tests:
+
+```
+$ cucumber
+```
+
+To run the rspec unit tests:
+
+```
+$ rspec
+```
+
+To run the slow cucumber heroku integration tests:
+
+```
+$ rake cucumber:remote 
+```
+
 ## Links
 
 Homepage: http://github.com/fastestforward/heroku_san
@@ -189,6 +209,7 @@ Issue Tracker: http://github.com/fastestforward/heroku_san/issues
 * Jonathan Hironaga (jonathan.hironaga@halogennetwork.com)
 * Ken Mayer (ken@bitwrangler.com)
 * Matt Burke (https://github.com/spraints)
+* Sam Joseph (sam@agileventures.org)
 
 ## License
 
