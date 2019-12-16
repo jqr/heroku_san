@@ -78,7 +78,7 @@ GEM
     ethon (0.6.1)
       ffi (>= 1.3.0)
       mime-types (~> 1.18)
-    excon (0.48.0)
+    excon (0.71.0)
     faraday (0.8.8)
       multipart-post (~> 1.2.0)
     faraday_middleware (0.9.0)
