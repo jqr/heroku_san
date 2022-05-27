@@ -128,7 +128,7 @@ GEM
     pusher-client (0.3.1)
       ruby-hmac (~> 0.4.0)
       websocket (~> 1.0.0)
-    rack (1.6.4)
+    rack (1.6.13)
     rack-test (0.6.3)
       rack (>= 1.0)
     rails (4.2.6)
