@@ -180,7 +180,7 @@ GEM
       sprockets (>= 3.0.0)
     terminal-notifier (1.5.1)
     thor (0.19.1)
-    thread_safe (0.3.5)
+    thread_safe (0.3.6)
     travis (1.5.6)
       backports
       faraday (~> 0.8.7)
@@ -195,7 +195,7 @@ GEM
       typhoeus (~> 0.6)
     typhoeus (0.6.5)
       ethon (~> 0.6.1)
-    tzinfo (1.2.2)
+    tzinfo (1.2.10)
       thread_safe (~> 0.1)
     websocket (1.0.7)
 
